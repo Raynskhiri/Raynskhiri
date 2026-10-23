@@ -13,7 +13,8 @@
 
 ### 🛡️ About me
 
-- 🔎 SOC Analyst L2/L3 at an MSSP, running detection and response for multiple client tenants on **Cortex XDR**
+- 🔎 SOC Analyst L2/L3 at **3S / TrustShield** (24/7 MSSP): L1 escalations to containment across client environments on **Cortex XDR and XSIAM**
+- 🏢 Previously SOC Analyst at **DataXion**, Tunisia's first Tier IV datacenter: Wazuh, Trend Micro DDEI, Nessus, ISO 27001 and PCI DSS
 - 🌐 Web Application Security Engineer: testing and hardening web apps
 - ⚔️ **CRTP** certified (Certified Red Team Professional): Active Directory attack and defense
 - 🏴 Top 700 globally on **HackTheBox**; former **Securinets** member (CTF challenge author and workshop facilitator)
@@ -41,20 +42,39 @@
 
 ### 🧰 Tech stack
 
-**Security operations**
-![Cortex XDR](https://img.shields.io/badge/Cortex%20XDR-FA582D?style=flat-square&logo=paloaltonetworks&logoColor=white)
+**SIEM, XDR and endpoint**
+![Cortex XDR](https://img.shields.io/badge/Cortex%20XDR%20%2F%20XSIAM-FA582D?style=flat-square&logo=paloaltonetworks&logoColor=white)
 ![XQL](https://img.shields.io/badge/XQL-FA582D?style=flat-square)
 ![Splunk](https://img.shields.io/badge/Splunk-000000?style=flat-square&logo=splunk&logoColor=white)
+![Wazuh](https://img.shields.io/badge/Wazuh-3595F4?style=flat-square)
+![Security Onion](https://img.shields.io/badge/Security%20Onion-2E4A62?style=flat-square)
+![Elastic](https://img.shields.io/badge/Elastic%20(ELK)-005571?style=flat-square&logo=elastic&logoColor=white)
+![Microsoft Sentinel](https://img.shields.io/badge/Microsoft%20Sentinel-0078D4?style=flat-square)
+![CrowdStrike](https://img.shields.io/badge/CrowdStrike%20Falcon-E01F3D?style=flat-square)
+![Kaspersky](https://img.shields.io/badge/Kaspersky-006D5C?style=flat-square)
+![Symantec](https://img.shields.io/badge/Symantec-FDB511?style=flat-square&logo=symantec&logoColor=black)
+![Trend Micro](https://img.shields.io/badge/Trend%20Micro-D71921?style=flat-square&logo=trendmicro&logoColor=white)
 ![FortiGate](https://img.shields.io/badge/FortiGate-EE3124?style=flat-square&logo=fortinet&logoColor=white)
+
+**Response, intel and forensics**
+![Cortex XSOAR](https://img.shields.io/badge/Cortex%20XSOAR-FA582D?style=flat-square&logo=paloaltonetworks&logoColor=white)
+![TheHive](https://img.shields.io/badge/TheHive-F3D02F?style=flat-square)
+![MISP](https://img.shields.io/badge/MISP-2C4A6E?style=flat-square)
+![OpenCTI](https://img.shields.io/badge/OpenCTI-001BDA?style=flat-square)
+![Volatility](https://img.shields.io/badge/Volatility-6A1B9A?style=flat-square)
+![Nessus](https://img.shields.io/badge/Nessus-00C176?style=flat-square)
 ![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-C00000?style=flat-square)
 
 **Offensive security**
 ![Burp Suite](https://img.shields.io/badge/Burp%20Suite-FF6633?style=flat-square&logo=burpsuite&logoColor=white)
 ![Kali Linux](https://img.shields.io/badge/Kali%20Linux-557C94?style=flat-square&logo=kalilinux&logoColor=white)
 ![Active Directory](https://img.shields.io/badge/Active%20Directory-0078D4?style=flat-square&logo=windows&logoColor=white)
+![BloodHound](https://img.shields.io/badge/BloodHound-E61616?style=flat-square)
+![Impacket](https://img.shields.io/badge/Impacket-333333?style=flat-square)
 
 **Automation and dev**
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=flat-square)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![Git](https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white)

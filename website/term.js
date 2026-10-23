@@ -19,7 +19,7 @@ const STATIC = {
   cat README.md   read a file
   help            every command
 
-Start with:  cat about/whoami.md   or   ls projects
+Start with:  cat about/whoami.md   or   ls experience   or   ls projects
 Live data:   cat feeds/exploited.txt   (what attackers exploit right now)`,
 
   "about/whoami.md": `# Rayen Skhiri
@@ -31,7 +31,7 @@ from alert triage to the incident report the client reads.
 When something repetitive slows the team down, I automate it in Python.
 
 Open to SOC, DFIR and AppSec roles.   ->  cd ../contact`,
-  "about/facts.txt": `role         SOC Analyst L2/L3
+  "about/facts.txt": `role         SOC Analyst L2/L3 (24/7 MSSP), Web App Security
 based in     Tunis, Tunisia
 experience   2+ years in SOC operations
 languages    English, French
@@ -56,9 +56,66 @@ reports and scheduled intelligence.
 tools: Python · APIs · GitHub Actions
 see:   cd ~/projects/maghreb-threat-watch`,
 
-  "stack/security-operations.txt": "Cortex XDR\nSplunk\nFortiGate\nVirusTotal\nWireshark",
-  "stack/offensive.txt": "OWASP\nBurp Suite\nKali Linux\nMetasploit\nHack The Box\nTryHackMe\nActive Directory",
-  "stack/engineering.txt": "Python\nBash\nLinux\nGit\nDocker\nGitHub Actions",
+  "stack/siem-xdr-endpoint.txt": `Cortex XDR and XSIAM   daily: alerts, incidents, causality chains, XQL
+Splunk                 SPL hunting and dashboards
+Wazuh                  detection and response at a Tier IV datacenter
+Security Onion         network security monitoring
+Elastic (ELK)          threat intelligence dashboards
+Microsoft Sentinel
+CrowdStrike Falcon
+Kaspersky
+Symantec
+Trend Micro            Deep Discovery Email Inspector against spear-phishing
+FortiGate              log management and tuning
+Cisco FTD`,
+  "stack/response-intel-forensics.txt": `Cortex XSOAR, TheHive   orchestration and case management
+MISP, OpenCTI           threat intelligence platforms
+VirusTotal, ANY.RUN     triage and sandboxing
+Wireshark, tcpdump      packet analysis
+Volatility, Autopsy, Sysinternals   forensics
+Nessus, OpenVAS         vulnerability management
+GLPI                    ticketing (I automated it from XDR)`,
+  "stack/offensive.txt": `Burp Suite, OWASP Top 10   web application testing
+Active Directory           CRTP: Kerberos, delegation, trusts
+BloodHound, Impacket, Mimikatz
+Metasploit, Kali Linux
+Hack The Box (top 700), TryHackMe`,
+  "stack/engineering.txt": `Python       automation, integrations, this site's pipelines
+PowerShell   deployment pipelines and GPO scripting
+Bash, Linux, Git, Docker
+GitHub Actions   CI/CD and scheduled intelligence
+Ollama       local LLMs for SOC triage`,
+
+  "experience/3s-trustshield.md": `# SOC Analyst L2/L3   Jul 2025 to present
+Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis
+
+- Escalation point in a 24/7 MSSP: L1 escalations across several client
+  environments on Cortex XDR and XSIAM, from the first alert to containment.
+- Investigated a Pass-the-Hash lateral movement alert on a domain controller
+  and a malspam VBS campaign hidden behind Unicode extension padding, both
+  scoped across the fleet before closure.
+- Weekly and monthly client security reports in French (MTTD, MTTA, MTTR).
+- Took a fleet-wide anomaly to Palo Alto Networks TAC through to root cause;
+  diagnosed a Broker VM syslog outage down to the firewall and message queue.
+- Cut a FortiGate log footprint of about 450 GB with Cortex XDR parsing rules.
+- Built a Python bridge: XDR incidents become GLPI tickets, kept in sync.
+- Mentor L1 analysts; write runbooks and client onboarding templates.`,
+  "experience/dataxion.md": `# SOC Analyst L1/L2   Jul 2024 to Mar 2025
+DataXion · first Tier IV certified datacenter in Tunisia · Tunis
+
+- Detected and contained targeted attacks on hosted critical services (Wazuh).
+- Blocked spear-phishing campaigns (Trend Micro DDEI), hardened the accounts hit.
+- Nessus scans and remediation follow-up with the system teams.
+- ISO 27001, PCI DSS and GDPR compliance; red team findings mapped to ATT&CK.`,
+  "experience/internships.md": `# Internships   2023 to 2024
+BITS Tunisia (2024)    cybersecurity: Nessus and OpenVAS assessments,
+                       remediation reports, cyber ranges in GNS3 and Docker
+Mazars Tunisia (2023)  threat intelligence: MISP and OpenCTI integration,
+                       threat dashboards in ELK`,
+  "experience/education.md": `M.Sc. Information Systems and Infrastructure Security   2024 to present
+  ISI, University of Tunis El Manar   (thesis: cd ~/projects/malwarescope)
+B.Sc. Networks and Telecommunications                  2021 to 2024
+  ISI, University of Tunis El Manar`,
 
   "projects/maghreb-threat-watch/README.md": `# Maghreb Threat Watch   [live]
 Open early warning for lookalike and phishing domains targeting 45 banks,
@@ -122,7 +179,7 @@ const LIVE = {
 };
 
 const DESCRIBE = {
-  "README.md": "start here", about: "who I am", services: "what I do for a team", stack: "tools I use every week",
+  "README.md": "start here", about: "who I am", experience: "where I have worked", services: "what I do for a team", stack: "tools I use every week",
   projects: "things I built", certs: "certifications and community", feeds: "live data, refreshed daily",
   contact: "how to reach me", "maghreb-threat-watch": "phishing early warning, live",
   malwarescope: "ML + LLM malware analysis, thesis", "detection-library": "29 rules, XQL + SPL",
@@ -131,7 +188,7 @@ const DESCRIBE = {
 };
 
 const SECTION = {
-  about: "#about", services: "#services", stack: "#stack", projects: "#projects", certs: "#proof", contact: "#contact",
+  about: "#about", experience: "#experience", services: "#services", stack: "#stack", projects: "#projects", certs: "#proof", contact: "#contact",
   "projects/maghreb-threat-watch": "https://threatwatch.rayenskhiri.online",
   "projects/malwarescope": "https://github.com/Raynskhiri/MalwareScope",
   "projects/detection-library": PLAYGROUND,
@@ -424,7 +481,7 @@ export function mount(root) {
     const info = [
       '<span class="o">rayen</span>@<span class="o">soc</span>', "---------",
       `<span class="o">Role</span>     SOC Analyst L2/L3, AppSec`, '<span class="o">Uptime</span>   2+ years in SOC operations',
-      '<span class="o">EDR</span>      Cortex XDR', '<span class="o">SIEM</span>     Splunk', '<span class="o">Certs</span>    CRTP',
+      '<span class="o">XDR/EDR</span>  Cortex XDR, XSIAM, CrowdStrike, Trend Micro', '<span class="o">SIEM</span>     Splunk, Wazuh, Security Onion, ELK', '<span class="o">Certs</span>    CRTP',
       '<span class="o">HTB</span>      top 700 worldwide', `<span class="o">Watch</span>    ${esc(tw)}`, `<span class="o">KEV</span>      ${esc(kv)}`,
     ];
     print(info.map((l, i) => `<span class="o">${esc(logo[i] || "").padEnd(13, " ")}</span>  ${l}`).join("\n"));

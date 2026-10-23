@@ -212,12 +212,36 @@ h2.title { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.08; font-weight: 
 .svc p { color: var(--muted); margin: 0; font-size: 0.95rem; }
 .svc .tools { margin-top: 16px; font-family: var(--mono); font-size: 0.76rem; color: var(--orange-2); }
 
+
+/* experience */
+.xp { list-style: none; margin: 0; padding: 0; position: relative; display: grid; gap: 18px; }
+.xp::before { content: ""; position: absolute; left: 118px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--orange), var(--line) 70%); border-radius: 2px; }
+.job { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 36px; position: relative; }
+.job::before { content: ""; position: absolute; left: 112px; top: 26px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 3px solid var(--orange); }
+.job.edu::before { border-color: var(--line-2); }
+.job .when { padding-top: 20px; text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+.job .when b { display: block; color: var(--text); font-weight: 600; }
+.job .when span { color: var(--dim); }
+.job .body { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
+.job h3 { margin: 0; font-size: 1.15rem; font-weight: 750; }
+.job h3.second { margin-top: 16px; }
+.job .org { margin: 4px 0 0; color: var(--orange-2); font-size: 0.92rem; }
+.job ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 0.95rem; display: grid; gap: 6px; }
+.job .tools { margin: 14px 0 0; font-family: var(--mono); font-size: 0.76rem; color: var(--dim); }
+@media (max-width: 720px) {
+  .xp::before { left: 7px; }
+  .job { grid-template-columns: minmax(0, 1fr); gap: 8px; padding-left: 30px; }
+  .job::before { left: 1px; top: 4px; }
+  .job .when { padding-top: 0; text-align: left; display: flex; gap: 8px; }
+}
+.logo-tile .mono { font-family: var(--mono); font-weight: 700; font-size: 0.95rem; color: var(--orange-2); letter-spacing: -0.02em; }
+
 /* stack */
-.stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 @media (max-width: 960px) { .stack { grid-template-columns: 1fr; } }
 .stack-group { padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
 .stack-group h3 { font-size: 0.95rem; font-weight: 600; margin: 0 0 18px; color: var(--muted); }
-.stack-group ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 10px; }
+.stack-group ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 18px 10px; }
 .stack-group li { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-size: 0.8rem; color: var(--muted); }
 .stack-group li .logo-tile { width: 54px; height: 54px; border-radius: 13px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); transition: border-color .2s; }
 .stack-group li:hover .logo-tile { border-color: var(--line-2); }
@@ -344,6 +368,7 @@ footer nav a:hover { color: var(--text); }
     <nav class="nav-links" id="nav-links" aria-label="Main">
       <a href="#home" class="active">Home</a>
       <a href="#about">About</a>
+      <a href="#experience">Experience</a>
       <a href="#services">Services</a>
       <a href="#stack">Stack</a>
       <a href="#projects">Projects</a>
@@ -416,7 +441,73 @@ footer nav a:hover { color: var(--text); }
     </div>
   </section>
 
-  <section id="services" aria-labelledby="services-title">
+  <section id="experience" aria-labelledby="experience-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">// Experience</p>
+          <h2 class="title" id="experience-title">Where I have defended</h2>
+          <p>Two SOCs, one MSSP serving many clients and one Tier IV datacenter, plus the internships that got me there.</p>
+        </div>
+      </div>
+      <ol class="xp">
+        <li class="job reveal">
+          <div class="when"><b>Jul 2025</b><span>to present</span></div>
+          <div class="body">
+            <h3>SOC Analyst L2/L3</h3>
+            <p class="org">Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis</p>
+            <ul>
+              <li>Escalation point in a 24/7 MSSP: I take L1 escalations across several client environments on Cortex XDR and XSIAM, from the first alert to containment.</li>
+              <li>Investigated a Pass-the-Hash lateral movement alert on a domain controller and a malspam VBS campaign hidden behind Unicode extension padding, both scoped across the fleet before closure.</li>
+              <li>Write the weekly and monthly security reports clients read, in French, with MTTD, MTTA and MTTR.</li>
+              <li>Took a fleet-wide anomaly to Palo Alto Networks TAC through to root cause, and diagnosed a Broker VM syslog outage down to the firewall and message queue.</li>
+              <li>Cut a FortiGate log footprint of about 450 GB by moving filtering and parsing into Cortex XDR parsing rules.</li>
+              <li>Built a Python bridge that turns XDR incidents into GLPI tickets and keeps both in sync, replacing manual ticketing.</li>
+              <li>Mentor L1 analysts and write runbooks and onboarding templates for new SOC clients.</li>
+            </ul>
+            <p class="tools">Cortex XDR · XSIAM · XQL · FortiGate · Broker VM · GLPI · Python · PowerShell</p>
+          </div>
+        </li>
+        <li class="job reveal">
+          <div class="when"><b>Jul 2024</b><span>to Mar 2025</span></div>
+          <div class="body">
+            <h3>SOC Analyst L1/L2</h3>
+            <p class="org">DataXion · first Tier IV certified datacenter in Tunisia · Tunis</p>
+            <ul>
+              <li>Detected and contained targeted attacks against hosted critical services with Wazuh.</li>
+              <li>Blocked spear-phishing campaigns with Trend Micro Deep Discovery Email Inspector and hardened the accounts they compromised.</li>
+              <li>Ran Nessus vulnerability scans and followed remediation with the system teams.</li>
+              <li>Supported ISO 27001, PCI DSS and GDPR compliance, and mapped red team findings to MITRE ATT&amp;CK coverage.</li>
+            </ul>
+            <p class="tools">Wazuh · Trend Micro DDEI · Nessus · ISO 27001 · PCI DSS</p>
+          </div>
+        </li>
+        <li class="job reveal">
+          <div class="when"><b>2023</b><span>to 2024</span></div>
+          <div class="body">
+            <h3>Internships</h3>
+            <p class="org">BITS Tunisia (2024) · Mazars Tunisia (2023)</p>
+            <ul>
+              <li>Cybersecurity intern at BITS: Nessus and OpenVAS assessments, remediation reports, and cyber ranges built in GNS3 and Docker.</li>
+              <li>Cyber threat intelligence intern at Mazars: MISP and OpenCTI integration, threat dashboards in ELK.</li>
+            </ul>
+            <p class="tools">Nessus · OpenVAS · GNS3 · MISP · OpenCTI · ELK</p>
+          </div>
+        </li>
+        <li class="job edu reveal">
+          <div class="when"><b>Education</b></div>
+          <div class="body">
+            <h3>M.Sc. Information Systems and Infrastructure Security</h3>
+            <p class="org">ISI, University of Tunis El Manar · 2024 to present · thesis: MalwareScope</p>
+            <h3 class="second">B.Sc. Networks and Telecommunications</h3>
+            <p class="org">ISI, University of Tunis El Manar · 2021 to 2024</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="alt" id="services" aria-labelledby="services-title">
     <div class="wrap">
       <div class="section-head reveal">
         <div>
@@ -433,29 +524,32 @@ footer nav a:hover { color: var(--text); }
     </div>
   </section>
 
-  <section class="alt" id="stack" aria-labelledby="stack-title">
+  <section id="stack" aria-labelledby="stack-title">
     <div class="wrap">
       <div class="section-head reveal">
         <div>
           <p class="eyebrow">// Tech stack</p>
-          <h2 class="title" id="stack-title">Tools I use every week</h2>
+          <h2 class="title" id="stack-title">Tools I work with</h2>
         </div>
       </div>
       <div class="stack">
-        <div class="stack-group reveal"><h3>Security operations</h3><ul>
-          {{tile:paloaltonetworks:Cortex XDR}}{{tile:splunk:Splunk}}{{tile:fortinet:FortiGate}}{{tile:virustotal:VirusTotal}}{{tile:wireshark:Wireshark}}{{tile:owasp:OWASP}}
+        <div class="stack-group reveal"><h3>SIEM, XDR and endpoint</h3><ul>
+          {{tile:paloaltonetworks:Cortex XDR / XSIAM}}{{tile:splunk:Splunk}}{{tile:mono:Wazuh}}{{tile:mono:Security Onion}}{{tile:elastic:Elastic (ELK)}}{{tile:mono:Microsoft Sentinel}}{{tile:mono:CrowdStrike Falcon}}{{tile:mono:Kaspersky}}{{tile:symantec:Symantec}}{{tile:trendmicro:Trend Micro}}{{tile:fortinet:FortiGate}}{{tile:cisco:Cisco FTD}}
+        </ul></div>
+        <div class="stack-group reveal"><h3>Response, intel and forensics</h3><ul>
+          {{tile:paloaltonetworks:Cortex XSOAR}}{{tile:mono:TheHive}}{{tile:mono:MISP}}{{tile:mono:OpenCTI}}{{tile:virustotal:VirusTotal}}{{tile:mono:ANY.RUN}}{{tile:wireshark:Wireshark}}{{tile:mono:Volatility}}{{tile:mono:Sysinternals}}{{tile:mono:Nessus}}{{tile:mono:OpenVAS}}{{tile:mono:GLPI}}
         </ul></div>
         <div class="stack-group reveal"><h3>Offensive security</h3><ul>
-          {{tile:burpsuite:Burp Suite}}{{tile:kalilinux:Kali Linux}}{{tile:metasploit:Metasploit}}{{tile:hackthebox:Hack The Box}}{{tile:tryhackme:TryHackMe}}{{tile:ad:Active Directory}}
+          {{tile:burpsuite:Burp Suite}}{{tile:metasploit:Metasploit}}{{tile:kalilinux:Kali Linux}}{{tile:ad:Active Directory}}{{tile:mono:BloodHound}}{{tile:mono:Impacket}}{{tile:owasp:OWASP}}{{tile:hackthebox:Hack The Box}}{{tile:tryhackme:TryHackMe}}
         </ul></div>
-        <div class="stack-group reveal"><h3>Engineering</h3><ul>
-          {{tile:python:Python}}{{tile:gnubash:Bash}}{{tile:linux:Linux}}{{tile:git:Git}}{{tile:docker:Docker}}{{tile:githubactions:GitHub Actions}}
+        <div class="stack-group reveal"><h3>Engineering and automation</h3><ul>
+          {{tile:python:Python}}{{tile:mono:PowerShell}}{{tile:gnubash:Bash}}{{tile:linux:Linux}}{{tile:git:Git}}{{tile:docker:Docker}}{{tile:githubactions:GitHub Actions}}{{tile:ollama:Ollama}}
         </ul></div>
       </div>
     </div>
   </section>
 
-  <section id="projects" aria-labelledby="projects-title">
+  <section class="alt" id="projects" aria-labelledby="projects-title">
     <div class="wrap">
       <div class="section-head reveal">
         <div>
@@ -531,7 +625,7 @@ footer nav a:hover { color: var(--text); }
     </div>
   </section>
 
-  <section id="terminal" class="alt" aria-labelledby="terminal-title">
+  <section id="terminal" aria-labelledby="terminal-title">
     <div class="wrap">
       <div class="section-head reveal">
         <div>
@@ -546,7 +640,7 @@ footer nav a:hover { color: var(--text); }
     </div>
   </section>
 
-  <section id="proof" aria-labelledby="proof-title">
+  <section class="alt" id="proof" aria-labelledby="proof-title">
     <div class="wrap">
       <h2 class="vh" id="proof-title">In numbers</h2>
       <div class="proof reveal">
@@ -643,7 +737,7 @@ footer nav a:hover { color: var(--text); }
         if (e.isIntersecting) navA.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['home', 'about', 'services', 'stack', 'projects', 'terminal', 'contact'].forEach(function (id) { var s = document.getElementById(id); if (s) secObs.observe(s); });
+    ['home', 'about', 'experience', 'services', 'stack', 'projects', 'terminal', 'contact'].forEach(function (id) { var s = document.getElementById(id); if (s) secObs.observe(s); });
   }
 
   // Reveal on scroll

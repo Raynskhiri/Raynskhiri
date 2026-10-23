@@ -74,13 +74,31 @@ def sprite() -> str:
     for slug in sorted(USED):
         icon = ICONS[slug]
         # Brand colours that vanish on a near-black background get a light fill.
-        colour = f'#{icon["hex"]}' if luminance(icon["hex"]) > 0.06 else DARK_FALLBACK
+        colour = f'#{icon["hex"]}' if luminance(icon["hex"]) > 0.1 else DARK_FALLBACK
         symbols.append(f'<symbol id="si-{slug}" viewBox="0 0 24 24"><path fill="{colour}" d="{icon["path"]}"/></symbol>')
     return f'<svg width="0" height="0" style="position:absolute" aria-hidden="true">{"".join(symbols)}</svg>'
 
 
+MONO = {"Kaspersky": "Ka", "PowerShell": "PS", "Wazuh": "Wz", "OpenCTI": "CTI", "ANY.RUN": "AR", "TheHive": "TH", "Sysinternals": "Si",
+        "Volatility": "Vol", "Nessus": "Ns", "OpenVAS": "OV", "GLPI": "GL", "MISP": "MI", "Impacket": "Im", "BloodHound": "BH"}
+
+
+def monogram(label: str) -> str:
+    if label in MONO:
+        return f'<span class="mono" aria-hidden="true">{MONO[label]}</span>'
+    words = [w for w in label.replace("-", " ").split() if w[0].isalnum()]
+    letters = (words[0][0] + (words[1][0] if len(words) > 1 else words[0][1])) if words else "?"
+    return f'<span class="mono" aria-hidden="true">{letters[0].upper()}{letters[1].lower() if len(words) == 1 else letters[1].upper()}</span>'
+
+
 def tile(slug: str, label: str) -> str:
-    glyph = ui("network") if slug == "ad" else si(slug)
+    """slug 'ad' = generic network icon, 'mono' = two-letter monogram (no brand icon exists)."""
+    if slug == "ad":
+        glyph = ui("network")
+    elif slug == "mono":
+        glyph = monogram(label)
+    else:
+        glyph = si(slug)
     return f'<li><span class="logo-tile">{glyph}</span>{label}</li>'
 
 
