@@ -611,6 +611,7 @@ footer nav a:hover { color: var(--text); }
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); load(); } }, { rootMargin: '600px 0px' });
     io.observe(box);
   } else load();
+  setTimeout(load, 5000); // fallback if the observer never fires
   const jump = () => load().then((input) => { document.getElementById('terminal').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => input.focus({ preventScroll: true }), 500); });
   let typed = '';
   document.addEventListener('keydown', (e) => {

@@ -186,15 +186,14 @@ const getKev = () => (kevCache ||= fetch(KEV, { cache: "no-cache" }).then((r) =>
 
 async function exploitedFeed(_, opts = {}) {
   const k = await getKev();
-  let rows = k.latest;
-  if (opts.ransomware) rows = rows.filter((r) => r.ransomware);
+  let rows = opts.ransomware ? (k.ransomware_latest || []) : k.latest;
   if (opts.filter) {
     const f = opts.filter.toLowerCase();
     rows = rows.filter((r) => `${r.vendor} ${r.product} ${r.name} ${r.cve}`.toLowerCase().includes(f));
   }
   rows = rows.slice(0, opts.limit || 12);
-  const head = `<span class="o">Actively exploited vulnerabilities</span> <span class="d">(CISA KEV ${esc(k.catalog_version)}, ${k.total.toLocaleString("en-US")} total, ${k.added_7d} added in 7 days, ${k.added_30d} in 30)</span>`;
-  if (!rows.length) return `${head}\nnothing matches '${esc(opts.filter || "")}' in the latest ${k.latest.length} entries`;
+  const head = `<span class="o">${opts.ransomware ? "Most recent KEV entries used in ransomware campaigns" : "Actively exploited vulnerabilities"}</span> <span class="d">(CISA KEV ${esc(k.catalog_version)}, ${k.total.toLocaleString("en-US")} total, ${k.added_7d} added in 7 days, ${k.added_30d} in 30)</span>`;
+  if (!rows.length) return `${head}\nnothing matches '${esc(opts.filter || "")}' in the ${k.latest.length} most recent entries. Full catalog: <a href="${k.source_url}" target="_blank" rel="noopener noreferrer">cisa.gov</a>`;
   const lines = rows.map((r) => {
     const url = `https://nvd.nist.gov/vuln/detail/${encodeURIComponent(r.cve)}`;
     return `<span class="d">${esc(r.added)}</span>  <a href="${url}" target="_blank" rel="noopener noreferrer">${esc(r.cve)}</a>  <b>${esc(r.vendor)} ${esc(r.product)}</b>${r.ransomware ? '  <span class="sev critical">RANSOMWARE</span>' : ""}\n            <span class="d">${esc(r.name)}</span>`;

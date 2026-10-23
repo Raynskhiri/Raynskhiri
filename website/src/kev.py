@@ -77,6 +77,7 @@ def build(catalog: dict, today: date) -> dict:
         "added_30d": sum(r["added"] >= month for r in rows),
         "ransomware_total": sum(r["ransomware"] for r in rows),
         "latest": rows[:KEEP],
+        "ransomware_latest": [r for r in rows if r["ransomware"]][:20],
     }
 
 

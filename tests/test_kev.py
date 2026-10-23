@@ -57,3 +57,9 @@ def test_rejects_something_that_is_not_the_feed():
 def test_committed_snapshot_is_valid():
     data = json.loads((Path(__file__).resolve().parents[1] / "website" / "data" / "kev.json").read_text())
     assert data["latest"] and all(kev.CVE.match(r["cve"]) for r in data["latest"])
+
+
+def test_ransomware_list_is_separate():
+    rw = entry(7, cveID="CVE-2026-77777", dateAdded="2026-01-01", knownRansomwareCampaignUse="Known")
+    out = kev.build(catalog([rw]), TODAY)
+    assert [r["cve"] for r in out["ransomware_latest"]] == ["CVE-2026-77777"]
