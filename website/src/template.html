@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rayen Skhiri | SOC Analyst and Application Security Engineer</title>
+<meta name="description" content="Rayen Skhiri, SOC analyst L2/L3 and application security engineer in Tunis. CRTP, Hack The Box top 700. Builder of Maghreb Threat Watch, an open early warning for phishing aimed at North Africa.">
+<meta name="theme-color" content="#0A0C10">
+<meta property="og:title" content="Rayen Skhiri | SOC and AppSec">
+<meta property="og:description" content="I hunt threats in the SOC, attack Active Directory to stay sharp, and build open tools that catch phishing aimed at North Africa.">
+<meta property="og:url" content="https://rayenskhiri.online/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://rayenskhiri.online/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rayen Skhiri, SOC Analyst and Application Security Engineer">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0C10;
+  --bg-2: #0E1117;
+  --surface: #131821;
+  --surface-2: #1A202B;
+  --line: #242B37;
+  --line-2: #323B4A;
+  --text: #F2F4F7;
+  --muted: #A3ABB8;
+  --dim: #7F8999;
+  --orange: #FF6B1A;
+  --orange-2: #FF8C42;
+  --orange-ink: #1A0B02;
+  --glow: rgba(255, 107, 26, 0.32);
+  --green: #3DDC97;
+  --red: #FF5C5C;
+  --radius: 14px;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Archivo", system-ui, sans-serif; font-size: 1rem; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+img, svg { display: block; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 640px) { .wrap { padding: 0 16px; } }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip:focus { position: fixed; left: 16px; top: 12px; width: auto; height: auto; clip: auto; z-index: 100; padding: 10px 16px; border-radius: 10px; background: var(--orange); color: var(--orange-ink); font-weight: 700; text-decoration: none; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 10px;
+  font-weight: 650; font-size: 0.98rem; text-decoration: none; border: 1px solid transparent; cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+  font-family: inherit;
+}
+.btn svg { width: 18px; height: 18px; }
+.btn-primary { background: var(--orange); color: var(--orange-ink); box-shadow: 0 8px 28px -10px var(--glow); }
+.btn-primary:hover { background: var(--orange-2); transform: translateY(-1px); }
+.btn-ghost { border-color: var(--line-2); color: var(--text); background: rgba(255,255,255,0.02); }
+.btn-ghost:hover { border-color: var(--orange); }
+.btn-sm { padding: 9px 16px; font-size: 0.9rem; }
+
+/* ---------- nav ---------- */
+header.nav {
+  position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: rgba(10, 12, 16, 0.78); border-bottom: 1px solid rgba(36, 43, 55, 0.7);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 20px; }
+.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.logo-mark { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--orange); color: var(--orange-ink); }
+.logo-mark svg { width: 20px; height: 20px; }
+.logo-text { line-height: 1.1; }
+.logo-text b { display: block; font-stretch: 112%; font-weight: 800; letter-spacing: 0.02em; font-size: 1rem; }
+.logo-text span { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.04em; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { text-decoration: none; color: var(--muted); font-size: 0.95rem; font-weight: 500; position: relative; padding: 6px 0; }
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+.nav-links a.btn { color: var(--orange-ink); padding: 9px 16px; }
+.nav-links a.btn:hover { color: var(--orange-ink); }
+.nav-links a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--orange); border-radius: 2px; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line-2); color: var(--text); border-radius: 10px; width: 44px; height: 44px; cursor: pointer; }
+.menu-btn svg { width: 20px; height: 20px; margin: auto; }
+@media (max-width: 920px) {
+  .menu-btn { display: grid; place-items: center; }
+  .nav-links { position: absolute; top: 72px; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0;
+    background: var(--bg); border-bottom: 1px solid var(--line); padding: 8px 16px 18px; display: none; }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 14px 4px; border-bottom: 1px solid var(--line); }
+  .nav-links a.active::after { display: none; }
+  .nav-links .btn { margin-top: 14px; justify-content: center; }
+}
+
+/* ---------- hero ---------- */
+.hero { position: relative; padding: 72px 0 96px; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 56px 56px; mask-image: radial-gradient(ellipse 70% 60% at 60% 40%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 60% 40%, #000 30%, transparent 75%);
+}
+.hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; }
+@media (max-width: 980px) { .hero-grid { grid-template-columns: 1fr; gap: 56px; } }
+.status { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(19, 24, 33, 0.8); font-size: 0.88rem; color: var(--muted); }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(61, 220, 151, 0.15); }
+.kicker { font-family: var(--mono); color: var(--orange); font-size: 0.9rem; margin: 26px 0 12px; letter-spacing: 0.02em; }
+.hero h1 {
+  margin: 0; font-weight: 900; font-stretch: 118%; line-height: 0.9; letter-spacing: -0.01em;
+  font-size: clamp(3rem, 8.4vw, 6.6rem); text-transform: uppercase;
+}
+.hero h1 .l1, .hero h1 .l2 { display: block; white-space: nowrap; }
+.hero h1 .l2 { color: var(--orange); }
+.cursor { display: inline-block; width: 0.5em; height: 0.09em; background: var(--orange); margin-left: 0.06em; vertical-align: baseline; }
+@media (prefers-reduced-motion: no-preference) { .cursor { animation: blink 1.1s steps(1) infinite; } }
+@keyframes blink { 50% { opacity: 0; } }
+.hero .lede { font-size: clamp(1.08rem, 1.6vw, 1.22rem); color: var(--muted); margin: 26px 0 0; max-width: 34em; }
+.hero .lede strong { color: var(--text); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; list-style: none; }
+.chips li { font-size: 0.86rem; padding: 6px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); color: var(--text); }
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+.socials { display: flex; align-items: center; gap: 12px; margin-top: 30px; color: var(--muted); font-size: 0.88rem; }
+.socials a { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line-2); display: grid; place-items: center; color: var(--text); transition: border-color .15s, color .15s; }
+.socials a:hover { border-color: var(--orange); color: var(--orange); }
+.socials svg { width: 18px; height: 18px; }
+
+/* portrait */
+.visual { position: relative; min-height: 560px; }
+@media (max-width: 980px) { .visual { min-height: 520px; max-width: 560px; width: 100%; margin: 0 auto; } }
+@media (max-width: 520px) { .visual { min-height: 470px; } }
+.portrait { position: absolute; right: 4%; top: 0; width: min(440px, 88%); aspect-ratio: 1 / 1.08; }
+.portrait .disc {
+  position: absolute; left: 6%; right: 6%; bottom: 0; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--orange-2), var(--orange) 45%, #B33F00 100%);
+  box-shadow: 0 30px 120px -20px var(--glow), inset 0 -20px 60px rgba(0,0,0,0.25);
+}
+.portrait .ring { position: absolute; left: 0; right: 0; bottom: -4%; aspect-ratio: 1; border-radius: 50%; border: 1px dashed rgba(255, 140, 66, 0.35); }
+.portrait .dots {
+  position: absolute; right: -6%; top: 6%; width: 120px; height: 90px; opacity: 0.55;
+  background-image: radial-gradient(var(--orange) 1.4px, transparent 1.6px); background-size: 14px 14px;
+}
+.portrait img { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.45)); }
+.portrait .initials { display: none; }
+.portrait.no-photo img { display: none; }
+.portrait.no-photo .initials {
+  display: grid; place-items: center; position: absolute; left: 6%; right: 6%; bottom: 0; aspect-ratio: 1; border-radius: 50%;
+  font-weight: 900; font-stretch: 125%; font-size: clamp(5rem, 12vw, 8.5rem); color: var(--orange-ink); letter-spacing: -0.02em;
+}
+
+.float { position: absolute; background: rgba(19, 24, 33, 0.92); border: 1px solid var(--line-2); border-radius: var(--radius); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 24px 60px -24px rgba(0,0,0,0.8); }
+.badge { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+.badge svg { width: 26px; height: 26px; }
+.badge b { display: block; font-size: 1.05rem; line-height: 1.15; }
+.badge span { font-size: 0.8rem; color: var(--muted); }
+.badge-htb { right: 0; top: 16%; }
+.badge-crtp { left: 2%; top: 4%; }
+.badge-crtp .tick { width: 26px; height: 26px; border-radius: 8px; background: rgba(61, 220, 151, 0.15); color: var(--green); display: grid; place-items: center; }
+.badge-crtp .tick svg { width: 16px; height: 16px; }
+@media (max-width: 520px) { .badge-crtp { display: none; } .badge-htb { top: 2%; } }
+
+.console { left: 0; bottom: 0; width: min(400px, 94%); font-family: var(--mono); font-size: 0.8rem; overflow: hidden; }
+.console .bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: rgba(10, 12, 16, 0.6); }
+.console .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); }
+.console .bar i:nth-child(1) { background: #FF5F57; } .console .bar i:nth-child(2) { background: #FEBC2E; } .console .bar i:nth-child(3) { background: #28C840; }
+.console .bar span { margin-left: 8px; color: var(--muted); font-size: 0.78rem; }
+.console .bar em { margin-left: auto; font-style: normal; color: var(--green); font-size: 0.74rem; display: flex; align-items: center; gap: 6px; }
+.console .bar em::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.console pre { margin: 0; padding: 14px 16px 16px; min-height: 154px; white-space: pre-wrap; word-break: break-word; line-height: 1.65; color: var(--text); }
+.c-dim { color: var(--dim); } .c-or { color: var(--orange-2); } .c-gr { color: var(--green); } .c-red { color: var(--red); font-weight: 600; }
+.c-hl { background: rgba(255, 107, 26, 0.22); color: #FFD3B5; border-radius: 3px; padding: 0 2px; }
+@media (max-width: 520px) { .console { font-size: 0.7rem; } .console pre { padding: 12px 12px 14px; } }
+.console .foot { border-top: 1px solid var(--line); padding: 9px 16px; color: var(--muted); font-size: 0.74rem; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- sections ---------- */
+section { padding: 104px 0; position: relative; }
+section.alt { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+@media (max-width: 640px) { section { padding: 76px 0; } }
+.eyebrow { font-family: var(--mono); color: var(--orange); font-size: 0.86rem; margin: 0 0 12px; }
+h2.title { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.08; font-weight: 800; font-stretch: 105%; letter-spacing: -0.015em; margin: 0; max-width: 18ch; }
+.section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 48px; }
+.section-head p { color: var(--muted); max-width: 40em; margin: 14px 0 0; }
+
+/* about */
+.about { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+@media (max-width: 900px) { .about { grid-template-columns: 1fr; gap: 40px; } }
+.about .body p { color: var(--muted); font-size: 1.06rem; margin: 20px 0 0; max-width: 34em; }
+.about .body p strong { color: var(--text); font-weight: 600; }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0; }
+@media (max-width: 480px) { .facts { grid-template-columns: 1fr; } }
+.fact { display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+.ico { flex: none; width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; background: rgba(255, 107, 26, 0.12); color: var(--orange); }
+.ico svg { width: 20px; height: 20px; }
+.fact dt { font-size: 0.82rem; color: var(--muted); }
+.fact dd { margin: 2px 0 0; font-weight: 650; font-size: 1.02rem; line-height: 1.3; }
+
+/* services */
+.services { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1040px) { .services { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .services { grid-template-columns: 1fr; } }
+.svc { padding: 26px 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); transition: border-color .2s, transform .2s; }
+.svc:hover { border-color: rgba(255, 107, 26, 0.55); transform: translateY(-3px); }
+.svc h3 { font-size: 1.15rem; margin: 20px 0 8px; font-weight: 700; }
+.svc p { color: var(--muted); margin: 0; font-size: 0.95rem; }
+.svc .tools { margin-top: 16px; font-family: var(--mono); font-size: 0.76rem; color: var(--orange-2); }
+
+/* stack */
+.stack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 960px) { .stack { grid-template-columns: 1fr; } }
+.stack-group { padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+.stack-group h3 { font-size: 0.95rem; font-weight: 600; margin: 0 0 18px; color: var(--muted); }
+.stack-group ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 10px; }
+.stack-group li { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-size: 0.8rem; color: var(--muted); }
+.stack-group li .logo-tile { width: 54px; height: 54px; border-radius: 13px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); transition: border-color .2s; }
+.stack-group li:hover .logo-tile { border-color: var(--line-2); }
+.stack-group li svg { width: 26px; height: 26px; }
+
+/* projects */
+.projects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 1040px) { .projects { grid-template-columns: 1fr; max-width: 680px; } }
+.proj { display: flex; flex-direction: column; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); overflow: hidden; transition: border-color .2s, transform .2s; }
+.proj:hover { border-color: rgba(255, 107, 26, 0.55); transform: translateY(-3px); }
+.preview { height: 220px; background: #0B0E13; border-bottom: 1px solid var(--line); padding: 16px; position: relative; overflow: hidden; font-family: var(--mono); font-size: 0.72rem; }
+.preview .pv-bar { display: flex; align-items: center; justify-content: space-between; color: var(--muted); margin-bottom: 12px; font-family: "Archivo", sans-serif; font-size: 0.78rem; }
+.preview .live { color: var(--green); display: inline-flex; align-items: center; gap: 6px; }
+.preview .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.pv-row > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pv-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); margin-bottom: 7px; color: var(--text); }
+.pill { text-align: center; border-radius: 6px; padding: 2px 0; font-weight: 700; }
+.pill.h { background: rgba(255, 92, 92, 0.16); color: var(--red); }
+.pill.m { background: rgba(255, 140, 66, 0.16); color: var(--orange-2); }
+.pv-row small { color: var(--muted); }
+.slack { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font-family: "Archivo", sans-serif; font-size: 0.8rem; }
+.slack .who { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+.slack .who i { width: 22px; height: 22px; border-radius: 6px; background: var(--orange); display: inline-block; }
+.slack .who span { font-weight: 400; color: var(--dim); font-size: 0.72rem; }
+.slack .kv { color: var(--muted); line-height: 1.55; }
+.slack .kv b { color: var(--text); font-weight: 600; }
+.slack .acts { display: flex; gap: 8px; margin-top: 10px; }
+.slack .acts span { padding: 5px 12px; border-radius: 7px; font-weight: 600; font-size: 0.76rem; }
+.slack .ok { background: var(--green); color: #06281A; }
+.slack .no { border: 1px solid var(--line-2); color: var(--text); }
+.tree { line-height: 1.85; color: var(--text); }
+.tree .t1 { padding-left: 16px; } .tree .t2 { padding-left: 32px; } .tree .t3 { padding-left: 48px; }
+.verdict { position: absolute; right: 14px; bottom: 14px; padding: 6px 12px; border-radius: 8px; background: rgba(255, 92, 92, 0.16); color: var(--red); font-weight: 700; font-family: "Archivo", sans-serif; font-size: 0.8rem; border: 1px solid rgba(255, 92, 92, 0.35); }
+.proj-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
+.proj-body .top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.proj-body h3 { font-size: 1.25rem; margin: 0; font-weight: 750; }
+.tag { flex: none; font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.tag.on { background: rgba(61, 220, 151, 0.12); border-color: rgba(61, 220, 151, 0.4); color: var(--green); }
+.proj-body p { color: var(--muted); margin: 10px 0 16px; font-size: 0.95rem; }
+.techs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; padding: 0; list-style: none; }
+.techs li { font-size: 0.74rem; padding: 3px 9px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.proj .links { margin-top: auto; display: flex; gap: 18px; flex-wrap: wrap; }
+.proj .links a { color: var(--orange); font-weight: 650; font-size: 0.92rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.proj .links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.proj .links svg { width: 15px; height: 15px; }
+.preview-note { font-size: 0.82rem; color: var(--dim); margin: 18px 0 0; }
+
+/* proof */
+.proof { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid rgba(255, 107, 26, 0.35); border-radius: 18px; background: linear-gradient(180deg, rgba(255, 107, 26, 0.07), rgba(255, 107, 26, 0.02)); box-shadow: 0 0 80px -40px var(--glow); }
+@media (max-width: 900px) { .proof { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat { padding: 34px 28px; display: flex; gap: 16px; align-items: center; }
+.stat + .stat { border-left: 1px solid var(--line); }
+@media (max-width: 900px) { .stat:nth-child(3) { border-left: 0; } .stat:nth-child(n+3) { border-top: 1px solid var(--line); } }
+@media (max-width: 480px) { .proof { grid-template-columns: 1fr; } .stat + .stat { border-left: 0; border-top: 1px solid var(--line); } }
+.stat .ico { width: 48px; height: 48px; }
+.stat b { display: block; white-space: nowrap; font-size: clamp(1.7rem, 2.8vw, 2.3rem); font-weight: 900; font-stretch: 110%; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { display: block; color: var(--muted); font-size: 0.9rem; margin-top: 6px; line-height: 1.35; }
+
+/* creds */
+.creds { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 48px; }
+@media (max-width: 1040px) { .creds { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .creds { grid-template-columns: 1fr; } }
+.cred { padding: 20px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+.cred .st { font-size: 0.74rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; display: inline-block; }
+.cred .st.done { background: rgba(61, 220, 151, 0.12); color: var(--green); }
+.cred .st.prep { background: rgba(255, 140, 66, 0.12); color: var(--orange-2); }
+.cred b { display: block; margin-top: 14px; font-size: 1.02rem; line-height: 1.3; }
+.cred span { display: block; color: var(--muted); font-size: 0.84rem; margin-top: 4px; }
+
+/* contact */
+.contact { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: start; }
+@media (max-width: 920px) { .contact { grid-template-columns: 1fr; } }
+.contact .lead { color: var(--muted); font-size: 1.06rem; margin: 18px 0 28px; max-width: 30em; }
+.channels { display: grid; gap: 12px; }
+.channel { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; transition: border-color .2s; }
+a.channel:hover { border-color: var(--orange); }
+.channel small { display: block; color: var(--muted); font-size: 0.8rem; }
+.channel b { font-weight: 600; word-break: break-all; }
+.channel .copy { margin-left: auto; background: none; border: 1px solid var(--line-2); color: var(--text); border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 0.82rem; cursor: pointer; }
+.channel .copy:hover { border-color: var(--orange); }
+form.compose { padding: 28px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 14px; }
+.compose .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { .compose .row { grid-template-columns: 1fr; } }
+.compose label { display: grid; gap: 6px; font-size: 0.86rem; color: var(--muted); }
+.compose input, .compose textarea {
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; width: 100%;
+}
+.compose textarea { min-height: 140px; resize: vertical; }
+.compose input:focus, .compose textarea:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 107, 26, 0.18); }
+.compose .hint { font-size: 0.8rem; color: var(--dim); margin: 0; }
+.compose .btn { justify-self: start; }
+
+footer.site { border-top: 1px solid var(--line); padding: 40px 0 48px; color: var(--muted); font-size: 0.88rem; }
+footer .f { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+footer nav a { text-decoration: none; }
+footer nav a:hover { color: var(--text); }
+
+/* reveal on scroll: one quiet, consistent entrance */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .js .reveal.in { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+<a class="vh skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#home" aria-label="Rayen Skhiri, home">
+      <span class="logo-mark">{{ui:shield}}</span>
+      <span class="logo-text"><b>RAYEN SKHIRI</b><span>SOC Analyst and AppSec</span></span>
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">{{ui:menu}}</button>
+    <nav class="nav-links" id="nav-links" aria-label="Main">
+      <a href="#home" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#stack">Stack</a>
+      <a href="#projects">Projects</a>
+      <a href="https://threatwatch.rayenskhiri.online">Threat Watch</a>
+      <a class="btn btn-primary btn-sm" href="#contact">Let's talk {{ui:arrow}}</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="home" aria-label="Introduction">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="status"><i></i>Open to SOC, DFIR and AppSec roles</span>
+        <p class="kicker">// SOC Analyst L2/L3 and Application Security Engineer</p>
+        <h1><span class="l1">Rayen</span> <span class="l2">Skhiri<span class="cursor" aria-hidden="true"></span></span></h1>
+        <p class="lede">I hunt threats in a <strong>multi-tenant SOC</strong>, attack <strong>Active Directory</strong> to stay sharp, and build open tools that catch <strong>phishing aimed at North Africa</strong> before it lands.</p>
+        <ul class="chips" aria-label="Core tools">
+          <li>Cortex XDR</li><li>XQL</li><li>Splunk</li><li>FortiGate</li><li>Python</li><li>Burp Suite</li><li>Active Directory</li>
+        </ul>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#projects">View my work {{ui:arrow}}</a>
+          <a class="btn btn-ghost" href="rayen-skhiri-cv.pdf" download id="cv-btn"><span class="cv-yes">Download CV</span><span class="cv-yes">{{ui:download}}</span><span class="cv-no" hidden>Get in touch</span><span class="cv-no" hidden>{{ui:arrow}}</span></a>
+        </div>
+        <div class="socials">
+          <span>Find me on</span>
+          <a href="https://github.com/Raynskhiri" aria-label="GitHub">{{si:github}}</a>
+          <a href="https://linkedin.com/in/rayen-skhiri" aria-label="LinkedIn">{{ui:linkedin}}</a>
+          <a href="mailto:skhirirayen@outlook.com" aria-label="Email">{{ui:mail}}</a>
+          <a href="https://threatwatch.rayenskhiri.online" aria-label="Maghreb Threat Watch dashboard">{{ui:radar}}</a>
+        </div>
+      </div>
+
+      <div class="visual" aria-label="Portrait and live Threat Watch console">
+        <div class="portrait" id="portrait">
+          <div class="ring"></div>
+          <div class="dots"></div>
+          <div class="disc"></div>
+          <div class="initials" aria-hidden="true">RS</div>
+          <img src="rayen.webp" alt="Rayen Skhiri" width="880" height="950" onerror="this.parentNode.classList.add('no-photo')">
+        </div>
+        <div class="float badge badge-htb">{{si:hackthebox}}<div><b>Top 700</b><span>worldwide on Hack The Box</span></div></div>
+        <div class="float badge badge-crtp"><span class="tick">{{ui:check}}</span><div><b>CRTP</b><span>Certified Red Team Professional</span></div></div>
+        <div class="float console" role="img" aria-label="Terminal: Maghreb Threat Watch scores the lookalike domain bi(Cyrillic a)t-login.com 85 out of 100, high confidence, impersonating BIAT">
+          <div class="bar"><i></i><i></i><i></i><span>threat-watch</span><em>live</em></div>
+          <pre id="console"></pre>
+          <div class="foot"><span id="tw-last">Scans every morning</span><span id="tw-count">tens of thousands of domains</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="about" aria-labelledby="about-title">
+    <div class="wrap about">
+      <div class="body reveal">
+        <p class="eyebrow">// About me</p>
+        <h2 class="title" id="about-title">I defend by thinking like the attacker.</h2>
+        <p>I'm a SOC analyst at a managed security provider in Tunis, working <strong>L2/L3 investigations across many client environments</strong> on Cortex XDR, from alert triage to the incident report the client reads.</p>
+        <p>On the other side I hold the <strong>CRTP</strong>, rank in the <strong>top 700 on Hack The Box</strong>, and design CTF challenges for Securinets. Knowing how an attack works is how I write the detection that catches it.</p>
+        <p>When something repetitive slows the team down, I automate it in Python.</p>
+      </div>
+      <dl class="facts reveal">
+        <div class="fact"><span class="ico">{{ui:user}}</span><div><dt>Role</dt><dd>SOC Analyst L2/L3</dd></div></div>
+        <div class="fact"><span class="ico">{{ui:pin}}</span><div><dt>Based in</dt><dd>Tunis, Tunisia</dd></div></div>
+        <div class="fact"><span class="ico">{{ui:clock}}</span><div><dt>Experience</dt><dd>2+ years in SOC operations</dd></div></div>
+        <div class="fact"><span class="ico">{{ui:globe}}</span><div><dt>Works in</dt><dd>English and French</dd></div></div>
+        <div class="fact"><span class="ico">{{ui:award}}</span><div><dt>Certified</dt><dd>CRTP (Altered Security)</dd></div></div>
+        <div class="fact"><span class="ico">{{ui:cap}}</span><div><dt>Studying</dt><dd>MSc Infrastructure Security, ISI</dd></div></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">// What I do</p>
+          <h2 class="title" id="services-title">Where I can help your team</h2>
+        </div>
+      </div>
+      <div class="services">
+        <article class="svc reveal"><span class="ico">{{ui:siren}}</span><h3>Detection and response</h3><p>L2/L3 triage, investigation and containment across multi-tenant environments, written up so clients understand what happened.</p><div class="tools">Cortex XDR · FortiGate · IR</div></article>
+        <article class="svc reveal"><span class="ico">{{ui:target}}</span><h3>Threat hunting</h3><p>Hypothesis-driven hunts and detection logic mapped to MITRE ATT&amp;CK, tuned to cut false positives, not just add rules.</p><div class="tools">XQL · Splunk SPL · ATT&amp;CK</div></article>
+        <article class="svc reveal"><span class="ico">{{ui:bug}}</span><h3>Web app security</h3><p>Testing web applications the way attackers do, then explaining fixes developers can ship.</p><div class="tools">Burp Suite · OWASP Top 10</div></article>
+        <article class="svc reveal"><span class="ico">{{ui:cpu}}</span><h3>Security automation</h3><p>Python tooling that removes manual SOC work: ticket sync, enrichment, reports and scheduled intelligence.</p><div class="tools">Python · APIs · GitHub Actions</div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="stack" aria-labelledby="stack-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">// Tech stack</p>
+          <h2 class="title" id="stack-title">Tools I use every week</h2>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="stack-group reveal"><h3>Security operations</h3><ul>
+          {{tile:paloaltonetworks:Cortex XDR}}{{tile:splunk:Splunk}}{{tile:fortinet:FortiGate}}{{tile:virustotal:VirusTotal}}{{tile:wireshark:Wireshark}}{{tile:owasp:OWASP}}
+        </ul></div>
+        <div class="stack-group reveal"><h3>Offensive security</h3><ul>
+          {{tile:burpsuite:Burp Suite}}{{tile:kalilinux:Kali Linux}}{{tile:metasploit:Metasploit}}{{tile:hackthebox:Hack The Box}}{{tile:tryhackme:TryHackMe}}{{tile:ad:Active Directory}}
+        </ul></div>
+        <div class="stack-group reveal"><h3>Engineering</h3><ul>
+          {{tile:python:Python}}{{tile:gnubash:Bash}}{{tile:linux:Linux}}{{tile:git:Git}}{{tile:docker:Docker}}{{tile:githubactions:GitHub Actions}}
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" aria-labelledby="projects-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">// Featured projects</p>
+          <h2 class="title" id="projects-title">Things I built</h2>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/Raynskhiri">All projects on GitHub {{ui:arrow}}</a>
+      </div>
+      <div class="projects">
+        <article class="proj reveal">
+          <div class="preview" aria-hidden="true">
+            <div class="pv-bar"><span>Findings, last 30 days</span><span class="live">Live</span></div>
+            <div class="pv-row"><span class="pill h">100</span><span>biat[.]com[.]tn[.]verify-account[.]xyz</span><small>TN</small></div>
+            <div class="pv-row"><span class="pill h">85</span><span>bi<span class="c-hl">а</span>t-login[.]com</span><small>TN</small></div>
+            <div class="pv-row"><span class="pill h">75</span><span>djezzy-bonus[.]shop</span><small>DZ</small></div>
+            <div class="pv-row"><span class="pill m">63</span><span>oredoo-recharge[.]xyz</span><small>TN</small></div>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>Maghreb Threat Watch</h3><span class="tag on">Live</span></div>
+            <p>Open early warning for lookalike and phishing domains targeting 45 banks, telecoms and public services in Tunisia, Morocco and Algeria. Every score is explained, and every finding ships with a ready-to-run hunt.</p>
+            <ul class="techs"><li>Python</li><li>Certificate Transparency</li><li>XQL</li><li>SPL</li><li>GitHub Actions</li></ul>
+            <div class="links"><a href="https://threatwatch.rayenskhiri.online">Live dashboard {{ui:external}}</a><a href="https://github.com/Raynskhiri/maghreb-threat-watch">Source code {{ui:external}}</a></div>
+          </div>
+        </article>
+        <article class="proj reveal">
+          <div class="preview" aria-hidden="true">
+            <div class="slack">
+              <div class="who"><i></i>Rayen agent <span>needs your approval</span></div>
+              <div class="kv"><b>Alert:</b> encoded PowerShell from Word<br><b>Verdict:</b> true positive, high confidence<br><b>Proposed:</b> isolate endpoint, block hash</div>
+              <div class="acts"><span class="ok">Approve</span><span class="no">Reject</span><span class="no">Investigate</span></div>
+            </div>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>SOC triage agent</h3><span class="tag">In progress</span></div>
+            <p>A local LLM agent that investigates Cortex XDR alerts, builds the timeline and drafts a verdict. Nothing is contained or sent to a client until I approve it in Slack.</p>
+            <ul class="techs"><li>Python</li><li>Ollama</li><li>Cortex XDR API</li><li>Slack</li></ul>
+            <div class="links"><a href="https://github.com/Raynskhiri">Follow on GitHub {{ui:external}}</a></div>
+          </div>
+        </article>
+        <article class="proj reveal">
+          <div class="preview" aria-hidden="true">
+            <div class="pv-bar"><span>Process tree, sample run</span><span>02:14</span></div>
+            <div class="tree">
+              <div>WINWORD.EXE <span class="c-dim">invoice_oct.docm</span></div>
+              <div class="t1">└ powershell.exe <span class="c-or">-enc JABzAD0A…</span></div>
+              <div class="t2">└ rundll32.exe <span class="c-dim">%TEMP%\a.dll,Run</span></div>
+              <div class="t3">└ <span class="c-red">connect 185.x.x.x:443</span></div>
+            </div>
+            <span class="verdict">Malicious</span>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>Malware sandbox</h3><span class="tag">In progress</span></div>
+            <p>Self-hosted dynamic analysis in the spirit of ANY.RUN: detonate a sample, watch the process tree and network, and feed the verdict back into Cortex XDR.</p>
+            <ul class="techs"><li>Python</li><li>Virtualization</li><li>Linux</li></ul>
+            <div class="links"><a href="https://github.com/Raynskhiri">Follow on GitHub {{ui:external}}</a></div>
+          </div>
+        </article>
+      </div>
+      <p class="preview-note reveal">Previews for projects in progress are illustrations of the interface, not real alerts.</p>
+    </div>
+  </section>
+
+  <section class="alt" aria-labelledby="proof-title">
+    <div class="wrap">
+      <h2 class="vh" id="proof-title">In numbers</h2>
+      <div class="proof reveal">
+        <div class="stat"><span class="ico">{{si:hackthebox}}</span><div><b data-count="700" data-prefix="Top ">Top 700</b><span>worldwide on Hack The Box</span></div></div>
+        <div class="stat"><span class="ico">{{ui:radar}}</span><div><b id="stat-domains" data-count="70000" data-suffix="+" data-compact="1">70K+</b><span>domains checked by Threat Watch each morning</span></div></div>
+        <div class="stat"><span class="ico">{{ui:shield}}</span><div><b data-count="45">45</b><span>banks, telecoms and services watched in 3 countries</span></div></div>
+        <div class="stat"><span class="ico">{{ui:clock}}</span><div><b data-count="2" data-suffix="+">2+</b><span>years in SOC operations</span></div></div>
+      </div>
+      <div class="creds">
+        <div class="cred reveal"><span class="st done">Certified</span><b>CRTP</b><span>Certified Red Team Professional, Altered Security</span></div>
+        <div class="cred reveal"><span class="st prep">Preparing</span><b>Splunk Core Certified Power User</b><span>Splunk</span></div>
+        <div class="cred reveal"><span class="st prep">Preparing</span><b>Certified XDR Analyst</b><span>Palo Alto Networks</span></div>
+        <div class="cred reveal"><span class="st prep">Preparing</span><b>Certified SOC Analyst</b><span>EC-Council</span></div>
+        <div class="cred reveal"><span class="st done">Community</span><b>Securinets</b><span>CTF challenge author and workshop facilitator</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+    <div class="wrap contact">
+      <div class="reveal">
+        <p class="eyebrow">// Let's work together</p>
+        <h2 class="title" id="contact-title">Have a SOC, DFIR or AppSec role in mind?</h2>
+        <p class="lead">I reply within a day. Email is the fastest way to reach me, in English or French.</p>
+        <div class="channels">
+          <div class="channel"><span class="ico">{{ui:mail}}</span><div><small>Email</small><b id="email">skhirirayen@outlook.com</b></div><button class="copy" type="button" id="copy-email">Copy</button></div>
+          <a class="channel" href="https://linkedin.com/in/rayen-skhiri"><span class="ico">{{ui:linkedin}}</span><div><small>LinkedIn</small><b>in/rayen-skhiri</b></div></a>
+          <a class="channel" href="https://github.com/Raynskhiri"><span class="ico">{{si:github}}</span><div><small>GitHub</small><b>Raynskhiri</b></div></a>
+        </div>
+      </div>
+      <form class="compose reveal" id="compose" novalidate>
+        <div class="row">
+          <label>Your name<input name="name" autocomplete="name" required></label>
+          <label>Company<input name="company" autocomplete="organization"></label>
+        </div>
+        <label>Subject<input name="subject" placeholder="SOC Analyst role at ..." required></label>
+        <label>Message<textarea name="message" required></textarea></label>
+        <p class="hint">Opens your email app with the message ready to send.</p>
+        <button class="btn btn-primary" type="submit">Write the email {{ui:send}}</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap f">
+    <a class="logo" href="#home"><span class="logo-mark">{{ui:shield}}</span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
+    <nav aria-label="Footer">
+      <a href="#about">About</a><a href="#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="#contact">Contact</a>
+    </nav>
+    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.documentElement.classList.add('js');
+
+  // Mobile menu
+  var btn = document.querySelector('.menu-btn'), links = document.getElementById('nav-links');
+  btn.addEventListener('click', function () {
+    var open = links.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  links.addEventListener('click', function (e) { if (e.target.closest('a')) { links.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); } });
+
+  // Active nav link
+  var navA = [].slice.call(links.querySelectorAll('a[href^="#"]'));
+  if ('IntersectionObserver' in window) {
+    var secObs = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) navA.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    ['home', 'about', 'services', 'stack', 'projects', 'contact'].forEach(function (id) { var s = document.getElementById(id); if (s) secObs.observe(s); });
+  }
+
+  // Reveal on scroll
+  var reveals = [].slice.call(document.querySelectorAll('.reveal'));
+  if (!reduce && 'IntersectionObserver' in window) {
+    var ro = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }); }, { threshold: 0.12 });
+    reveals.forEach(function (r) { ro.observe(r); });
+    // Never leave content hidden: reveal everything once the page bottom is reached.
+    window.addEventListener('scroll', function onEnd() {
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 40) {
+        reveals.forEach(function (r) { r.classList.add('in'); });
+        window.removeEventListener('scroll', onEnd);
+      }
+    }, { passive: true });
+  } else { reveals.forEach(function (r) { r.classList.add('in'); }); }
+
+  // Console: types the scoring of a lookalike domain
+  var lines = [
+    ['<span class="c-dim">$</span> mtw check bi<span class="c-hl">а</span>t-login.com', 30],
+    ['<span class="c-dim">[brand]</span> BIAT with Cyrillic <span class="c-hl">а</span> U+0430  <span class="c-gr">+65</span>', 6],
+    ['<span class="c-dim">[lure ]</span> "login" beside the brand   <span class="c-gr">+15</span>', 6],
+    ['<span class="c-dim">[idn  ]</span> xn--bit-login-1yh.com       <span class="c-gr">+5</span>', 6],
+    ['<span class="c-red">SCORE 85/100  HIGH</span>  <span class="c-dim">hunt query ready</span>', 6]
+  ];
+  var pre = document.getElementById('console');
+  function plain(h) { var d = document.createElement('div'); d.innerHTML = h; return d.textContent; }
+  if (reduce) { pre.innerHTML = lines.map(function (l) { return l[0]; }).join('\n'); }
+  else {
+    var li = 0;
+    (function next() {
+      if (li >= lines.length) { setTimeout(function () { pre.innerHTML = ''; li = 0; next(); }, 6000); return; }
+      var html = lines[li][0], text = plain(html), n = 0, speed = lines[li][1];
+      var done = pre.innerHTML ? pre.innerHTML + '\n' : '';
+      (function type() {
+        n += speed > 10 ? 1 : 4;
+        if (n >= text.length) { pre.innerHTML = done + html; li++; setTimeout(next, li === 1 ? 500 : 260); return; }
+        pre.textContent = plain(done) + text.slice(0, n);
+        setTimeout(type, speed);
+      })();
+    })();
+  }
+
+  // Live numbers from the Threat Watch dashboard
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  fetch('https://threatwatch.rayenskhiri.online/stats.json', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (s) {
+      if (!s) return;
+      if (s.domains_checked_last_run) {
+        document.getElementById('tw-count').textContent = fmt(s.domains_checked_last_run) + ' domains checked';
+        var k = Math.floor(s.domains_checked_last_run / 1000);
+        var el = document.getElementById('stat-domains'); el.dataset.count = String(k * 1000); el.textContent = k + 'K+';
+      }
+      if (s.last_run_day) {
+        var d = new Date(s.last_run_day + 'T00:00:00Z');
+        document.getElementById('tw-last').textContent = 'Last scan ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) +
+          (typeof s.new_last_run === 'number' ? ', ' + s.new_last_run + ' new' : '');
+      }
+    }).catch(function () {});
+
+  // Count-up on the numbers band
+  var counters = [].slice.call(document.querySelectorAll('[data-count]'));
+  function render(el, v) {
+    var pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+    el.textContent = pre + (el.dataset.compact ? Math.round(v / 1000) + 'K' : Math.round(v)) + suf;
+  }
+  if (!reduce && 'IntersectionObserver' in window) {
+    var co = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return; co.unobserve(e.target);
+        var el = e.target, to = +el.dataset.count, t0 = null;
+        (function step(t) { t0 = t0 || t; var p = Math.min(1, (t - t0) / 1100); render(el, to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(performance.now());
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (c) { co.observe(c); });
+  }
+
+  // CV button falls back to contact when no CV is published yet
+  var cv = document.getElementById('cv-btn');
+  fetch(cv.getAttribute('href'), { method: 'HEAD' }).then(function (r) {
+    if (!r.ok || (r.headers.get('content-type') || '').indexOf('pdf') < 0) throw 0;
+  }).catch(function () {
+    cv.removeAttribute('download'); cv.setAttribute('href', '#contact');
+    cv.querySelectorAll('.cv-yes').forEach(function (x) { x.hidden = true; });
+    cv.querySelectorAll('.cv-no').forEach(function (x) { x.hidden = false; });
+  });
+
+  // Copy email
+  var copyBtn = document.getElementById('copy-email');
+  copyBtn.addEventListener('click', function () {
+    var t = document.getElementById('email').textContent;
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(function () { copyBtn.textContent = 'Copied'; setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1500); });
+  });
+
+  // Compose: opens the visitor's email app with the message filled in
+  document.getElementById('compose').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = e.target, name = f.name.value.trim(), subj = f.subject.value.trim(), msg = f.message.value.trim(), co = f.company.value.trim();
+    if (!name || !subj || !msg) { (!name ? f.name : !subj ? f.subject : f.message).focus(); return; }
+    var body = msg + '\n\n' + name + (co ? ', ' + co : '');
+    location.href = 'mailto:skhirirayen@outlook.com?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body);
+  });
+})();
+</script>
+</body>
+</html>
