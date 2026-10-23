@@ -13,8 +13,8 @@
 
 ### 🛡️ About me
 
-- 🔎 SOC Analyst L2/L3 at **3S / TrustShield** (24/7 MSSP): L1 escalations to containment across client environments on **Cortex XDR and XSIAM**
-- 🏢 Previously SOC Analyst at **DataXion**, Tunisia's first Tier IV datacenter: Wazuh, Trend Micro DDEI, Nessus, ISO 27001 and PCI DSS
+- 🔎 SOC Analyst L2/L3 at **3S / TrustShield** (24/7 MSSP, 800+ endpoints): L1 escalations to containment on **Cortex XDR and XSIAM**; cut client onboarding from 3 weeks to 2 days with GPO and PowerShell pipelines
+- 🏢 Previously SOC Analyst at **DataXion**, Tunisia's first Tier IV datacenter: blocked spear-phishing with Trend Micro DDEI, hardened 30+ accounts, 50+ prioritised Nessus remediations
 - 🌐 Web Application Security Engineer: testing and hardening web apps
 - ⚔️ **CRTP** certified (Certified Red Team Professional): Active Directory attack and defense
 - 🏴 Top 700 globally on **HackTheBox**; former **Securinets** member (CTF challenge author and workshop facilitator)

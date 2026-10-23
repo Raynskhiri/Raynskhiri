@@ -41,3 +41,5 @@
 .rt-help .h-c { color: #F2F4F7; white-space: nowrap; padding-left: 12px; }
 .rt-help .h-d { color: #A3ABB8; }
 @media (max-width: 600px) { .rt-help { grid-template-columns: minmax(0, 1fr); gap: 0; } .rt-help .h-d { padding-left: 24px; margin-bottom: 4px; } .rt-help .h-c { white-space: normal; } }
+.rt-boot { padding: 18px 16px; color: #D8DEE8; }
+@media (max-width: 600px) { .rt-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .rt-chips::-webkit-scrollbar { display: none; } .tk.chip { flex: none; } }

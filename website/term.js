@@ -19,7 +19,7 @@ const STATIC = {
   cat README.md   read a file
   help            every command
 
-Start with:  cat about/whoami.md   or   ls experience   or   ls projects
+Start with:  benchmark   or   ls experience   or   ls projects
 Live data:   cat feeds/exploited.txt   (what attackers exploit right now)`,
 
   "about/whoami.md": `# Rayen Skhiri
@@ -38,74 +38,76 @@ languages    English, French
 certified    CRTP (Altered Security)
 studying     MSc Infrastructure Security, ISI`,
 
-  "services/detection-and-response.md": `# Detection and response
+  "skills/detection-and-response.md": `# Detection and response
 L2/L3 triage, investigation and containment across multi-tenant environments,
-written up so clients understand what happened.
-tools: Cortex XDR · FortiGate · IR`,
-  "services/threat-hunting.md": `# Threat hunting
-Hypothesis-driven hunts and detection logic mapped to MITRE ATT&CK,
-tuned to cut false positives, not just add rules.
-tools: XQL · Splunk SPL · ATT&CK
-see:   cd ~/projects/detection-library`,
-  "services/web-app-security.md": `# Web app security
-Testing web applications the way attackers do, then explaining fixes developers can ship.
-tools: Burp Suite · OWASP Top 10`,
-  "services/security-automation.md": `# Security automation
-Python tooling that removes manual SOC work: ticket sync, enrichment,
-reports and scheduled intelligence.
-tools: Python · APIs · GitHub Actions
-see:   cd ~/projects/maghreb-threat-watch`,
+written up so clients understand what happened and what to fix.
 
-  "stack/siem-xdr-endpoint.txt": `Cortex XDR and XSIAM   daily: alerts, incidents, causality chains, XQL
+Cortex XDR and XSIAM   daily: alerts, incidents, causality chains, XQL
 Splunk                 SPL hunting and dashboards
 Wazuh                  detection and response at a Tier IV datacenter
 Security Onion         network security monitoring
 Elastic (ELK)          threat intelligence dashboards
-Microsoft Sentinel
-CrowdStrike Falcon
-Kaspersky
-Symantec
-Trend Micro            Deep Discovery Email Inspector against spear-phishing
-FortiGate              log management and tuning
-Cisco FTD`,
-  "stack/response-intel-forensics.txt": `Cortex XSOAR, TheHive   orchestration and case management
+Microsoft Sentinel, CrowdStrike Falcon
+Kaspersky, Symantec, Trend Micro (Deep Discovery Email Inspector)
+FortiGate, Cisco FTD   firewall logs, tuning and parsing`,
+  "skills/threat-hunting-and-intel.md": `# Threat hunting and intel
+Hypothesis-driven hunts in XQL and SPL mapped to MITRE ATT&CK, enriched with
+threat intelligence, and forensics when an alert turns out to be real.
+
+Cortex XSOAR, TheHive   orchestration and case management
 MISP, OpenCTI           threat intelligence platforms
 VirusTotal, ANY.RUN     triage and sandboxing
 Wireshark, tcpdump      packet analysis
 Volatility, Autopsy, Sysinternals   forensics
 Nessus, OpenVAS         vulnerability management
-GLPI                    ticketing (I automated it from XDR)`,
-  "stack/offensive.txt": `Burp Suite, OWASP Top 10   web application testing
+see: cd ~/projects/detection-library`,
+  "skills/offensive-and-web-app-security.md": `# Offensive and web app security
+Testing web applications and Active Directory the way attackers do, then
+explaining fixes developers and admins can ship.
+
+Burp Suite, OWASP Top 10   web application testing
 Active Directory           CRTP: Kerberos, delegation, trusts
-BloodHound, Impacket, Mimikatz
-Metasploit, Kali Linux
+BloodHound, Impacket, Mimikatz, Metasploit, Kali Linux
 Hack The Box (top 700), TryHackMe`,
-  "stack/engineering.txt": `Python       automation, integrations, this site's pipelines
-PowerShell   deployment pipelines and GPO scripting
+  "skills/security-automation.md": `# Security automation
+Python and PowerShell that remove manual SOC work: ticket sync, deployment
+pipelines, enrichment, reports and scheduled intelligence.
+
+Python        XDR to GLPI bridge, this site's pipelines, Threat Watch
+PowerShell    GPO deployment pipelines (client onboarding: 3 weeks to 2 days)
 Bash, Linux, Git, Docker
 GitHub Actions   CI/CD and scheduled intelligence
-Ollama       local LLMs for SOC triage`,
+Ollama        local LLMs for SOC triage
+see: cd ~/projects/maghreb-threat-watch`,
+
+  "impact/credentials.md": `certified    CRTP, Certified Red Team Professional (Altered Security)
+preparing    Splunk Core Certified Power User
+preparing    Palo Alto Networks Certified XDR Analyst
+preparing    EC-Council Certified SOC Analyst
+ranking      Hack The Box, top 700 worldwide
+community    Securinets, past member: CTF challenge author and workshop facilitator
+             writeups  https://github.com/Raynskhiri/Writeup`,
 
   "experience/3s-trustshield.md": `# SOC Analyst L2/L3   Jul 2025 to present
 Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis
 
-- Escalation point in a 24/7 MSSP: L1 escalations across several client
-  environments on Cortex XDR and XSIAM, from the first alert to containment.
+- Escalation point in a 24/7 MSSP covering 800+ endpoints: L1 escalations
+  across several client environments on Cortex XDR and XSIAM, to containment.
 - Investigated a Pass-the-Hash lateral movement alert on a domain controller
   and a malspam VBS campaign hidden behind Unicode extension padding, both
   scoped across the fleet before closure.
+- Cut client integration lead time from 3 weeks to 2 days (GPO, PowerShell).
+- Reduced a FortiGate log footprint of about 450 GB with Cortex XDR parsing
+  rules; took a fleet-wide anomaly to Palo Alto Networks TAC to root cause.
 - Weekly and monthly client security reports in French (MTTD, MTTA, MTTR).
-- Took a fleet-wide anomaly to Palo Alto Networks TAC through to root cause;
-  diagnosed a Broker VM syslog outage down to the firewall and message queue.
-- Cut a FortiGate log footprint of about 450 GB with Cortex XDR parsing rules.
 - Built a Python bridge: XDR incidents become GLPI tickets, kept in sync.
 - Mentor L1 analysts; write runbooks and client onboarding templates.`,
   "experience/dataxion.md": `# SOC Analyst L1/L2   Jul 2024 to Mar 2025
 DataXion · first Tier IV certified datacenter in Tunisia · Tunis
 
 - Detected and contained targeted attacks on hosted critical services (Wazuh).
-- Blocked spear-phishing campaigns (Trend Micro DDEI), hardened the accounts hit.
-- Nessus scans and remediation follow-up with the system teams.
+- Blocked spear-phishing campaigns (Trend Micro DDEI), hardened 30+ accounts.
+- Nessus scans: 50+ prioritised remediations, followed with the system teams.
 - ISO 27001, PCI DSS and GDPR compliance; red team findings mapped to ATT&CK.`,
   "experience/internships.md": `# Internships   2023 to 2024
 BITS Tunisia (2024)    cybersecurity: Nessus and OpenVAS assessments,
@@ -154,15 +156,6 @@ A local LLM agent that investigates Cortex XDR alerts, builds the timeline
 and drafts a verdict. Nothing is contained or sent to a client until a human
 approves it in Slack.`,
 
-  "certs/CRTP.md": `# Certified Red Team Professional (Altered Security)   [certified]
-Active Directory enumeration, Kerberos attacks, delegation, trusts, persistence.`,
-  "certs/in-progress.md": `Splunk Core Certified Power User           preparing
-Palo Alto Networks Certified XDR Analyst   preparing
-EC-Council Certified SOC Analyst           preparing`,
-  "certs/community.md": `Hack The Box   top 700 worldwide
-Securinets     past member: CTF challenge author and workshop facilitator
-               writeups  https://github.com/Raynskhiri/Writeup`,
-
   "contact/contact.md": `email     skhirirayen@outlook.com
 linkedin  https://www.linkedin.com/in/rayen-skhiri
 github    https://github.com/Raynskhiri
@@ -172,6 +165,7 @@ Want to talk about a role? Type 'hire' to open the contact form.`,
 
 // Files whose content is fetched when read.
 const LIVE = {
+  "impact/benchmark.txt": benchmark,
   "feeds/exploited.txt": exploitedFeed,
   "feeds/threatwatch.txt": threatwatchStats,
   "projects/maghreb-threat-watch/stats.txt": threatwatchStats,
@@ -179,8 +173,9 @@ const LIVE = {
 };
 
 const DESCRIBE = {
-  "README.md": "start here", about: "who I am", experience: "where I have worked", services: "what I do for a team", stack: "tools I use every week",
-  projects: "things I built", certs: "certifications and community", feeds: "live data, refreshed daily",
+  "README.md": "start here", about: "who I am", impact: "the numbers, benchmarked", experience: "where I have worked",
+  skills: "what I bring to a team, and the tools", projects: "things I built", feeds: "live data, refreshed daily",
+  "benchmark.txt": "run me", "credentials.md": "certifications and community",
   contact: "how to reach me", "maghreb-threat-watch": "phishing early warning, live",
   malwarescope: "ML + LLM malware analysis, thesis", "detection-library": "29 rules, XQL + SPL",
   "soc-triage-agent": "LLM triage with human approval, in progress", "exploited.txt": "CISA KEV, actively exploited",
@@ -188,7 +183,7 @@ const DESCRIBE = {
 };
 
 const SECTION = {
-  about: "#about", experience: "#experience", services: "#services", stack: "#stack", projects: "#projects", certs: "#proof", contact: "#contact",
+  about: "#home", impact: "#impact", experience: "#experience", skills: "#skills", projects: "#projects", contact: "#contact",
   "projects/maghreb-threat-watch": "https://threatwatch.rayenskhiri.online",
   "projects/malwarescope": "https://github.com/Raynskhiri/MalwareScope",
   "projects/detection-library": PLAYGROUND,
@@ -271,6 +266,37 @@ ${esc(r.summary)}
 <a href="https://nvd.nist.gov/vuln/detail/${encodeURIComponent(r.cve)}" target="_blank" rel="noopener noreferrer">NVD entry</a>`;
 }
 
+async function benchmark() {
+  let domains = "70,000+";
+  let day = "every morning";
+  try {
+    const s = await fetch(THREATWATCH, { cache: "no-store" }).then((r) => r.json());
+    domains = Number(s.domains_checked_last_run).toLocaleString("en-US");
+    day = s.last_run_day;
+  } catch { /* keep the static value */ }
+  const row = (n, what, src) => `  <b>${esc(n.padEnd(12))}</b>${esc(what.padEnd(34))}<span class="d">${esc(src)}</span>`;
+  return [
+    `<span class="d">$</span> rayen --benchmark --since 2024`,
+    "",
+    `<span class="o">AT WORK</span>`,
+    row("800+", "endpoints monitored, 24/7", "3S · TrustShield"),
+    row("3 wk → 2 d", "client integration lead time", "3S · TrustShield"),
+    row("~450 GB", "FortiGate log footprint reduced", "3S · TrustShield"),
+    row("30+", "compromised accounts hardened", "DataXion"),
+    row("50+", "prioritised remediations", "DataXion"),
+    row("L1 → L3", "in 2+ years of SOC operations", "since Jul 2024"),
+    "",
+    `<span class="o">IN THE OPEN</span>`,
+    row(domains, `domains checked (${day})`, "Maghreb Threat Watch, live"),
+    row("29 rules", "800+ events checked per commit", "detection library"),
+    row("82% vs 36%", "ML model vs an LLM alone", "MalwareScope"),
+    row("Top 700", "worldwide on Hack The Box", "of ~2M players"),
+    "",
+    `<span class="d">KPIs I report weekly: MTTD · MTTA · MTTR · SLA · NIST SP 800-61</span>`,
+    `<span class="g">result: PASS</span>  <span class="d">next step:</span> ${'<button type="button" class="tk f" data-cmd="hire">hire</button>'}`,
+  ].join("\n");
+}
+
 async function threatwatchStats() {
   const s = await fetch(THREATWATCH, { cache: "no-store" }).then((r) => r.json());
   return esc(`Maghreb Threat Watch, last run ${s.last_run_day}
@@ -338,9 +364,11 @@ export function mount(root) {
     const kids = isDir(st.cwd) ? children(st.cwd).filter((n) => !n.startsWith(".")) : [];
     const sug = ["ls"];
     if (st.cwd !== HOME) sug.push("cd ..");
-    kids.slice(0, 3).forEach((n) => sug.push(isDir(`${st.cwd}/${n}`) ? `cd ${n}` : `cat ${n}`));
-    if (st.cwd === HOME) sug.push("kev", "help");
-    else sug.push("open .");
+    if (st.cwd === HOME) sug.push("benchmark", "cd experience", "cd projects", "kev", "help");
+    else {
+      kids.slice(0, 3).forEach((n) => sug.push(isDir(`${st.cwd}/${n}`) ? `cd ${n}` : `cat ${n}`));
+      sug.push("open .");
+    }
     chips.innerHTML = sug.map((c) => btn(c, c, "chip")).join("");
   }
 
@@ -497,6 +525,8 @@ ${row(btn("tree", "tree"), "everything below here")}
 ${row(btn("pwd", "pwd"), "where am I")}
 ${row("grep &lt;word&gt;", `search every file, e.g. ${btn("grep cortex", "grep cortex")}`)}
 ${row("open [path]", "jump to that part of the page, or open the project")}
+<b class="h-t">Numbers</b>
+${row(btn("benchmark", "benchmark"), "impact at work and in the open, benchmarked")}
 <b class="h-t">Live data</b>
 ${row(`${btn("kev", "kev")} [vendor]`, "vulnerabilities exploited in the wild right now (CISA KEV)")}
 ${row(btn("kev --ransomware", "kev --ransomware"), "only the ones ransomware groups use")}
@@ -515,6 +545,7 @@ ${row(`${btn("pwsh", "pwsh")} ${btn("clear", "clear")} ${btn("history", "history
     ls, ll: (a) => ls(["-l", ...a]), dir: (a) => ls(["-l", ...a]),
     cd, pwd: () => say(st.mode === "bash" ? st.cwd : `C:${st.cwd.replace(/\//g, "\\")}`),
     cat, less: cat, more: cat, head: cat, type: cat, tree, grep, open, kev,
+    benchmark: () => cat(["~/impact/benchmark.txt"]), bench: () => cat(["~/impact/benchmark.txt"]),
     detect: (_, raw) => detectCmd(raw),
     clear: () => { out.innerHTML = ""; }, cls: () => { out.innerHTML = ""; },
     history: () => say(st.history.map((h, i) => `${String(i + 1).padStart(4)}  ${h}`).join("\n")),
