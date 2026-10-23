@@ -585,7 +585,7 @@ footer nav a:hover { color: var(--text); }
   </div>
 </footer>
 
-<!-- Terminal people: press ` anywhere on this page. -->
+<!-- Terminal people: press ` or type sudo anywhere on this page. -->
 <script>
 (function () {
   // Hidden shell for terminal people: press ` (or tap the footer credit 5 times).
@@ -597,14 +597,20 @@ footer nav a:hover { color: var(--text); }
     }
     import('./term.js').then(function (m) { m.openTerminal(); }).catch(function () {}).then(function () { termLoading = false; });
   }
+  // Trigger: ` (AltGr+7 works too on AZERTY), or simply type "sudo" anywhere.
+  var typed = '';
   document.addEventListener('keydown', function (e) {
-    if (e.key !== '`' || e.ctrlKey || e.metaKey || e.altKey) return;
     var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
-    e.preventDefault(); openTerm();
+    if (document.getElementById('rterm') && !document.getElementById('rterm').hidden) return;
+    if (e.key === '`' && !e.metaKey && (!e.ctrlKey || e.altKey)) { e.preventDefault(); openTerm(); return; }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      typed = (typed + e.key.toLowerCase()).slice(-4);
+      if (typed === 'sudo') { typed = ''; openTerm(); }
+    }
   });
   var taps = 0, tapT; var built = document.getElementById('built');
   if (built) built.addEventListener('click', function () { taps++; clearTimeout(tapT); tapT = setTimeout(function () { taps = 0; }, 1500); if (taps >= 5) { taps = 0; openTerm(); } });
-  try { console.log('%c rayen@soc %c press ` on this page for a shell ', 'background:#FF6B1A;color:#1A0B02;font-weight:700', 'color:#FF8C42'); } catch (e) {}
+  try { console.log('%c rayen@soc %c press ` or type sudo on this page ', 'background:#FF6B1A;color:#1A0B02;font-weight:700', 'color:#FF8C42'); } catch (e) {}
 })();
 (function () {
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
