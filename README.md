@@ -16,9 +16,10 @@
 - 🔎 SOC Analyst L2/L3 at an MSSP, running detection and response for multiple client tenants on **Cortex XDR**
 - 🌐 Web Application Security Engineer: testing and hardening web apps
 - ⚔️ **CRTP** certified (Certified Red Team Professional): Active Directory attack and defense
-- 🏴 Top 700 globally on **HackTheBox**, CTF challenge designer and workshop facilitator at **Securinets**
+- 🏴 Top 700 globally on **HackTheBox**; former **Securinets** member (CTF challenge author and workshop facilitator)
 - 🛰️ Maintainer of **Maghreb Threat Watch**, an open phishing early-warning feed for North African brands
-- 🤖 Currently building: AI-assisted SOC automation and a self-hosted malware sandbox
+- 🦠 Co-author of **MalwareScope**, my Master's thesis: ML + LLM malware analysis with an isolated sandbox
+- 🤖 Currently building: an AI-assisted SOC triage agent with human approval
 - 🎓 Master's in Information Systems and Infrastructure Security, ISI (University of Tunis El Manar)
 - 🌍 Based in Tunisia, open to opportunities worldwide
 
@@ -29,11 +30,10 @@
 | Project | What it does | Stack |
 |---|---|---|
 | **[Maghreb Threat Watch](https://github.com/Raynskhiri/maghreb-threat-watch)** 🛰️ | Open-source early warning for lookalike and phishing domains targeting 45 North African banks, telecoms and public services. Runs daily for free, explains every score, and ships ready-to-paste **Cortex XQL and Splunk SPL** hunts. **[Live dashboard](https://threatwatch.rayenskhiri.online)** | Python, Certificate Transparency, GitHub Actions, XQL, SPL |
-| **[SOC Triage Agent](#)** 🚧 | Local LLM agent that investigates Cortex XDR alerts (enrichment, correlation, timeline), suggests classification and response, and drafts reports. Every action goes through **human approval in Slack**. | Python, Ollama, Slack API, Cortex XDR API |
-| **[Malware Sandbox](#)** 🚧 | Self-hosted, ANY.RUN-style dynamic malware analysis platform with a web UI, designed to integrate with Cortex XDR. | Python, Linux, virtualization |
-| **[XDR to Ticketing Bridge](#)** | Automates incident ticket creation from XDR alerts with full lifecycle sync, replacing manual ticketing. | Python, Cortex XDR API, GLPI API |
-| **[Detection & Hunting Library](#)** | Curated XQL hunting queries and detection logic from real SOC operations. | XQL, MITRE ATT&CK |
-| **[Red Team Notes](#)** | Active Directory attack paths and writeups from CRTP and HackTheBox. | AD, PowerShell, BloodHound |
+| **[MalwareScope](https://github.com/Raynskhiri/MalwareScope)** 🦠 | Master's thesis (with Omar Kharrat). A Random Forest classifies Windows executables (89.5% on held-out data, vs 36% for an LLM alone), an LLM explains the verdict, and an isolated KVM sandbox shows the behaviour. It refuses to run a sample it can't watch, signs its evidence, and exports to Splunk, Cortex XDR, STIX/TAXII and MISP. 437 tests. | Python, scikit-learn, KVM, Sysmon, FastAPI, React |
+| **[Detection Library](https://github.com/Raynskhiri/detection-library)** 🎯 | 29 detections written once in YAML and compiled to **Cortex XQL and Splunk SPL**, mapped to MITRE ATT&CK, each with triage steps. CI runs the compiled queries against events that must and must not fire. | Python, XQL, SPL, Sysmon, ATT&CK |
+| **SOC Triage Agent** 🚧 | Local LLM agent that investigates Cortex XDR alerts (enrichment, correlation, timeline), suggests classification and response, and drafts reports. Every action goes through **human approval in Slack**. | Python, Ollama, Slack API, Cortex XDR API |
+| **[Securinets CTF writeups](https://github.com/Raynskhiri/Writeup)** 🏴 | Writeups from my Securinets days: server-side template injection (Jinja2) and local file inclusion challenges. | Web exploitation |
 
 <sub>🚧 = work in progress</sub>
 

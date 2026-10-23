@@ -223,8 +223,16 @@ h2.title { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.08; font-weight: 
 .stack-group li svg { width: 26px; height: 26px; }
 
 /* projects */
-.projects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
-@media (max-width: 1040px) { .projects { grid-template-columns: 1fr; max-width: 680px; } }
+.projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.bars { display: grid; gap: 14px; margin-top: 6px; font-family: "Archivo", sans-serif; }
+.bars .lbl { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.8rem; margin-bottom: 6px; }
+.bars .lbl b { color: var(--text); font-variant-numeric: tabular-nums; }
+.bars .trk { height: 10px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.bars .fill { height: 100%; border-radius: 6px; background: var(--orange); }
+.bars .fill.dim { background: var(--line-2); }
+.rules .pv-row { grid-template-columns: 64px minmax(0, 1fr) auto; }
+.ok-x { color: var(--green); font-weight: 700; }
+@media (max-width: 900px) { .projects { grid-template-columns: 1fr; max-width: 680px; } }
 .proj { display: flex; flex-direction: column; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); overflow: hidden; transition: border-color .2s, transform .2s; }
 .proj:hover { border-color: rgba(255, 107, 26, 0.55); transform: translateY(-3px); }
 .preview { height: 220px; background: #0B0E13; border-bottom: 1px solid var(--line); padding: 16px; position: relative; overflow: hidden; font-family: var(--mono); font-size: 0.72rem; }
@@ -279,6 +287,7 @@ h2.title { font-size: clamp(2rem, 4.2vw, 3rem); line-height: 1.08; font-weight: 
 .creds { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-top: 48px; }
 @media (max-width: 1040px) { .creds { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .creds { grid-template-columns: 1fr; } }
+a.cred { text-decoration: none; color: inherit; transition: border-color .2s; } a.cred:hover { border-color: var(--orange); }
 .cred { padding: 20px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
 .cred .st { font-size: 0.74rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; display: inline-block; }
 .cred .st.done { background: rgba(61, 220, 151, 0.12); color: var(--green); }
@@ -393,7 +402,7 @@ footer nav a:hover { color: var(--text); }
         <p class="eyebrow">// About me</p>
         <h2 class="title" id="about-title">I defend by thinking like the attacker.</h2>
         <p>I'm a SOC analyst at a managed security provider in Tunis, working <strong>L2/L3 investigations across many client environments</strong> on Cortex XDR, from alert triage to the incident report the client reads.</p>
-        <p>On the other side I hold the <strong>CRTP</strong>, rank in the <strong>top 700 on Hack The Box</strong>, and design CTF challenges for Securinets. Knowing how an attack works is how I write the detection that catches it.</p>
+        <p>On the other side I hold the <strong>CRTP</strong>, rank in the <strong>top 700 on Hack The Box</strong>, and used to write CTF challenges and run workshops for Securinets. Knowing how an attack works is how I write the detection that catches it.</p>
         <p>When something repetitive slows the team down, I automate it in Python.</p>
       </div>
       <dl class="facts reveal">
@@ -473,6 +482,37 @@ footer nav a:hover { color: var(--text); }
         </article>
         <article class="proj reveal">
           <div class="preview" aria-hidden="true">
+            <div class="pv-bar"><span>Classification accuracy, same 50 samples</span><span>760 PE files</span></div>
+            <div class="bars">
+              <div><div class="lbl"><span>Random Forest (ours)</span><b>82.0%</b></div><div class="trk"><div class="fill" style="width:82%"></div></div></div>
+              <div><div class="lbl"><span>LLM alone, zero-shot</span><b>36.0%</b></div><div class="trk"><div class="fill dim" style="width:36%"></div></div></div>
+              <div><div class="lbl"><span>Held-out test split, 152 files</span><b>89.5%</b></div><div class="trk"><div class="fill" style="width:89.5%"></div></div></div>
+            </div>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>MalwareScope</h3><span class="tag on">Master's thesis</span></div>
+            <p>Malware analysis platform: a trained classifier gives the verdict, an LLM explains it, and an isolated Windows sandbox shows what the file really does. It refuses to run a sample it cannot watch, then exports findings to Splunk, Cortex XDR and STIX. Built with Omar Kharrat.</p>
+            <ul class="techs"><li>Python</li><li>scikit-learn</li><li>KVM</li><li>Sysmon</li><li>FastAPI</li><li>React</li></ul>
+            <div class="links"><a href="https://github.com/Raynskhiri/MalwareScope">Source code <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
+          </div>
+        </article>
+        <article class="proj reveal">
+          <div class="preview rules" aria-hidden="true">
+            <div class="pv-bar"><span>CI: compiled queries vs test events</span><span class="live">Passing</span></div>
+            <div class="pv-row"><span class="c-or">DL-0016</span><span>LSASS dumped with comsvcs or ProcDump</span><small><span class="ok-x">XQL ✓ SPL ✓</span></small></div>
+            <div class="pv-row"><span class="c-or">DL-0023</span><span>Impacket wmiexec / smbexec command</span><small><span class="ok-x">XQL ✓ SPL ✓</span></small></div>
+            <div class="pv-row"><span class="c-or">DL-0018</span><span>Kerberoasting or AS-REP roasting tool</span><small><span class="ok-x">XQL ✓ SPL ✓</span></small></div>
+            <div class="pv-row"><span class="c-or">DL-0029</span><span>Shadow copies or backups deleted</span><small><span class="ok-x">XQL ✓ SPL ✓</span></small></div>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>Detection library</h3><span class="tag on">29 rules</span></div>
+            <p>Each detection is written once and compiled to Cortex XDR XQL and Splunk SPL, mapped to MITRE ATT&amp;CK, with triage steps. CI runs the compiled queries against test events that must and must not fire.</p>
+            <ul class="techs"><li>XQL</li><li>Splunk SPL</li><li>Sysmon</li><li>MITRE ATT&amp;CK</li><li>Python</li></ul>
+            <div class="links"><a href="https://github.com/Raynskhiri/detection-library">Source code <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
+          </div>
+        </article>
+        <article class="proj reveal">
+          <div class="preview" aria-hidden="true">
             <div class="slack">
               <div class="who"><i></i>Rayen agent <span>needs your approval</span></div>
               <div class="kv"><b>Alert:</b> encoded PowerShell from Word<br><b>Verdict:</b> true positive, high confidence<br><b>Proposed:</b> isolate endpoint, block hash</div>
@@ -486,26 +526,8 @@ footer nav a:hover { color: var(--text); }
             <div class="links"><a href="https://github.com/Raynskhiri">Follow on GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
           </div>
         </article>
-        <article class="proj reveal">
-          <div class="preview" aria-hidden="true">
-            <div class="pv-bar"><span>Process tree, sample run</span><span>02:14</span></div>
-            <div class="tree">
-              <div>WINWORD.EXE <span class="c-dim">invoice_oct.docm</span></div>
-              <div class="t1">└ powershell.exe <span class="c-or">-enc JABzAD0A…</span></div>
-              <div class="t2">└ rundll32.exe <span class="c-dim">%TEMP%\a.dll,Run</span></div>
-              <div class="t3">└ <span class="c-red">connect 185.x.x.x:443</span></div>
-            </div>
-            <span class="verdict">Malicious</span>
-          </div>
-          <div class="proj-body">
-            <div class="top"><h3>Malware sandbox</h3><span class="tag">In progress</span></div>
-            <p>Self-hosted dynamic analysis in the spirit of ANY.RUN: detonate a sample, watch the process tree and network, and feed the verdict back into Cortex XDR.</p>
-            <ul class="techs"><li>Python</li><li>Virtualization</li><li>Linux</li></ul>
-            <div class="links"><a href="https://github.com/Raynskhiri">Follow on GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
-          </div>
-        </article>
       </div>
-      <p class="preview-note reveal">Previews for projects in progress are illustrations of the interface, not real alerts.</p>
+      <p class="preview-note reveal">The SOC agent preview is an illustration of the interface, not a real alert.</p>
     </div>
   </section>
 
@@ -523,7 +545,7 @@ footer nav a:hover { color: var(--text); }
         <div class="cred reveal"><span class="st prep">Preparing</span><b>Splunk Core Certified Power User</b><span>Splunk</span></div>
         <div class="cred reveal"><span class="st prep">Preparing</span><b>Certified XDR Analyst</b><span>Palo Alto Networks</span></div>
         <div class="cred reveal"><span class="st prep">Preparing</span><b>Certified SOC Analyst</b><span>EC-Council</span></div>
-        <div class="cred reveal"><span class="st done">Community</span><b>Securinets</b><span>CTF challenge author and workshop facilitator</span></div>
+        <a class="cred reveal" href="https://github.com/Raynskhiri/Writeup"><span class="st done">Past member</span><b>Securinets</b><span>CTF challenge author and workshop facilitator. Writeups on GitHub ↗</span></a>
       </div>
     </div>
   </section>
