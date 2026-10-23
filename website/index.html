@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rayen Skhiri | SOC analyst and application security engineer</title>
+<meta name="description" content="Rayen Skhiri, SOC analyst L2/L3 and application security engineer in Tunis. CRTP. Builder of Maghreb Threat Watch, an open early warning for phishing aimed at North Africa.">
+<meta property="og:title" content="Rayen Skhiri">
+<meta property="og:description" content="SOC analyst and application security engineer in Tunis. Builder of Maghreb Threat Watch.">
+<meta property="og:url" content="https://rayenskhiri.online/">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wash: #F6F8FB;
+  --ink: #0D1B2E;
+  --blue: #1A5BB5;
+  --blue-soft: #DCE7F7;
+  --stone: #586577;
+  --rule: #D5DDE8;
+  --marker: #FFE066;
+  --marker-ink: #0D1B2E;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wash: #0E1A2C;
+    --ink: #E9EEF6;
+    --blue: #86B6FF;
+    --blue-soft: #1B2E4A;
+    --stone: #9DAABD;
+    --rule: #24364F;
+    --marker: #E9C84A;
+    --marker-ink: #0D1B2E;
+    color-scheme: dark;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .glyph { background-position: 0 100%; background-size: 100% 12%; }
+}
+:root[data-theme="dark"] .glyph { background-position: 0 100%; background-size: 100% 12%; }
+:root[data-theme="dark"] {
+  --wash: #0E1A2C; --ink: #E9EEF6; --blue: #86B6FF; --blue-soft: #1B2E4A;
+  --stone: #9DAABD; --rule: #24364F; --marker: #E9C84A; --marker-ink: #0D1B2E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--wash);
+  color: var(--ink);
+  font-family: "Onest", system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-feature-settings: "tnum" 0;
+}
+a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 2px; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+/* Header */
+.top { padding: 28px 0 0; }
+.top nav { display: flex; gap: 8px 22px; flex-wrap: wrap; }
+.top nav a { color: var(--stone); text-decoration: none; font-size: 0.95rem; }
+.top nav a:hover { color: var(--ink); }
+
+/* Intro */
+.intro { padding: 64px 0 24px; max-width: 760px; }
+.intro h1 {
+  font-size: clamp(2.4rem, 6vw, 4.25rem);
+  font-weight: 600; letter-spacing: -0.035em; line-height: 1.02; margin: 0 0 22px;
+}
+.intro p { font-size: clamp(1.1rem, 2vw, 1.3rem); line-height: 1.55; margin: 0; color: var(--ink); max-width: 38em; }
+
+/* Specimen: the one bold moment */
+.specimen { padding: 40px 0 72px; border-bottom: 1px solid var(--rule); }
+.specimen .lead { color: var(--stone); margin: 0 0 6px; font-size: 0.98rem; }
+.domain {
+  font-size: clamp(2.6rem, 10.5vw, 8rem);
+  font-weight: 500; letter-spacing: -0.045em; line-height: 1.05;
+  margin: 0; white-space: nowrap; overflow-wrap: normal;
+}
+.glyph {
+  background-image: linear-gradient(var(--marker), var(--marker));
+  background-repeat: no-repeat;
+  background-position: 0 74%;
+  background-size: 100% 34%;
+  color: inherit;
+  border-radius: 2px;
+}
+.trace {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px 0;
+  max-width: 640px; margin: 28px 0 0; padding: 0; list-style: none;
+}
+.trace li { display: contents; }
+.trace .why { color: var(--ink); }
+.trace .why small { color: var(--stone); font-size: 0.9rem; display: block; }
+.trace .pts { padding-left: 32px; font-variant-numeric: tabular-nums; color: var(--blue); font-weight: 600; text-align: right; }
+.trace .total { border-top: 1px solid var(--ink); padding-top: 10px; font-weight: 600; }
+.trace .total.pts { color: var(--ink); }
+.specimen .after { margin: 26px 0 0; max-width: 40em; color: var(--stone); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .glyph { animation: sweep 900ms cubic-bezier(.6,.05,.3,1) 500ms both; }
+  :root[data-theme="dark"] .glyph { animation-name: sweep-dark; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .glyph { animation-name: sweep-dark; } }
+  .trace li > * { animation: arrive 420ms ease-out both; }
+  .trace li:nth-child(1) > * { animation-delay: 1300ms; }
+  .trace li:nth-child(2) > * { animation-delay: 1650ms; }
+  .trace li:nth-child(3) > * { animation-delay: 2000ms; }
+  .trace li:nth-child(4) > * { animation-delay: 2450ms; }
+  @keyframes sweep { from { background-size: 0% 34%; } to { background-size: 100% 34%; } }
+  @keyframes sweep-dark { from { background-size: 0% 12%; } to { background-size: 100% 12%; } }
+  @keyframes arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+
+/* Sections with a label column */
+section.block {
+  display: grid; grid-template-columns: 220px 1fr; gap: 24px 48px;
+  padding: 56px 0; border-bottom: 1px solid var(--rule);
+}
+section.block > h2 {
+  font-size: 1.05rem; font-weight: 600; margin: 4px 0 0; letter-spacing: -0.005em;
+}
+section.block > .body { max-width: 680px; }
+@media (max-width: 760px) {
+  section.block { grid-template-columns: 1fr; gap: 14px; padding: 44px 0; }
+}
+
+dl.roles { margin: 0; display: grid; grid-template-columns: 1fr; gap: 26px; }
+dl.roles dt { font-weight: 600; font-size: 1.15rem; letter-spacing: -0.01em; }
+dl.roles dd { margin: 4px 0 0; color: var(--ink); }
+
+.project { padding: 0 0 30px; }
+.project + .project { padding-top: 30px; border-top: 1px solid var(--rule); }
+.project h3 {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  font-size: 1.45rem; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 6px;
+}
+.status {
+  font-size: 0.85rem; font-weight: 500; letter-spacing: 0; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--rule); color: var(--stone);
+}
+.status.live { background: var(--blue); border-color: var(--blue); color: var(--wash); }
+.project p { margin: 0 0 10px; }
+.project .links { display: flex; gap: 20px; flex-wrap: wrap; font-weight: 500; }
+
+table.creds { border-collapse: collapse; width: 100%; }
+table.creds th, table.creds td { text-align: left; vertical-align: top; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+table.creds th { font-weight: 500; color: var(--stone); width: 140px; padding-right: 20px; }
+table.creds tr:last-child th, table.creds tr:last-child td { border-bottom: 0; }
+table.creds ul { margin: 0; padding: 0; list-style: none; }
+@media (max-width: 480px) {
+  table.creds th { display: block; width: auto; padding-bottom: 0; border-bottom: 0; }
+  table.creds td { display: block; padding-top: 4px; }
+}
+
+.contact p { margin: 0 0 14px; }
+.contact .big { font-size: clamp(1.4rem, 3.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.02em; }
+.contact .others { display: flex; gap: 24px; flex-wrap: wrap; font-weight: 500; }
+
+footer { padding: 32px 0 48px; color: var(--stone); font-size: 0.9rem; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.theme { background: none; border: 1px solid var(--rule); color: var(--stone); font: inherit; font-size: 0.85rem; padding: 4px 12px; border-radius: 999px; cursor: pointer; }
+.theme:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <nav aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#projects">Projects</a>
+      <a href="https://threatwatch.rayenskhiri.online">Threat Watch</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="intro">
+      <h1>Rayen Skhiri</h1>
+      <p>SOC analyst and application security engineer in Tunis. I investigate alerts for a living, attack Active Directory to stay sharp, and build open tools that catch the phishing aimed at North Africa.</p>
+    </div>
+
+    <div class="specimen" aria-labelledby="specimen-title">
+      <p class="lead" id="specimen-title">This domain looks like a Tunisian bank's login page. Look closer.</p>
+      <p class="domain" lang="en"><span aria-hidden="true">bi<span class="glyph">а</span>t-login.com</span><span class="sr-only" style="position:absolute;left:-9999px">bi, Cyrillic a, t-login.com</span></p>
+      <ol class="trace" aria-label="How the domain is scored">
+        <li><span class="why">Brand name spelled with a Cyrillic <strong>а</strong><small>U+0430, drawn exactly like the Latin a in every browser bar</small></span><span class="pts">+65</span></li>
+        <li><span class="why">“login” next to the brand<small>a word phishing kits add to look official</small></span><span class="pts">+15</span></li>
+        <li><span class="why">Registered in punycode as xn--bit-login-1yh.com<small>what the address really is under the hood</small></span><span class="pts">+5</span></li>
+        <li><span class="why total">Score, high confidence</span><span class="pts total">85</span></li>
+      </ol>
+      <p class="after">That is how <a href="https://threatwatch.rayenskhiri.online">Maghreb Threat Watch</a> reads a lookalike. It checks tens of thousands of new domains and certificates every morning, explains every point it gives, and hands analysts a ready query to see who already clicked. This example is illustrative.</p>
+    </div>
+
+    <section class="block" id="work" aria-labelledby="work-title">
+      <h2 id="work-title">What I do</h2>
+      <div class="body">
+        <dl class="roles">
+          <div>
+            <dt>Detect and respond</dt>
+            <dd>L2/L3 analyst at a managed security provider: multi-tenant Cortex XDR, XQL hunting, FortiGate log analysis, and incident reports for clients in French and English.</dd>
+          </div>
+          <div>
+            <dt>Attack</dt>
+            <dd>CRTP certified, top 700 worldwide on Hack The Box, and a CTF challenge author and workshop facilitator with Securinets. Knowing the attack is how I write the detection.</dd>
+          </div>
+          <div>
+            <dt>Build</dt>
+            <dd>Python automation that removes manual SOC work, and open-source security tooling. Application security testing for web apps on the side of every role.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="block" id="projects" aria-labelledby="projects-title">
+      <h2 id="projects-title">Projects</h2>
+      <div class="body">
+        <article class="project">
+          <h3>Maghreb Threat Watch <span class="status live">Live</span></h3>
+          <p>Early warning for lookalike and phishing domains targeting 45 banks, telecoms, postal services and government portals in Tunisia, Morocco and Algeria. Passive by design, tuned to stay quiet, and every finding comes with hunts for Cortex XQL and Splunk.</p>
+          <div class="links">
+            <a href="https://threatwatch.rayenskhiri.online">Today's report</a>
+            <a href="https://github.com/Raynskhiri/maghreb-threat-watch">Source on GitHub</a>
+          </div>
+        </article>
+        <article class="project">
+          <h3>SOC triage agent <span class="status">In progress</span></h3>
+          <p>A local LLM agent that investigates Cortex XDR alerts, builds the timeline and drafts a verdict. Nothing is contained or sent to a client without my approval in Slack.</p>
+        </article>
+        <article class="project">
+          <h3>Malware sandbox <span class="status">In progress</span></h3>
+          <p>Self-hosted dynamic analysis in the spirit of ANY.RUN, built to feed its verdicts back into Cortex XDR.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="creds-title">
+      <h2 id="creds-title">Credentials</h2>
+      <div class="body">
+        <table class="creds">
+          <tr><th scope="row">Certified</th><td>CRTP, Certified Red Team Professional (Altered Security)</td></tr>
+          <tr><th scope="row">Preparing</th><td><ul><li>Splunk Core Certified Power User</li><li>Palo Alto Networks Certified XDR Analyst</li><li>EC-Council Certified SOC Analyst</li></ul></td></tr>
+          <tr><th scope="row">Ranking</th><td>Top 700 worldwide on Hack The Box</td></tr>
+          <tr><th scope="row">Education</th><td>Master's in Information Systems and Infrastructure Security, ISI, University of Tunis El Manar</td></tr>
+          <tr><th scope="row">Community</th><td>Securinets: CTF challenge author and workshop facilitator</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="block contact" id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact</h2>
+      <div class="body">
+        <p class="big"><a href="mailto:skhirirayen@outlook.com">skhirirayen@outlook.com</a></p>
+        <p>I work in English and French. Happy to talk about SOC, detection engineering and application security roles.</p>
+        <p class="others">
+          <a href="https://linkedin.com/in/rayen-skhiri">LinkedIn</a>
+          <a href="https://github.com/Raynskhiri">GitHub</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Rayen Skhiri, Tunis</span>
+    <button class="theme" type="button" id="theme">Switch theme</button>
+  </footer>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('theme');
+  function current() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  try { var saved = localStorage.getItem('theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+  btn.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
