@@ -508,7 +508,7 @@ footer nav a:hover { color: var(--text); }
             <div class="top"><h3>Detection library</h3><span class="tag on">29 rules</span></div>
             <p>Each detection is written once and compiled to Cortex XDR XQL and Splunk SPL, mapped to MITRE ATT&amp;CK, with triage steps. CI runs the compiled queries against test events that must and must not fire.</p>
             <ul class="techs"><li>XQL</li><li>Splunk SPL</li><li>Sysmon</li><li>MITRE ATT&amp;CK</li><li>Python</li></ul>
-            <div class="links"><a href="https://github.com/Raynskhiri/detection-library">Source code <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
+            <div class="links"><a href="https://detections.rayenskhiri.online">Try it live <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a><a href="https://github.com/Raynskhiri/detection-library">Source code <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
           </div>
         </article>
         <article class="proj reveal">
@@ -580,13 +580,33 @@ footer nav a:hover { color: var(--text); }
   <div class="wrap f">
     <a class="logo" href="#home"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
     <nav aria-label="Footer">
-      <a href="#about">About</a><a href="#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="#contact">Contact</a>
+      <a href="#about">About</a><a href="#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://detections.rayenskhiri.online">Detections</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="#contact">Contact</a>
     </nav>
-    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+    <span id="built">Designed and built by Rayen. Hosted on Vercel.</span>
   </div>
 </footer>
 
+<!-- Terminal people: press ` anywhere on this page. -->
 <script>
+(function () {
+  // Hidden shell for terminal people: press ` (or tap the footer credit 5 times).
+  var termLoading = false;
+  function openTerm() {
+    if (termLoading) return; termLoading = true;
+    if (!document.getElementById('term-css')) {
+      var l = document.createElement('link'); l.id = 'term-css'; l.rel = 'stylesheet'; l.href = 'term.css'; document.head.appendChild(l);
+    }
+    import('./term.js').then(function (m) { m.openTerminal(); }).catch(function () {}).then(function () { termLoading = false; });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '`' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault(); openTerm();
+  });
+  var taps = 0, tapT; var built = document.getElementById('built');
+  if (built) built.addEventListener('click', function () { taps++; clearTimeout(tapT); tapT = setTimeout(function () { taps = 0; }, 1500); if (taps >= 5) { taps = 0; openTerm(); } });
+  try { console.log('%c rayen@soc %c press ` on this page for a shell ', 'background:#FF6B1A;color:#1A0B02;font-weight:700', 'color:#FF8C42'); } catch (e) {}
+})();
 (function () {
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.documentElement.classList.add('js');
