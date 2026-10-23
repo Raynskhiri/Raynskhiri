@@ -1,0 +1,28 @@
+name: Site
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: index.html matches its template
+        run: |
+          python website/src/build.py
+          git diff --exit-code website/index.html
+      - name: Scripts parse
+        run: node --check website/term.js
+      - name: No em dashes on the site
+        run: "! grep -n $'\\u2014' website/index.html website/term.js"
