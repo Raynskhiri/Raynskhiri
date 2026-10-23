@@ -381,7 +381,7 @@ footer nav a:hover { color: var(--text); }
         <span class="status"><i></i>Open to SOC, DFIR and AppSec roles</span>
         <p class="kicker">// SOC Analyst L2/L3 and Application Security Engineer</p>
         <h1><span class="l1">Rayen</span> <span class="l2">Skhiri<span class="cursor" aria-hidden="true"></span></span></h1>
-        <p class="lede">I run <strong>L2/L3 investigations in a 24/7 multi-tenant SOC</strong>, attack <strong>Active Directory</strong> to stay sharp, and build open tools that catch <strong>phishing aimed at North Africa</strong> before it lands.</p>
+        <p class="lede">I run <strong>L2/L3 investigations in a 24/7 multi-tenant SOC</strong> where every client brings its own XDR, EDR and NDR stack, attack <strong>Active Directory</strong> to stay sharp, and build open tools that catch <strong>phishing aimed at North Africa</strong> before it lands.</p>
         <ul class="chips" aria-label="Core tools">
           <li>Cortex XDR</li><li>XQL</li><li>Splunk</li><li>Wazuh</li><li>FortiGate</li><li>Python</li>
         </ul>
@@ -404,6 +404,7 @@ footer nav a:hover { color: var(--text); }
           <dl>
             <dt>role</dt><dd>SOC Analyst L2/L3 · AppSec</dd>
             <dt>shift</dt><dd>24/7 MSSP, 800+ endpoints</dd>
+            <dt>stack</dt><dd>multi-vendor XDR · EDR · NDR</dd>
             <dt>location</dt><dd>Tunis, Tunisia · UTC+1</dd>
             <dt>languages</dt><dd>English, French</dd>
             <dt>certified</dt><dd><span class="ok">✓</span> CRTP, Altered Security</dd>
@@ -433,7 +434,7 @@ footer nav a:hover { color: var(--text); }
 
       <h3 class="sub-h">At work</h3>
       <div class="kpis">
-        <article class="kpi reveal"><div class="num" data-count="800" data-suffix="+">800<em>+</em></div><div class="what">endpoints monitored, 24/7</div><p class="how">L2/L3 escalations across several client environments on Cortex XDR and XSIAM.</p><div class="src">3S · TrustShield</div></article>
+        <article class="kpi reveal"><div class="num" data-count="800" data-suffix="+">800<em>+</em></div><div class="what">endpoints monitored, 24/7</div><p class="how">L2/L3 escalations across several client environments, each on its own XDR, EDR or NDR stack.</p><div class="src">3S · TrustShield</div></article>
         <article class="kpi reveal"><div class="num">3 wk <em>→</em> 2 d</div><div class="what">client integration lead time</div><div class="ba" aria-hidden="true"><div><span>before</span><i style="width:100%"></i></div><div class="after"><span>after</span><i style="width:9.5%"></i></div></div><p class="how">GPO and PowerShell deployment pipelines replaced manual onboarding.</p><div class="src">3S · TrustShield</div></article>
         <article class="kpi reveal"><div class="num">~450<small>GB</small></div><div class="what">FortiGate log footprint reduced</div><p class="how">Filtering and parsing moved into Cortex XDR parsing rules, with a formal change record.</p><div class="src">3S · TrustShield</div></article>
         <article class="kpi reveal"><div class="num" data-count="30" data-suffix="+">30<em>+</em></div><div class="what">compromised accounts hardened</div><p class="how">After spear-phishing campaigns blocked with Trend Micro DDEI.</p><div class="src">DataXion · Tier IV datacenter</div></article>
@@ -477,14 +478,14 @@ footer nav a:hover { color: var(--text); }
             <h3>SOC Analyst L2/L3</h3>
             <p class="org">Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis</p>
             <ul>
-              <li>Escalation point in a 24/7 MSSP covering <strong>800+ endpoints</strong>: I take L1 escalations across several client environments on Cortex XDR and XSIAM, from the first alert to containment.</li>
+              <li>Escalation point in a 24/7 MSSP covering <strong>800+ endpoints</strong>: I take L1 escalations from the first alert to containment, on whatever each client runs. Every client has its own XDR, EDR and NDR stack, with Cortex XDR and XSIAM the most common.</li>
               <li>Investigated a Pass-the-Hash lateral movement alert on a domain controller and a malspam VBS campaign hidden behind Unicode extension padding, both scoped across the fleet before closure.</li>
               <li>Cut client integration lead time from <strong>3 weeks to 2 days</strong> with GPO and PowerShell deployment pipelines.</li>
               <li>Reduced a FortiGate log footprint of about <strong>450 GB</strong> with Cortex XDR parsing rules, and took a fleet-wide anomaly to Palo Alto Networks TAC through to root cause.</li>
-              <li>Built a Python bridge that turns XDR incidents into GLPI tickets and keeps both in sync, replacing manual ticketing.</li>
+              <li>The same work repeats for every client, so I automate it: a Python bridge that turns XDR incidents into GLPI tickets and keeps both in sync, and tooling for the reports and client emails that eat analyst time.</li>
               <li>Write the weekly and monthly reports clients read, in French (MTTD, MTTA, MTTR), mentor L1 analysts and write runbooks.</li>
             </ul>
-            <p class="tools">Cortex XDR · XSIAM · XQL · FortiGate · Broker VM · GLPI · Python · PowerShell</p>
+            <p class="tools">Cortex XDR · XSIAM · multi-vendor XDR, EDR and NDR · FortiGate · GLPI · Python · PowerShell</p>
           </div>
         </li>
         <li class="job reveal">
@@ -538,7 +539,7 @@ footer nav a:hover { color: var(--text); }
       <div class="skills">
         <article class="skill reveal">
           <div class="skill-head"><span class="ico">{{ui:siren}}</span><h3>Detection and response</h3></div>
-          <p>L2/L3 triage, investigation and containment across multi-tenant environments, written up so clients understand what happened and what to fix.</p>
+          <p>L2/L3 triage, investigation and containment for many clients at once, each on its own XDR, EDR and NDR stack, written up so clients understand what happened and what to fix.</p>
           <ul class="tiles">
             {{tile:paloaltonetworks:Cortex XDR / XSIAM}}{{tile:splunk:Splunk}}{{tile:mono:Wazuh}}{{tile:mono:Security Onion}}{{tile:elastic:Elastic (ELK)}}{{tile:mono:Microsoft Sentinel}}{{tile:mono:CrowdStrike Falcon}}{{tile:mono:Kaspersky}}{{tile:symantec:Symantec}}{{tile:trendmicro:Trend Micro}}{{tile:fortinet:FortiGate}}{{tile:cisco:Cisco FTD}}
           </ul>
@@ -559,7 +560,7 @@ footer nav a:hover { color: var(--text); }
         </article>
         <article class="skill reveal">
           <div class="skill-head"><span class="ico">{{ui:cpu}}</span><h3>Security automation</h3></div>
-          <p>Python and PowerShell that remove manual SOC work: ticket sync, deployment pipelines, enrichment, reports and scheduled intelligence.</p>
+          <p>In an MSSP the same process repeats for every client. I automate the repetitive part: ticket sync, deployment pipelines, enrichment, and the reports and client emails that eat analyst time.</p>
           <ul class="tiles">
             {{tile:python:Python}}{{tile:mono:PowerShell}}{{tile:gnubash:Bash}}{{tile:linux:Linux}}{{tile:git:Git}}{{tile:docker:Docker}}{{tile:githubactions:GitHub Actions}}{{tile:ollama:Ollama}}
           </ul>

@@ -32,6 +32,7 @@ When something repetitive slows the team down, I automate it in Python.
 
 Open to SOC, DFIR and AppSec roles.   ->  cd ../contact`,
   "about/facts.txt": `role         SOC Analyst L2/L3 (24/7 MSSP), Web App Security
+stack        multi-vendor: each client brings its own XDR, EDR and NDR
 based in     Tunis, Tunisia
 experience   2+ years in SOC operations
 languages    English, French
@@ -39,8 +40,8 @@ certified    CRTP (Altered Security)
 studying     MSc Infrastructure Security, ISI`,
 
   "skills/detection-and-response.md": `# Detection and response
-L2/L3 triage, investigation and containment across multi-tenant environments,
-written up so clients understand what happened and what to fix.
+L2/L3 triage, investigation and containment for many clients at once, each on
+its own XDR, EDR and NDR stack, written up so clients understand what happened.
 
 Cortex XDR and XSIAM   daily: alerts, incidents, causality chains, XQL
 Splunk                 SPL hunting and dashboards
@@ -70,8 +71,9 @@ Active Directory           CRTP: Kerberos, delegation, trusts
 BloodHound, Impacket, Mimikatz, Metasploit, Kali Linux
 Hack The Box (top 700), TryHackMe`,
   "skills/security-automation.md": `# Security automation
-Python and PowerShell that remove manual SOC work: ticket sync, deployment
-pipelines, enrichment, reports and scheduled intelligence.
+In an MSSP the same process repeats for every client. I automate the
+repetitive part: ticket sync, deployment pipelines, enrichment, and the
+reports and client emails that eat analyst time.
 
 Python        XDR to GLPI bridge, this site's pipelines, Threat Watch
 PowerShell    GPO deployment pipelines (client onboarding: 3 weeks to 2 days)
@@ -91,8 +93,9 @@ community    Securinets, past member: CTF challenge author and workshop facilita
   "experience/3s-trustshield.md": `# SOC Analyst L2/L3   Jul 2025 to present
 Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis
 
-- Escalation point in a 24/7 MSSP covering 800+ endpoints: L1 escalations
-  across several client environments on Cortex XDR and XSIAM, to containment.
+- Escalation point in a 24/7 MSSP covering 800+ endpoints: L1 escalations to
+  containment, on each client's own XDR, EDR and NDR stack (Cortex XDR and
+  XSIAM most of all).
 - Investigated a Pass-the-Hash lateral movement alert on a domain controller
   and a malspam VBS campaign hidden behind Unicode extension padding, both
   scoped across the fleet before closure.
@@ -100,7 +103,8 @@ Standard Sharing Software (3S) · TrustShield SOCaaS · Tunis
 - Reduced a FortiGate log footprint of about 450 GB with Cortex XDR parsing
   rules; took a fleet-wide anomaly to Palo Alto Networks TAC to root cause.
 - Weekly and monthly client security reports in French (MTTD, MTTA, MTTR).
-- Built a Python bridge: XDR incidents become GLPI tickets, kept in sync.
+- The process repeats per client, so I automate it: XDR incidents become GLPI
+  tickets kept in sync, and tooling for the reports and client emails.
 - Mentor L1 analysts; write runbooks and client onboarding templates.`,
   "experience/dataxion.md": `# SOC Analyst L1/L2   Jul 2024 to Mar 2025
 DataXion · first Tier IV certified datacenter in Tunisia · Tunis
