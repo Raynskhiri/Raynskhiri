@@ -18,10 +18,12 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: index.html matches its template
+      - name: index.html and the CSP headers match the template
         run: |
           python website/src/build.py
-          git diff --exit-code website/index.html
+          git diff --exit-code website/index.html website/vercel.json
+      - name: KEV feed builder rejects hostile input
+        run: pip install pytest && python -m pytest -q tests
       - name: Scripts parse
         run: node --check website/term.js
       - name: No em dashes on the site

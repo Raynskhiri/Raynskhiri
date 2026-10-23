@@ -16,6 +16,7 @@
 <meta property="og:image:alt" content="Rayen Skhiri, SOC Analyst and Application Security Engineer">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="term.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -346,6 +347,7 @@ footer nav a:hover { color: var(--text); }
       <a href="#services">Services</a>
       <a href="#stack">Stack</a>
       <a href="#projects">Projects</a>
+      <a href="#terminal">Terminal</a>
       <a href="https://threatwatch.rayenskhiri.online">Threat Watch</a>
       <a class="btn btn-primary btn-sm" href="#contact">Let's talk {{ui:arrow}}</a>
     </nav>
@@ -377,12 +379,11 @@ footer nav a:hover { color: var(--text); }
       </div>
 
       <div class="visual" aria-label="Portrait and live Threat Watch console">
-        <div class="portrait" id="portrait">
+        <div class="portrait no-photo" id="portrait">
           <div class="ring"></div>
           <div class="dots"></div>
           <div class="disc"></div>
           <div class="initials" aria-hidden="true">RS</div>
-          <img src="rayen.webp" alt="Rayen Skhiri" width="880" height="950" onerror="this.parentNode.classList.add('no-photo')">
         </div>
         <div class="float badge badge-htb">{{si:hackthebox}}<div><b>Top 700</b><span>worldwide on Hack The Box</span></div></div>
         <div class="float badge badge-crtp"><span class="tick">{{ui:check}}</span><div><b>CRTP</b><span>Certified Red Team Professional</span></div></div>
@@ -530,7 +531,22 @@ footer nav a:hover { color: var(--text); }
     </div>
   </section>
 
-  <section class="alt" aria-labelledby="proof-title">
+  <section id="terminal" class="alt" aria-labelledby="terminal-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">// rayen@soc</p>
+          <h2 class="title" id="terminal-title">Prefer a terminal?</h2>
+          <p>The whole site as a file system. <code>ls</code> to look around, <code>cd</code> into a project, <code>cat</code> to read, <code>kev</code> for the vulnerabilities attackers are exploiting this week. Not a terminal person? Just click the names.</p>
+        </div>
+      </div>
+      <div class="rt reveal" id="rt" data-src="term.js">
+        <noscript><p style="padding:20px">The terminal needs JavaScript. Everything in it is also on this page.</p></noscript>
+      </div>
+    </div>
+  </section>
+
+  <section id="proof" aria-labelledby="proof-title">
     <div class="wrap">
       <h2 class="vh" id="proof-title">In numbers</h2>
       <div class="proof reveal">
@@ -585,33 +601,26 @@ footer nav a:hover { color: var(--text); }
   </div>
 </footer>
 
-<!-- Terminal people: press ` or type sudo anywhere on this page. -->
-<script>
-(function () {
-  // Hidden shell for terminal people: press ` (or tap the footer credit 5 times).
-  var termLoading = false;
-  function openTerm() {
-    if (termLoading) return; termLoading = true;
-    if (!document.getElementById('term-css')) {
-      var l = document.createElement('link'); l.id = 'term-css'; l.rel = 'stylesheet'; l.href = 'term.css'; document.head.appendChild(l);
-    }
-    import('./term.js').then(function (m) { m.openTerminal(); }).catch(function () {}).then(function () { termLoading = false; });
-  }
-  // Trigger: ` (AltGr+7 works too on AZERTY), or simply type "sudo" anywhere.
-  var typed = '';
-  document.addEventListener('keydown', function (e) {
-    var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
-    if (document.getElementById('rterm') && !document.getElementById('rterm').hidden) return;
-    if (e.key === '`' && !e.metaKey && (!e.ctrlKey || e.altKey)) { e.preventDefault(); openTerm(); return; }
-    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      typed = (typed + e.key.toLowerCase()).slice(-4);
-      if (typed === 'sudo') { typed = ''; openTerm(); }
-    }
+<script type="module">
+  // Terminal section: load when it comes near the viewport, or on ` / typing "sudo".
+  const box = document.getElementById('rt');
+  let loading = null;
+  const load = () => (loading ||= import('./term.js').then((m) => m.mount(box)));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); load(); } }, { rootMargin: '600px 0px' });
+    io.observe(box);
+  } else load();
+  const jump = () => load().then((input) => { document.getElementById('terminal').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => input.focus({ preventScroll: true }), 500); });
+  let typed = '';
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (e.key === '`' && !e.metaKey && (!e.ctrlKey || e.altKey)) { e.preventDefault(); jump(); return; }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) { typed = (typed + e.key.toLowerCase()).slice(-4); if (typed === 'sudo') { typed = ''; jump(); } }
   });
-  var taps = 0, tapT; var built = document.getElementById('built');
-  if (built) built.addEventListener('click', function () { taps++; clearTimeout(tapT); tapT = setTimeout(function () { taps = 0; }, 1500); if (taps >= 5) { taps = 0; openTerm(); } });
-  try { console.log('%c rayen@soc %c press ` or type sudo on this page ', 'background:#FF6B1A;color:#1A0B02;font-weight:700', 'color:#FF8C42'); } catch (e) {}
-})();
+  try { console.log('%c rayen@soc %c press ` anywhere to jump to the terminal ', 'background:#FF6B1A;color:#1A0B02;font-weight:700', 'color:#FF8C42'); } catch (e) {}
+</script>
+<script>
 (function () {
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.documentElement.classList.add('js');
@@ -633,7 +642,7 @@ footer nav a:hover { color: var(--text); }
         if (e.isIntersecting) navA.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['home', 'about', 'services', 'stack', 'projects', 'contact'].forEach(function (id) { var s = document.getElementById(id); if (s) secObs.observe(s); });
+    ['home', 'about', 'services', 'stack', 'projects', 'terminal', 'contact'].forEach(function (id) { var s = document.getElementById(id); if (s) secObs.observe(s); });
   }
 
   // Reveal on scroll

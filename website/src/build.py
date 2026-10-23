@@ -10,12 +10,15 @@ Run: python3 website/src/build.py
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "index.html"
+HEADERS = HERE.parent / "vercel.json"
 ICONS = json.loads((HERE / "brand-icons.json").read_text())
 
 # Stroke icons, 24x24, drawn for this site.
@@ -91,7 +94,46 @@ def build() -> str:
     if left:
         raise SystemExit(f"unresolved placeholders: {left}")
     OUT.write_text(html, encoding="utf-8")
+    HEADERS.write_text(json.dumps(vercel_config(html), indent=2) + "\n", encoding="utf-8")
     return str(OUT)
+
+
+def script_hashes(html: str) -> list[str]:
+    """CSP hashes for every inline script, so only these exact scripts can run."""
+    hashes = []
+    for m in re.finditer(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", html, re.S):
+        if "application/ld+json" in m.group(1):
+            continue
+        digest = hashlib.sha256(m.group(2).encode("utf-8")).digest()
+        hashes.append("'sha256-" + base64.b64encode(digest).decode() + "'")
+    return hashes
+
+
+def vercel_config(html: str) -> dict:
+    csp = "; ".join([
+        "default-src 'self'",
+        "script-src 'self' https://detections.rayenskhiri.online " + " ".join(script_hashes(html)),
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src https://fonts.gstatic.com",
+        "img-src 'self' data:",
+        "connect-src 'self' https://threatwatch.rayenskhiri.online https://detections.rayenskhiri.online",
+        "base-uri 'none'",
+        "form-action 'self' mailto:",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "upgrade-insecure-requests",
+    ])
+    return {"headers": [
+        {"source": "/(.*)", "headers": [
+            {"key": "Content-Security-Policy", "value": csp},
+            {"key": "X-Content-Type-Options", "value": "nosniff"},
+            {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"},
+            {"key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"},
+            {"key": "Cross-Origin-Opener-Policy", "value": "same-origin"},
+            {"key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains"},
+        ]},
+        {"source": "/data/(.*)", "headers": [{"key": "Cache-Control", "value": "public, max-age=600, must-revalidate"}]},
+    ]}
 
 
 if __name__ == "__main__":

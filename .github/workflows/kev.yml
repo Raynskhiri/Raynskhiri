@@ -1,0 +1,35 @@
+name: Exploited vulnerabilities feed
+
+# Daily snapshot of CISA's Known Exploited Vulnerabilities catalog for the site's
+# terminal (cat feeds/exploited.txt). Visitors never call CISA directly.
+on:
+  schedule:
+    - cron: "23 6 * * *"
+    - cron: "23 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kev
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Fetch, validate and sanitize
+        run: python website/src/kev.py
+      - name: Commit if the catalog changed
+        run: |
+          git diff --quiet website/data/kev.json && { echo "no change"; exit 0; }
+          git config user.name "kev-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add website/data/kev.json
+          git commit -m "feed: CISA KEV $(python -c 'import json;print(json.load(open("website/data/kev.json"))["catalog_version"])')"
+          git push
