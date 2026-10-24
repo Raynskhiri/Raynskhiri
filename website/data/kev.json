@@ -2,10 +2,10 @@
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
  "catalog_version": "2026.10.23",
- "generated": "2026-10-23T18:34:18Z",
- "total": 1755,
- "added_7d": 9,
- "added_30d": 34,
+ "generated": "2026-10-24T11:19:08Z",
+ "total": 1756,
+ "added_7d": 8,
+ "added_30d": 35,
  "ransomware_total": 361,
  "latest": [
   {
@@ -17,6 +17,16 @@
    "due": "2026-10-26",
    "ransomware": false,
    "summary": "Arista VeloCloud Orchestrator on-prem contains a SQL injection vulnerability that may allow a remote attacker to access privileged internal functionality and impact the VCO host. Successful exploitation may compromise the confidentiality, integrity, and availability of the orche…"
+  },
+  {
+   "cve": "CVE-2026-110447",
+   "vendor": "Collabora",
+   "product": "Collabora Online – Built-in CODE Server",
+   "name": "Collabora Online – Built-in CODE Server OS Command Injection Vulnerability",
+   "added": "2026-10-23",
+   "due": "2026-10-26",
+   "ransomware": false,
+   "summary": "Collabora Collabora Online – Built-in CODE Server when used within the NextCloud platform contains an OS command injection vulnerability that allows for remote code execution when the CODE server isn't running."
   },
   {
    "cve": "CVE-2026-96656",
@@ -397,16 +407,6 @@
    "due": "2026-09-24",
    "ransomware": false,
    "summary": "Zyxel GS1900 series switches contain a stack-based buffer overflow vulnerability in the CGI program which could allow a LAN-based, unauthenticated attacker to exploit the flaw and potentially execute OS commands via a crafted HTTP request."
-  },
-  {
-   "cve": "CVE-2026-53266",
-   "vendor": "Linux",
-   "product": "Kernel",
-   "name": "Linux Kernel Out-of-Bounds Write Vulnerability",
-   "added": "2026-09-18",
-   "due": "2026-09-21",
-   "ransomware": false,
-   "summary": "Linux Kernel contains an out-of-bounds write vulnerability in the ebtables SNAT target which allows an ARP sender hardware address rewrite to write directly into a nonlinear socket-buffer fragment backed by a splice-imported file page. The impacted product(s) could be end-of-lif…"
   }
  ],
  "ransomware_latest": [
