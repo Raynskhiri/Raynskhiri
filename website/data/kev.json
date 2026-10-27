@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.23",
- "generated": "2026-10-26T13:20:51Z",
- "total": 1756,
- "added_7d": 8,
- "added_30d": 30,
+ "catalog_version": "2026.10.26",
+ "generated": "2026-10-27T12:29:07Z",
+ "total": 1758,
+ "added_7d": 10,
+ "added_30d": 32,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-109619",
+   "vendor": "PHP Group",
+   "product": "PHP",
+   "name": "PHP Stale Internal Request-State Vulnerability",
+   "added": "2026-10-26",
+   "due": "2026-10-29",
+   "ransomware": false,
+   "summary": "PHP contains a stale internal request-state vulnerability that allows for unauthenticated remote code execution."
+  },
+  {
+   "cve": "CVE-2026-109618",
+   "vendor": "PHP Group",
+   "product": "PHP",
+   "name": "PHP Memory Corruption Vulnerability",
+   "added": "2026-10-26",
+   "due": "2026-10-29",
+   "ransomware": false,
+   "summary": "PHP contains an out-of-memory corruption vulnerability that allows for unauthenticated remote code execution."
+  },
   {
    "cve": "CVE-2026-114625",
    "vendor": "Arista",
@@ -387,26 +407,6 @@
    "due": "2026-09-25",
    "ransomware": false,
    "summary": "Check Point Security Management Server, Multi-Domain Security Management Server, Log Server, Multi-Domain Log Server, and SmartEvent contain a path traversal vulnerability that allows an unauthenticated attacker to upload and execute arbitrary scripts."
-  },
-  {
-   "cve": "CVE-2026-85102",
-   "vendor": "Check Point",
-   "product": "Multiple Products",
-   "name": "Check Point Multiple Products Improper Certificate Validation Vulnerability",
-   "added": "2026-09-22",
-   "due": "2026-09-25",
-   "ransomware": false,
-   "summary": "Check Point Security Gateway and Check Point Spark Firewall using Site to Site VPN or Remote Access VPN contain an improper certificate validation vulnerability which could allow an unauthenticated remote attacker to execute arbitrary code on the Gateway."
-  },
-  {
-   "cve": "CVE-2026-7273",
-   "vendor": "Zyxel",
-   "product": "GS1900 Series Switches",
-   "name": "Zyxel GS1900 Series Switches Stack-Based Buffer Overflow Vulnerability",
-   "added": "2026-09-21",
-   "due": "2026-09-24",
-   "ransomware": false,
-   "summary": "Zyxel GS1900 series switches contain a stack-based buffer overflow vulnerability in the CGI program which could allow a LAN-based, unauthenticated attacker to exploit the flaw and potentially execute OS commands via a crafted HTTP request."
   }
  ],
  "ransomware_latest": [
