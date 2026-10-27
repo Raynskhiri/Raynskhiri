@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.26",
- "generated": "2026-10-27T12:29:07Z",
- "total": 1758,
- "added_7d": 10,
- "added_30d": 32,
+ "catalog_version": "2026.10.27",
+ "generated": "2026-10-27T22:19:17Z",
+ "total": 1760,
+ "added_7d": 12,
+ "added_30d": 34,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-48356",
+   "vendor": "Adobe",
+   "product": "Commerce and Magento",
+   "name": "Adobe Commerce and Magento Unrestricted Upload of File with Dangerous Type Vulnerability",
+   "added": "2026-10-27",
+   "due": "2026-11-10",
+   "ransomware": false,
+   "summary": "Adobe Commerce and Magento contain an unrestricted upload of file with dangerous type vulnerability that could result in arbitrary code execution in the context of the current user, potentially gaining elevated access or control over the victim's account or session."
+  },
+  {
+   "cve": "CVE-2026-111497",
+   "vendor": "Google",
+   "product": "Brotli",
+   "name": "Google Brotli Unchecked Return Value Vulnerability",
+   "added": "2026-10-27",
+   "due": "2026-11-10",
+   "ransomware": false,
+   "summary": "Google Brotli contains an unchecked return value vulnerability that allows a remote unauthenticated attacker to corrupt adjacent decoder state memory, disclose sensitive memory contents, cause a denial of service, or potentially execute arbitrary code using a crafted Brotli-comp…"
+  },
   {
    "cve": "CVE-2026-109619",
    "vendor": "PHP Group",
@@ -387,26 +407,6 @@
    "due": "2026-09-25",
    "ransomware": false,
    "summary": "F5 BIG-IP APM contains a heap-based buffer overflow vulnerability when access policy and an OAuth profile are configured on a virtual server. This vulnerability could allow an unauthenticated attacker to perform remote code execution."
-  },
-  {
-   "cve": "CVE-2026-93952",
-   "vendor": "Arista",
-   "product": "VeloCloud Orchestrator",
-   "name": "Arista VeloCloud Orchestrator Improper Input Validation Vulnerability",
-   "added": "2026-09-22",
-   "due": "2026-09-25",
-   "ransomware": false,
-   "summary": "Arista VeloCloud Orchestrator (VCO) on-prem contains an improper input validation vulnerability that may allow a remote attacker to access privileged internal functionality and impact the VCO host. Successful exploitation may compromise the confidentiality, integrity, and availa…"
-  },
-  {
-   "cve": "CVE-2026-93616",
-   "vendor": "Check Point",
-   "product": "Multiple Products",
-   "name": "Check Point Multiple Products Path Traversal Vulnerability",
-   "added": "2026-09-22",
-   "due": "2026-09-25",
-   "ransomware": false,
-   "summary": "Check Point Security Management Server, Multi-Domain Security Management Server, Log Server, Multi-Domain Log Server, and SmartEvent contain a path traversal vulnerability that allows an unauthenticated attacker to upload and execute arbitrary scripts."
   }
  ],
  "ransomware_latest": [
