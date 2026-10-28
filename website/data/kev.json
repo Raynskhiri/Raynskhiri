@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.27",
- "generated": "2026-10-28T13:16:11Z",
- "total": 1760,
- "added_7d": 6,
- "added_30d": 32,
+ "catalog_version": "2026.10.28",
+ "generated": "2026-10-28T22:39:45Z",
+ "total": 1762,
+ "added_7d": 8,
+ "added_30d": 34,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-46300",
+   "vendor": "Linux",
+   "product": "Kernel",
+   "name": "Linux Kernel Missing Initialization of a Variable Vulnerability",
+   "added": "2026-10-28",
+   "due": "2026-10-31",
+   "ransomware": false,
+   "summary": "Linux Kernel contains a missing initialization of a variable vulnerability that could allow for unintended modification of page-cache-backed data via failure to preserve the shared-fragment marker during socket buffer coalescing, causing ESP input processing to decrypt shared fr…"
+  },
+  {
+   "cve": "CVE-2026-41709",
+   "vendor": "Broadcom",
+   "product": "VMware ESX",
+   "name": "Broadcom VMWare ESX Insufficient Logging Vulnerability",
+   "added": "2026-10-28",
+   "due": "2026-11-11",
+   "ransomware": false,
+   "summary": "Broadcom VMWare ESX contains an insufficient logging vulnerability that could allow a malicious actor with admin access to perform certain operations without being logged."
+  },
   {
    "cve": "CVE-2026-48356",
    "vendor": "Adobe",
@@ -387,26 +407,6 @@
    "due": "2026-09-27",
    "ransomware": false,
    "summary": "Adobe Commerce and Magento contains an incorrect authorization vulnerability that could allow an attacker to leverage this vulnerability to gain elevated access to sensitive resources without any user interaction."
-  },
-  {
-   "cve": "CVE-2026-5430",
-   "vendor": "WSO2",
-   "product": "Multiple Products",
-   "name": "WSO2 Multiple Products Path Traversal Vulnerability",
-   "added": "2026-09-24",
-   "due": "2026-09-27",
-   "ransomware": false,
-   "summary": "WSO2 API Control Plane, API Manager, Traffic Manager & Universal Gateway contain a path traversal vulnerability that could allow for unrestricted file upload and lead to remote code execution."
-  },
-  {
-   "cve": "CVE-2026-94127",
-   "vendor": "F5",
-   "product": "BIG-IP APM",
-   "name": "F5 BIG-IP APM Heap-based Buffer Overflow Vulnerability",
-   "added": "2026-09-22",
-   "due": "2026-09-25",
-   "ransomware": false,
-   "summary": "F5 BIG-IP APM contains a heap-based buffer overflow vulnerability when access policy and an OAuth profile are configured on a virtual server. This vulnerability could allow an unauthenticated attacker to perform remote code execution."
   }
  ],
  "ransomware_latest": [
