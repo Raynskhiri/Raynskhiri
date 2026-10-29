@@ -162,8 +162,8 @@ def build_blog() -> list[str]:
         content = (
             f'<header class="article-head"><div class="wrap"><div class="inner">'
             f'<a class="back" href="/blog/">&larr; All posts</a>'
-            f'<div><span class="badge">{{{{ui:award}}}}{esc(p["badge"])}</span></div>'
-            f'<h1>{esc(p["title"])}</h1><p class="lede">{esc(p["description"])}</p>'
+            + (f'<div><a class="badge" href="{p["verify"]}">{{{{ui:award}}}}{esc(p["badge"])}</a></div>' if p.get("verify") else f'<div><span class="badge">{{{{ui:award}}}}{esc(p["badge"])}</span></div>')
+            + f'<h1>{esc(p["title"])}</h1><p class="lede">{esc(p["description"])}</p>'
             f'<div class="meta"><span>Rayen Skhiri</span><span><time datetime="{p["date"]}">{p["date_human"]}</time></span>'
             f'<span>{p["read"]}</span>{tags}</div></div></div></header>'
             f'<div class="wrap"><article class="article">{p["body"]}'

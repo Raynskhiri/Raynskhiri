@@ -94,6 +94,7 @@ h1.title { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.05; font-weight
 .article-head .lede { color: var(--muted); font-size: 1.12rem; margin: 0 0 22px; }
 .badge { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(61, 220, 151, 0.4); background: rgba(61, 220, 151, 0.1); color: var(--green); font-size: 0.86rem; font-weight: 600; margin-bottom: 22px; }
 .badge svg { width: 16px; height: 16px; }
+a.badge { text-decoration: none; transition: border-color .15s; } a.badge:hover { border-color: var(--green); }
 
 .article { padding: 48px 0 40px; font-size: 1.06rem; line-height: 1.75; color: #D9DEE6; }
 .article h2 { color: var(--text); font-size: 1.55rem; line-height: 1.25; font-weight: 780; margin: 48px 0 14px; letter-spacing: -0.01em; }
