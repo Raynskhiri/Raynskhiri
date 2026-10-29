@@ -157,7 +157,7 @@ def build_blog() -> list[str]:
     written = []
     for p in posts:
         url = f"{SITE}/blog/{p['slug']}/"
-        image = f"{SITE}/blog/{p['slug']}/og.png" if (BLOG_OUT / p["slug"] / "og.png").exists() else f"{SITE}/og.png"
+        image = f"{SITE}/blog/{p['slug']}/og.png?v=2" if (BLOG_OUT / p["slug"] / "og.png").exists() else f"{SITE}/og.png"
         tags = "".join(f'<span class="tagx">#{esc(t)}</span>' for t in p["tags"])
         content = (
             f'<header class="article-head"><div class="wrap"><div class="inner">'
@@ -188,7 +188,7 @@ def build_blog() -> list[str]:
     out = BLOG_OUT / "index.html"
     out.write_text(page("Blog | Rayen Skhiri", "Blog | Rayen Skhiri",
                         "Notes from a SOC analyst: certifications, Active Directory security, detections and open tools.",
-                        f"{SITE}/blog/", f"{SITE}/og.png", index, blog_current=True), encoding="utf-8")
+                        f"{SITE}/blog/", f"{SITE}/og.png?v=2", index, blog_current=True), encoding="utf-8")
     written.append(str(out))
     return written
 
