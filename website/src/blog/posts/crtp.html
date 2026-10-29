@@ -1,0 +1,86 @@
+<!--meta
+{
+  "slug": "crtp",
+  "title": "I passed the CRTP. Here is what it changed for a SOC analyst",
+  "short": "I passed the CRTP",
+  "description": "What the Certified Red Team Professional from Altered Security taught me as a SOC analyst: how attacking Active Directory changes the way you defend it, how to prepare, and the exam tips I wish I had on day one.",
+  "date": "2026-10-29",
+  "date_human": "29 October 2026",
+  "read": "8 min read",
+  "tags": ["Active Directory", "Red team", "Certification"],
+  "badge": "CRTP, Altered Security"
+}
+-->
+<p>I work as an L2/L3 analyst in a 24/7 SOC. Most of my day is spent on the other side of the attacks in this post: an alert fires on a domain controller, and I have to decide quickly whether it is an admin doing their job or someone moving through the network. I took the <strong>Certified Red Team Professional (CRTP)</strong> from Altered Security because I wanted to understand those attacks from the attacker's side, not only from the alert.</p>
+
+<p>I passed. This post covers what the course changed in the way I look at Active Directory, how I would prepare for it, and the practical tips I would give anyone booking the exam.</p>
+
+<div class="callout"><b>A note before we start:</b> Altered Security does not allow sharing exam content, so there is nothing here about the exam environment, its machines or its attack path. Everything below is about the course, the public lab topics and my own preparation.</div>
+
+<h2>What the CRTP is</h2>
+<p>The CRTP is the exam for Altered Security's <strong>Attacking and Defending Active Directory</strong> course by Nikhil Mittal. The course runs on a lab with several domains and forest trusts, on patched Windows servers with Microsoft Defender turned on. That last part matters: you cannot just run the first tool you find on GitHub and hope for the best. You have to understand what the defenses see and work around them properly.</p>
+
+<div class="facts">
+  <div class="fact"><b>24 hours</b><span>hands-on exam in a fresh environment</span></div>
+  <div class="fact"><b>48 hours</b><span>after that to submit a full report</span></div>
+  <div class="fact"><b>No shortcuts</b><span>patched systems, Defender on, no CVEs to lean on</span></div>
+</div>
+
+<p>Passing needs two things: the access on the targets, and a professional report that explains every step and how to fix it. The report is not a formality.</p>
+
+<h2>How to prepare</h2>
+<p>This is what I would tell anyone starting the course, especially if they are working full time like I was.</p>
+<ul>
+  <li><strong>Pair each video module with its lab objectives.</strong> Theory alone fades fast; doing the matching objective in the lab while it is fresh is what makes it stick.</li>
+  <li><strong>Redo the objectives without the lab manual.</strong> The second pass, from your own notes only, shows you what you have really understood.</li>
+  <li><strong>Keep one note per technique with the same four headings:</strong> what it needs (rights, access, prerequisites), the commands, what it looks like to a defender, and how to fix it. That note becomes your cheat sheet and half of your report.</li>
+  <li><strong>Practise the boring parts.</strong> Getting tools past AMSI the way the course teaches, moving files between machines, keeping track of which ticket is loaded in which session. In the exam, the boring parts are what cost you time.</li>
+</ul>
+
+<h2>What attacking AD taught me about defending it</h2>
+<p>This is the part that made the course worth it for me as a defender. A few ideas that stuck:</p>
+
+<h3>Permissions are the real attack surface</h3>
+<p>Most of the paths in the course do not use a vulnerability at all. They use an ACL that someone granted years ago and forgot: a group that can reset a password it should not, an account that can write to a computer object. Nothing is patched, nothing is unpatched, and the antivirus has nothing to catch. When I review an environment now, I look at who can change what before I look at missing updates.</p>
+
+<h3>Kerberos is a trust system, and trust can be abused</h3>
+<p>Delegation (unconstrained, constrained and resource-based), service tickets, Silver, Golden and Diamond tickets: once you understand what each ticket proves and who signs it, you understand why a single misplaced delegation setting can let an attacker impersonate an administrator. It also explains why some of these attacks are so hard to spot in logs.</p>
+
+<h3>Certificates are credentials</h3>
+<p>Active Directory Certificate Services was an eye-opener. A badly configured certificate template can hand out a login for any user, and that certificate keeps working after the password is changed. Many teams still do not treat their CA as a tier-0 system.</p>
+
+<h3>A forest trust is not a wall</h3>
+<p>The course spends real time on trusts between domains and forests. The lesson for defenders: if one side of a trust falls, assume the other side is exposed until you prove otherwise.</p>
+
+<p>For each of these, I now know which events to look for. Here is the short version I keep next to my XQL and SPL queries:</p>
+
+<table class="map">
+  <thead><tr><th>Technique</th><th>What I hunt for</th></tr></thead>
+  <tbody>
+    <tr><td>Kerberoasting</td><td>Event 4769 bursts for service accounts, especially with RC4 encryption</td></tr>
+    <tr><td>DCSync</td><td>Event 4662 with the replication GUIDs, from an account that is not a domain controller</td></tr>
+    <tr><td>ACL abuse</td><td>Event 5136 on sensitive objects, 4728 / 4732 / 4756 for group changes, 4724 for password resets</td></tr>
+    <tr><td>Certificate abuse</td><td>Events 4886 / 4887 on the CA, requests made on behalf of another user</td></tr>
+    <tr><td>Credential dumping</td><td>Access to LSASS memory, which EDRs like Cortex XDR flag when protections are on</td></tr>
+  </tbody>
+</table>
+
+<p>Several of these ended up as rules in my <a href="https://github.com/Raynskhiri/detection-library">detection library</a>, which compiles each one to Cortex XQL and Splunk SPL and tests it in CI.</p>
+
+<h2>Exam tips I wish I had on day one</h2>
+<p>None of this is about the exam's content. It is about how to spend 24 hours well.</p>
+<ol>
+  <li><strong>Enumerate everything before you attack anything.</strong> Time spent on enumeration pays for itself. The path is usually visible in the output long before you try anything.</li>
+  <li><strong>Screenshot as you go, and always take the proof.</strong> On every machine you reach, capture <code>hostname</code> and <code>whoami</code> in the same screenshot. I missed one and had to go back for it while writing the report. Do not be me.</li>
+  <li><strong>Keep a timeline.</strong> Paste every command you run into a notes file with the time. Writing the report becomes copy, clean and explain.</li>
+  <li><strong>Do not stack AMSI bypasses.</strong> Pick the method the course teaches and stick to it. Mixing two approaches in the same session caused me errors that had nothing to do with the target.</li>
+  <li><strong>Check your keyboard layout before you type a password.</strong> I use an AZERTY keyboard. Over RDP, the lab machine expected a different layout and my password kept "failing" when the problem was the keyboard.</li>
+  <li><strong>When a tool fails, read the error before trying something else.</strong> Nine times out of ten it tells you exactly what is missing: a key, a ticket, a right.</li>
+  <li><strong>Sleep and eat.</strong> 24 hours is long. A break and fresh eyes solve more problems than a fifth retry of the same command.</li>
+  <li><strong>Treat the report like a client deliverable.</strong> Explain every command, why it worked, what the business impact is and how to fix it. Write it for the admin who has to fix it, not for yourself.</li>
+</ol>
+
+<h2>What is next</h2>
+<p>The CRTP made me a better analyst, not just a better attacker. Next I am preparing the <strong>Splunk Core Certified Power User</strong> and the <strong>Palo Alto Networks Certified XDR Analyst</strong>, and I keep turning what I learn on the offensive side into detections I can use on real shifts.</p>
+
+<p>If you are preparing for the CRTP and have questions, or if you work on Active Directory security and want to compare notes, my messages are open.</p>

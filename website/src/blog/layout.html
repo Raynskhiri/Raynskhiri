@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%%TITLE%%</title>
+<meta name="description" content="%%DESC%%">
+<meta name="theme-color" content="#0A0C10">
+<link rel="canonical" href="%%URL%%">
+<meta property="og:title" content="%%OGTITLE%%">
+<meta property="og:description" content="%%DESC%%">
+<meta property="og:url" content="%%URL%%">
+<meta property="og:type" content="%%TYPE%%">
+<meta property="og:image" content="%%IMAGE%%">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="%%OGTITLE%%">
+<meta name="twitter:card" content="summary_large_image">
+%%EXTRAMETA%%<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog.css">
+</head>
+<body>
+<a class="vh skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="/" aria-label="Rayen Skhiri, home">
+      <span class="logo-mark">{{ui:shield}}</span>
+      <span class="logo-text"><b>RAYEN SKHIRI</b><span>SOC Analyst and AppSec</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="opt" href="/#projects">Projects</a>
+      <a href="/blog/"%%BLOGCURRENT%%>Blog</a>
+      <a class="btn btn-primary btn-sm" href="/#contact">Let's talk {{ui:arrow}}</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+%%CONTENT%%
+</main>
+
+<footer class="site">
+  <div class="wrap f">
+    <a class="logo" href="/"><span class="logo-mark">{{ui:shield}}</span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
+    <nav aria-label="Footer">
+      <a href="/">Home</a><a href="/blog/">Blog</a><a href="/#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="https://linkedin.com/in/rayen-skhiri">LinkedIn</a>
+    </nav>
+    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+  </div>
+</footer>
+</body>
+</html>

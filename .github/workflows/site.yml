@@ -21,10 +21,11 @@ jobs:
       - name: index.html and the CSP headers match the template
         run: |
           python website/src/build.py
-          git diff --exit-code website/index.html website/vercel.json
+          git diff --exit-code website/index.html website/vercel.json website/blog
+          test -z "$(git status --porcelain website/blog)"
       - name: KEV feed builder rejects hostile input
         run: pip install pytest && python -m pytest -q tests
       - name: Scripts parse
         run: node --check website/term.js
       - name: No em dashes on the site
-        run: "! grep -n $'\\u2014' website/index.html website/term.js"
+        run: "! grep -rn $'\\u2014' website/index.html website/term.js website/blog website/blog.css"

@@ -1,4 +1,4 @@
-"""Build website/index.html from src/template.html.
+"""Build website/index.html from src/template.html, and the blog from src/blog/.
 
 Placeholders:
   {{ui:name}}           inline UI icon (stroke icons, currentColor)
@@ -116,6 +116,83 @@ def build() -> str:
     return str(OUT)
 
 
+SITE = "https://rayenskhiri.online"
+BLOG_SRC = HERE / "blog"
+BLOG_OUT = HERE.parent / "blog"
+
+
+def esc(text: str) -> str:
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+def read_post(path: Path) -> dict:
+    """A post is HTML with a JSON block in a leading <!--meta ... --> comment."""
+    raw = path.read_text(encoding="utf-8")
+    m = re.match(r"\s*<!--meta\s*(\{.*?\})\s*-->\s*", raw, re.S)
+    if not m:
+        raise SystemExit(f"{path.name}: missing <!--meta {{...}} --> block")
+    meta = json.loads(m.group(1))
+    meta["body"] = raw[m.end():]
+    return meta
+
+
+def page(title: str, og_title: str, desc: str, url: str, image: str, content: str,
+         og_type: str = "website", extra_meta: str = "", blog_current: bool = False) -> str:
+    html = (BLOG_SRC / "layout.html").read_text(encoding="utf-8")
+    for key, val in {"%%TITLE%%": esc(title), "%%OGTITLE%%": esc(og_title), "%%DESC%%": esc(desc),
+                     "%%URL%%": url, "%%IMAGE%%": image, "%%TYPE%%": og_type, "%%EXTRAMETA%%": extra_meta,
+                     "%%BLOGCURRENT%%": ' aria-current="page"' if blog_current else "",
+                     "%%CONTENT%%": content}.items():
+        html = html.replace(key, val)
+    html = re.sub(r"\{\{ui:([a-z]+)\}\}", lambda m: ui(m.group(1)), html)
+    left = re.findall(r"\{\{[^}]+\}\}|%%[A-Z]+%%", html)
+    if left:
+        raise SystemExit(f"blog: unresolved placeholders: {left}")
+    return html
+
+
+def build_blog() -> list[str]:
+    posts = sorted((read_post(p) for p in (BLOG_SRC / "posts").glob("*.html")),
+                   key=lambda p: p["date"], reverse=True)
+    written = []
+    for p in posts:
+        url = f"{SITE}/blog/{p['slug']}/"
+        image = f"{SITE}/blog/{p['slug']}/og.png" if (BLOG_OUT / p["slug"] / "og.png").exists() else f"{SITE}/og.png"
+        tags = "".join(f'<span class="tagx">#{esc(t)}</span>' for t in p["tags"])
+        content = (
+            f'<header class="article-head"><div class="wrap"><div class="inner">'
+            f'<a class="back" href="/blog/">&larr; All posts</a>'
+            f'<div><span class="badge">{{{{ui:award}}}}{esc(p["badge"])}</span></div>'
+            f'<h1>{esc(p["title"])}</h1><p class="lede">{esc(p["description"])}</p>'
+            f'<div class="meta"><span>Rayen Skhiri</span><span><time datetime="{p["date"]}">{p["date_human"]}</time></span>'
+            f'<span>{p["read"]}</span>{tags}</div></div></div></header>'
+            f'<div class="wrap"><article class="article">{p["body"]}'
+            f'<div class="end"><p><b>Thanks for reading.</b> Questions about the CRTP or Active Directory security? I reply within a day.</p>'
+            f'<div class="acts"><a class="btn btn-primary btn-sm" href="https://linkedin.com/in/rayen-skhiri">Message me on LinkedIn {{{{ui:arrow}}}}</a>'
+            f'<a class="btn btn-ghost btn-sm" href="/blog/">More posts</a></div></div></article></div>'
+        )
+        extra = (f'<meta property="article:published_time" content="{p["date"]}">\n'
+                 f'<meta property="article:author" content="Rayen Skhiri">\n')
+        out = BLOG_OUT / p["slug"] / "index.html"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(page(f'{p["title"]} | Rayen Skhiri', p["title"], p["description"], url, image,
+                            content, "article", extra), encoding="utf-8")
+        written.append(str(out))
+    cards = "".join(
+        f'<li><a class="post-card" href="/blog/{p["slug"]}/"><div class="meta"><time datetime="{p["date"]}">{p["date_human"]}</time>'
+        f'<span>{p["read"]}</span></div><h2>{esc(p["title"])}</h2><p>{esc(p["description"])}</p>'
+        f'<span class="more">Read the post {{{{ui:arrow}}}}</span></a></li>' for p in posts)
+    index = (f'<div class="wrap"><div class="page-head"><p class="eyebrow">// blog <b>· notes from the SOC and the lab</b></p>'
+             f'<h1 class="title">Blog</h1><p class="sub">What I learn defending a 24/7 SOC and attacking labs to stay sharp: '
+             f'certifications, detections and the tools I build.</p></div><ul class="posts">{cards}</ul></div>')
+    out = BLOG_OUT / "index.html"
+    out.write_text(page("Blog | Rayen Skhiri", "Blog | Rayen Skhiri",
+                        "Notes from a SOC analyst: certifications, Active Directory security, detections and open tools.",
+                        f"{SITE}/blog/", f"{SITE}/og.png", index, blog_current=True), encoding="utf-8")
+    written.append(str(out))
+    return written
+
+
 def script_hashes(html: str) -> list[str]:
     """CSP hashes for every inline script, so only these exact scripts can run."""
     hashes = []
@@ -156,3 +233,5 @@ def vercel_config(html: str) -> dict:
 
 if __name__ == "__main__":
     print("wrote", build())
+    for path in build_blog():
+        print("wrote", path)
