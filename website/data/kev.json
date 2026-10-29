@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.28",
- "generated": "2026-10-28T22:39:45Z",
- "total": 1762,
- "added_7d": 8,
- "added_30d": 34,
+ "catalog_version": "2026.10.29",
+ "generated": "2026-10-29T22:48:20Z",
+ "total": 1764,
+ "added_7d": 10,
+ "added_30d": 36,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-97229",
+   "vendor": "GitLab",
+   "product": "Community Edition and Enterprise Edition",
+   "name": "GitLab Community Edition and Enterprise Edition Integer Overflow or Wraparound Vulnerability",
+   "added": "2026-10-29",
+   "due": "2026-11-01",
+   "ransomware": false,
+   "summary": "GitLab Community Edition and Enterprise Edition contain a integer overflow or wraparound vulnerability that could allow an unauthenticated user to execute arbitrary code on the GitLab server via a specially crafted regular expression in a CI/CD configuration, due to insufficient…"
+  },
+  {
+   "cve": "CVE-2026-76418",
+   "vendor": "Cisco",
+   "product": "Secure Firewall ASA Software and Cisco Secure FTD Software",
+   "name": "Cisco Secure Firewall ASA Software and Cisco Secure FTD Software Unchecked Return Value to NULL Pointer Deref…",
+   "added": "2026-10-29",
+   "due": "2026-11-01",
+   "ransomware": false,
+   "summary": "Cisco Secure Firewall ASA Software and Cisco Secure FTD Software contains an unchecked return value to NULL pointer dereference vulnerability that could allow an unauthenticated, remote attacker to cause the device to reload unexpectedly, resulting in a denial of service (DoS) c…"
+  },
   {
    "cve": "CVE-2026-46300",
    "vendor": "Linux",
@@ -387,26 +407,6 @@
    "due": "2026-09-28",
    "ransomware": false,
    "summary": "Mikrotik RouterOS contains an improper enforcement of behavioral workflow vulnerability that could allow an unauthenticated client to open a session channel and send an exec request. This vulnerability can be chained to achieve unauthenticated exploitation of CVE-2026-86060."
-  },
-  {
-   "cve": "CVE-2026-65660",
-   "vendor": "Microsoft",
-   "product": "SharePoint",
-   "name": "Microsoft SharePoint Code Injection Vulnerability",
-   "added": "2026-09-25",
-   "due": "2026-09-28",
-   "ransomware": false,
-   "summary": "Microsoft SharePoint contains a code injection vulnerability which could allow an authorized attacker to execute code over a network."
-  },
-  {
-   "cve": "CVE-2026-71362",
-   "vendor": "Adobe",
-   "product": "Commerce and Magento",
-   "name": "Adobe Commerce and Magento Incorrect Authorization Vulnerability",
-   "added": "2026-09-24",
-   "due": "2026-09-27",
-   "ransomware": false,
-   "summary": "Adobe Commerce and Magento contains an incorrect authorization vulnerability that could allow an attacker to leverage this vulnerability to gain elevated access to sensitive resources without any user interaction."
   }
  ],
  "ransomware_latest": [
