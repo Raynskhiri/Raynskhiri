@@ -145,7 +145,7 @@ held-out test split  89.5% accuracy (Random Forest, 152 files)
 same 50 files        82.0% Random Forest vs 36.0% LLM alone
 automated tests      437 passing
 source               https://github.com/Raynskhiri/MalwareScope`,
-  "projects/detection-library/README.md": `# Detection library   [62 rules]
+  "projects/detection-library/README.md": `# Detection library   [67 rules]
 Each detection is written once in YAML and compiled to Cortex XDR XQL and
 Splunk SPL, mapped to MITRE ATT&CK, with triage steps. CI checks Python,
 the compiled queries and the browser engine against the same 800+ events.
@@ -181,7 +181,7 @@ const DESCRIBE = {
   skills: "what I bring to a team, and the tools", projects: "things I built", feeds: "live data, refreshed daily",
   "benchmark.txt": "run me", "credentials.md": "certifications and community",
   contact: "how to reach me", "maghreb-threat-watch": "phishing early warning, live",
-  malwarescope: "ML + LLM malware analysis, thesis", "detection-library": "62 rules, XQL + SPL",
+  malwarescope: "ML + LLM malware analysis, thesis", "detection-library": "67 rules, XQL + SPL",
   "soc-triage-agent": "LLM triage with human approval, in progress", "exploited.txt": "CISA KEV, actively exploited",
   "threatwatch.txt": "today's Threat Watch numbers",
 };
@@ -292,7 +292,7 @@ async function benchmark() {
     "",
     `<span class="o">IN THE OPEN</span>`,
     row(domains, `domains checked (${day})`, "Maghreb Threat Watch, live"),
-    row("62 rules", "800+ events checked per commit", "detection library"),
+    row("67 rules", "800+ events checked per commit", "detection library"),
     row("82% vs 36%", "ML model vs an LLM alone", "MalwareScope"),
     row("Top 700", "worldwide on Hack The Box", "of ~2M players"),
     "",
@@ -573,7 +573,7 @@ ${row(`${btn("pwsh", "pwsh")} ${btn("clear", "clear")} ${btn("history", "history
     "get-childitem": (a) => ls(["-l", ...a]), gci: (a) => ls(["-l", ...a]),
     "set-location": cd, sl: cd, "get-location": () => C.pwd(), "get-content": cat, gc: cat,
     "get-help": HELP, "clear-host": () => { out.innerHTML = ""; }, "select-string": grep, "start-process": open,
-    "get-process": () => say("Handles  Status     ProcessName\n-------  ------     -----------\n     45  Running    maghreb-threat-watch\n     62  Running    detection-library\n    437  Completed  malwarescope\n      1  Building   soc-triage-agent"),
+    "get-process": () => say("Handles  Status     ProcessName\n-------  ------     -----------\n     45  Running    maghreb-threat-watch\n     67  Running    detection-library\n    437  Completed  malwarescope\n      1  Building   soc-triage-agent"),
   };
 
   async function run(raw) {

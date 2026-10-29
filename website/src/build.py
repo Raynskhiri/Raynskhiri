@@ -167,7 +167,7 @@ def build_blog() -> list[str]:
             f'<div class="meta"><span>Rayen Skhiri</span><span><time datetime="{p["date"]}">{p["date_human"]}</time></span>'
             f'<span>{p["read"]}</span>{tags}</div></div></div></header>'
             f'<div class="wrap"><article class="article">{p["body"]}'
-            f'<div class="end"><p><b>Thanks for reading.</b> Questions about the CRTP or Active Directory security? I reply within a day.</p>'
+            f'<div class="end"><p><b>Thanks for reading.</b> {esc(p.get("cta", "Questions or feedback? I reply within a day."))}</p>'
             f'<div class="acts"><a class="btn btn-primary btn-sm" href="https://linkedin.com/in/rayen-skhiri">Message me on LinkedIn {{{{ui:arrow}}}}</a>'
             f'<a class="btn btn-ghost btn-sm" href="/blog/">More posts</a></div></div></article></div>'
         )
