@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detecting FortiGate compromise when the firewall is your only log source | Rayen Skhiri</title>
+<meta name="description" content="2026 has been a hard year for FortiGate: SSO authentication bypasses, rogue admins on patched devices and an implant that switches syslog off. What happened, and seven tested Cortex XDR and Splunk detections that need nothing but the FortiGate's own logs.">
+<meta name="theme-color" content="#0A0C10">
+<link rel="canonical" href="https://rayenskhiri.online/blog/fortigate/">
+<meta property="og:title" content="Detecting FortiGate compromise when the firewall is your only log source">
+<meta property="og:description" content="2026 has been a hard year for FortiGate: SSO authentication bypasses, rogue admins on patched devices and an implant that switches syslog off. What happened, and seven tested Cortex XDR and Splunk detections that need nothing but the FortiGate's own logs.">
+<meta property="og:url" content="https://rayenskhiri.online/blog/fortigate/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://rayenskhiri.online/blog/fortigate/og.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Detecting FortiGate compromise when the firewall is your only log source">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-10-30">
+<meta property="article:author" content="Rayen Skhiri">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog.css">
+</head>
+<body>
+<a class="vh skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="/" aria-label="Rayen Skhiri, home">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <span class="logo-text"><b>RAYEN SKHIRI</b><span>SOC Analyst and AppSec</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="opt" href="/#projects">Projects</a>
+      <a href="/blog/">Blog</a>
+      <a class="btn btn-primary btn-sm" href="/#contact">Let's talk <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<header class="article-head"><div class="wrap"><div class="inner"><a class="back" href="/blog/">&larr; All posts</a><div><a class="badge" href="https://github.com/Raynskhiri/detection-library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14 -1.5 7 5-3 5 3-1.5-7"/></svg>Detections in my open-source library</a></div><h1>Detecting FortiGate compromise when the firewall is your only log source</h1><p class="lede">2026 has been a hard year for FortiGate: SSO authentication bypasses, rogue admins on patched devices and an implant that switches syslog off. What happened, and seven tested Cortex XDR and Splunk detections that need nothing but the FortiGate's own logs.</p><div class="meta"><span>Rayen Skhiri</span><span><time datetime="2026-10-30">30 October 2026</time></span><span>16 min read</span><span class="tagx">#FortiGate</span><span class="tagx">#Detection engineering</span><span class="tagx">#Cortex XDR</span><span class="tagx">#Splunk</span></div></div></div></header><div class="wrap"><article class="article"><p>Every SOC analyst in Tunisia knows this situation. A new client signs up, you ask for logs, and you get the <strong>FortiGate</strong>. Maybe an EDR on some laptops. No domain controller logs, no server logs, no proxy. "We will send the rest later." Later rarely comes.</p>
+
+<p>So this post starts from that reality. 2026 has been a hard year for FortiGate: authentication bypasses through FortiCloud SSO, rogue admin accounts on fully patched devices, and in October an implant that hides inside FortiOS processes and turns syslog off. Most write-ups assume you have every log source. I wanted to know how much a SOC can still catch <strong>with the FortiGate's own logs and nothing else</strong>, and what changes when the EDR and Active Directory logs do arrive.</p>
+
+<p>The short answer: more than you would expect. The bugs are different, but once attackers are on the box they all do the same handful of things, and FortiOS logs every one of them. All the detections below are in my <a href="https://github.com/Raynskhiri/detection-library">detection library</a> as DL-0068 to DL-0075, with test events that must and must not fire, and you can paste a raw FortiGate log line into the <a href="https://detections.rayenskhiri.online">playground</a> to see which rules fire.</p>
+
+<div class="facts">
+  <div class="fact"><b>7 rules</b><span>that need only the FortiGate's own syslog</span></div>
+  <div class="fact"><b>9.8 and 9.4</b><span>CVSS of the 2026 SSO admin bypasses</span></div>
+  <div class="fact"><b>In CISA KEV</b><span>CVE-2025-61624 since 16 October 2026</span></div>
+</div>
+
+<h2>What happened to FortiGate in 2026</h2>
+<table class="map">
+  <thead><tr><th>When</th><th>Bug</th><th>What it gives the attacker</th></tr></thead>
+  <tbody>
+    <tr><td>Dec 2025</td><td>CVE-2025-59718, CVE-2025-59719 (CVSS 9.8)</td><td>A crafted SAML message logs in as admin when FortiCloud SSO is enabled</td></tr>
+    <tr><td>Jan 2026</td><td>CVE-2026-24858 (CVSS 9.4, FG-IR-26-060)</td><td>The attacker logs into <em>your</em> FortiGate with <em>their own</em> FortiCloud account. Exploited as a zero-day; Fortinet locked two attacker accounts on 22 January and disabled FortiCloud SSO on its side on 26 January</td></tr>
+    <tr><td>From 15 Jan 2026</td><td>Automated campaign reported by Arctic Wolf</td><td>Admin access within seconds, config downloads, new admin accounts with VPN access, also on devices already running 7.4.9, 7.4.10 and 7.6.x</td></tr>
+    <tr><td>Jul 2026</td><td>CVE-2025-68686 (CISA KEV)</td><td>A bypass of the earlier fix for the symlink persistence trick, so an old compromise can survive patching</td></tr>
+    <tr><td>Oct 2026</td><td>CVE-2025-61624 (CISA KEV on 16 October)</td><td>Path traversal in the FortiOS CLI. Unit 42 saw it used to deploy <strong>PEERSTITCH</strong>, a memory-resident implant that hooks <code>miglogd</code> and <code>iked</code>, lets tagged VPN sessions skip checks, stops syslog and clears crash logs</td></tr>
+    <tr><td>Still today</td><td>CVE-2020-12812</td><td>The old 2FA bypass through username case. Fortinet warned of new abuse, and about 9,700 exposed devices were still vulnerable in January 2026</td></tr>
+  </tbody>
+</table>
+
+<p>Two incident reports from this year are worth reading in full, because they show the whole path from the firewall to domain admin. In both, the attackers:</p>
+<ol>
+  <li>got admin on the FortiGate,</li>
+  <li>exported the full configuration (<code>show full-configuration</code>),</li>
+  <li>decrypted the LDAP service account stored in it, since FortiOS protects those secrets with reversible encryption,</li>
+  <li>created a local admin with a boring name (<code>support</code>, <code>ssl-admin</code>),</li>
+  <li>added permissive "any to any" firewall policies,</li>
+  <li>used the stolen AD account to join rogue workstations to the domain or log into servers,</li>
+  <li>installed remote management tools (Pulseway, and MeshAgent hidden with <code>SystemComponent=1</code>),</li>
+  <li>and in one case copied <code>NTDS.dit</code> from a shadow copy and sent it out.</li>
+</ol>
+<p>Steps 1 to 5 happen <strong>on the FortiGate</strong>. That is the part you can see with firewall logs alone.</p>
+
+<h2>Step 1: find what is exposed</h2>
+<p>Before hunting, check the boxes themselves. On each FortiGate:</p>
+<pre><code>get system status                              # FortiOS version
+show system global | grep -i sso               # admin-forticloud-sso-login should be disable
+show system admin | grep edit                  # every admin account, one per line
+show system interface | grep -i allowaccess    # https or ssh on a WAN interface is the real problem
+show system automation-action                  # anything you did not create?
+show system auto-script</code></pre>
+<ul>
+  <li><strong>Version</strong> at or above the fixed release for every advisory above. For CVE-2026-24858 that is 7.6.6, 7.4.11, 7.2.13 or 7.0.19. For CVE-2025-61624, GovCERT.HK lists FortiOS 6.4, 7.0 and 7.2 as affected in full, plus 7.4.0 to 7.4.9 and 7.6.0 to 7.6.4.</li>
+  <li><strong>FortiCloud SSO for admins disabled</strong> unless someone really uses it. It is off by default, but FortiCare registration can turn it on.</li>
+  <li><strong>No admin access from the internet.</strong> Every bug in the table is worse when the admin GUI answers on the WAN. Use trusted hosts or a management network.</li>
+  <li><strong>No admin you cannot put a name on.</strong> Compare the list with the account names at the end of this post.</li>
+</ul>
+<p>In an MSSP, run this through FortiManager or a small script for every client and keep the output. It becomes the baseline for the detections.</p>
+
+<h2>Step 2: detect it with the logs you actually have</h2>
+<p>I split the detections into two tiers:</p>
+<ul>
+  <li><strong>Minimal tier:</strong> FortiGate syslog only (event, VPN and traffic logs). This is what most clients send.</li>
+  <li><strong>Full tier:</strong> you also have an EDR on the servers and the domain controller security log.</li>
+</ul>
+
+<h3>Getting FortiGate logs into Cortex XDR and Splunk</h3>
+<p>Point the FortiGate at a Broker VM syslog applet. The logs land in the <code>fortinet_fortigate_raw</code> dataset. Depending on how the source was set up you get parsed fields or only <code>_raw_log</code>, so every query below pulls the fields it needs out of <code>_raw_log</code> with <code>regextract</code>. They work either way. In Splunk, install the Fortinet FortiGate Add-on and define a <code>fortigate</code> macro over your FortiGate sourcetypes.</p>
+<p>Two log IDs carry most of the value. <code>0100044547</code> ("Object attribute configured") is written whenever an object such as an admin, a policy or an address is added, edited or deleted. <code>0100044546</code> ("Attribute configured") covers global settings. Both carry <code>cfgpath</code> (what changed), <code>cfgobj</code> (which object), <code>cfgattr</code> (old and new values), <code>action</code>, <code>user</code> and <code>ui</code> (how and from where the admin was connected).</p>
+
+<h3>Minimal tier, layer 1: the way in</h3>
+<p>A successful admin login where the method is SSO, or where the source address is outside RFC 1918. It will fire on legitimate MSSP management from a public IP. Allow-list those exact addresses and nothing more. If admin logins from the internet are normal for a client, that belongs in the client report as a finding.</p>
+<div class="qlabel"><span><b>DL-0068</b> Admin login through FortiCloud SSO or from an internet address</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0068.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_subtype = arrayindex(regextract(_raw_log, &quot;\\bsubtype=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_status = arrayindex(regextract(_raw_log, &quot;\\bstatus=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_method = arrayindex(regextract(_raw_log, &quot;\\bmethod=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter (fg_subtype = &quot;system&quot; and fg_action = &quot;login&quot; and fg_status = &quot;success&quot;) and ((fg_method = &quot;sso&quot; or fg_ui ~= &quot;(?i)^sso&quot;) or not ((fg_srcip != null and (incidr(fg_srcip, &quot;10.0.0.0/8&quot;) or incidr(fg_srcip, &quot;172.16.0.0/12&quot;) or incidr(fg_srcip, &quot;192.168.0.0/16&quot;) or incidr(fg_srcip, &quot;127.0.0.0/8&quot;)))))
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where (lower(subtype)=&quot;system&quot; AND lower(action)=&quot;login&quot; AND lower(status)=&quot;success&quot;) AND ((lower(method)=&quot;sso&quot; OR match(ui, &quot;(?i)^sso&quot;)) OR NOT ((isnotnull(srcip) AND (cidrmatch(&quot;10.0.0.0/8&quot;, srcip) OR cidrmatch(&quot;172.16.0.0/12&quot;, srcip) OR cidrmatch(&quot;192.168.0.0/16&quot;, srcip) OR cidrmatch(&quot;127.0.0.0/8&quot;, srcip)))))
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<p>A cheap companion: brute force on the admin GUI or the SSL VPN. Many users from one address is spraying; then check whether that address ever got a success.</p>
+<p class="qlabel"><span>Cortex XDR: failed admin or VPN logins per source, per hour</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| alter fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_status = arrayindex(regextract(_raw_log, &quot;\\bstatus=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_srcip  = arrayindex(regextract(_raw_log, &quot;\\b(?:srcip|remip)=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_user   = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0)
+| filter (fg_action = &quot;login&quot; and fg_status = &quot;failed&quot;) or fg_action = &quot;ssl-login-fail&quot;
+| bin _time span = 1h
+| comp count() as failures, count_distinct(fg_user) as users by _time, fg_srcip
+| filter failures &gt;= 20 or users &gt;= 5
+| sort desc failures</code></pre>
+<p>Then logins by the account names reported in the intrusions. A name is a lead, not proof. If a client really has a <code>support</code> account, rename it after a person and the rule stays useful.</p>
+<div class="qlabel"><span><b>DL-0074</b> Admin or SSL VPN login with an account name used in FortiGate intrusions</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0074.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_subtype = arrayindex(regextract(_raw_log, &quot;\\bsubtype=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_status = arrayindex(regextract(_raw_log, &quot;\\bstatus=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter ((fg_subtype in (&quot;system&quot;, &quot;vpn&quot;) and fg_action in (&quot;login&quot;, &quot;tunnel-up&quot;, &quot;ssl-login&quot;)) and fg_user in (&quot;support&quot;, &quot;ssl-admin&quot;, &quot;backupadmin&quot;, &quot;backup&quot;, &quot;itadmin&quot;, &quot;secadmin&quot;, &quot;svcadmin&quot;, &quot;remoteadmin&quot;, &quot;adccount&quot;, &quot;audit&quot;, &quot;deploy&quot;, &quot;security&quot;, &quot;helpdesk&quot;)) and not ((fg_status != null and fg_status in (&quot;failed&quot;, &quot;failure&quot;)))
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where (((lower(subtype)=&quot;system&quot; OR lower(subtype)=&quot;vpn&quot;) AND (lower(action)=&quot;login&quot; OR lower(action)=&quot;tunnel-up&quot; OR lower(action)=&quot;ssl-login&quot;)) AND (lower(user)=&quot;support&quot; OR lower(user)=&quot;ssl-admin&quot; OR lower(user)=&quot;backupadmin&quot; OR lower(user)=&quot;backup&quot; OR lower(user)=&quot;itadmin&quot; OR lower(user)=&quot;secadmin&quot; OR lower(user)=&quot;svcadmin&quot; OR lower(user)=&quot;remoteadmin&quot; OR lower(user)=&quot;adccount&quot; OR lower(user)=&quot;audit&quot; OR lower(user)=&quot;deploy&quot; OR lower(user)=&quot;security&quot; OR lower(user)=&quot;helpdesk&quot;)) AND NOT ((isnotnull(status) AND (lower(status)=&quot;failed&quot; OR lower(status)=&quot;failure&quot;)))
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<h3>Minimal tier, layer 2: what they do on the box</h3>
+<p><strong>A new admin.</strong> Admin accounts are created a few times a year, so every hit deserves a look. Read <code>user</code> and <code>ui</code> to see who created it and how they were logged in. PEERSTITCH deleted its admin after use, so an Add and a Delete of the same <code>cfgobj</code> minutes apart is worse than an Add alone.</p>
+<div class="qlabel"><span><b>DL-0069</b> New administrator account created on a FortiGate</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0069.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_cfgpath = arrayindex(regextract(_raw_log, &quot;\\bcfgpath=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter fg_cfgpath = &quot;system.admin&quot; and fg_action = &quot;add&quot;
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where lower(cfgpath)=&quot;system.admin&quot; AND lower(action)=&quot;add&quot;
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<p><strong>The configuration leaves the box.</strong> The config file is the prize: the LDAP bind account, VPN keys, local passwords and the whole network map. The wording of the backup event changes a little between FortiOS versions, so the rule matches backup or download together with config in <code>logdesc</code> or <code>msg</code>. One gap to know: <code>show full-configuration</code> typed in the GUI console does not always log a backup event, so also review <code>ui=jsconsole</code> sessions from unusual addresses.</p>
+<div class="qlabel"><span><b>DL-0070</b> FortiGate configuration backed up or downloaded</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0070.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_subtype = arrayindex(regextract(_raw_log, &quot;\\bsubtype=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter fg_subtype = &quot;system&quot; and (fg_logdesc ~= &quot;(?i)(backup|back up|backed up|download).*(conf|configuration)|(conf|configuration).*(backup|backed up|download)&quot; or fg_msg ~= &quot;(?i)(backup|back up|backed up|download).*(conf|configuration)|(conf|configuration).*(backup|backed up|download)&quot;)
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where lower(subtype)=&quot;system&quot; AND (match(logdesc, &quot;(?i)(backup|back up|backed up|download).*(conf|configuration)|(conf|configuration).*(backup|backed up|download)&quot;) OR match(msg, &quot;(?i)(backup|back up|backed up|download).*(conf|configuration)|(conf|configuration).*(backup|backed up|download)&quot;))
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<p><strong>An any to any accept policy.</strong> One of this year's intrusions added four of them to open every zone to every other zone. Real admins almost never write one.</p>
+<div class="qlabel"><span><b>DL-0071</b> Firewall policy set to accept any source to any destination</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0071.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_cfgpath = arrayindex(regextract(_raw_log, &quot;\\bcfgpath=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_cfgattr = arrayindex(regextract(_raw_log, &quot;\\bcfgattr=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter (fg_cfgpath = &quot;firewall.policy&quot; and fg_action in (&quot;add&quot;, &quot;edit&quot;)) and (fg_cfgattr ~= &quot;(?i)srcaddr\\[([^\\]]*-&gt;)?all\\]&quot; and fg_cfgattr ~= &quot;(?i)dstaddr\\[([^\\]]*-&gt;)?all\\]&quot;)
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where (lower(cfgpath)=&quot;firewall.policy&quot; AND (lower(action)=&quot;add&quot; OR lower(action)=&quot;edit&quot;)) AND (match(cfgattr, &quot;(?i)srcaddr\\[([^\\]]*-&gt;)?all\\]&quot;) AND match(cfgattr, &quot;(?i)dstaddr\\[([^\\]]*-&gt;)?all\\]&quot;))
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<p><strong>Automation that runs commands.</strong> Stitches, actions and auto-scripts run CLI commands on a schedule or a trigger. PEERSTITCH used an auto-script to download and start its parts, then removed it.</p>
+<div class="qlabel"><span><b>DL-0073</b> Automation stitch, action or auto-script created</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0073.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_action = arrayindex(regextract(_raw_log, &quot;\\baction=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_cfgpath = arrayindex(regextract(_raw_log, &quot;\\bcfgpath=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter fg_cfgpath in (&quot;system.automation-stitch&quot;, &quot;system.automation-action&quot;, &quot;system.automation-trigger&quot;, &quot;system.auto-script&quot;) and fg_action in (&quot;add&quot;, &quot;edit&quot;)
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where (lower(cfgpath)=&quot;system.automation-stitch&quot; OR lower(cfgpath)=&quot;system.automation-action&quot; OR lower(cfgpath)=&quot;system.automation-trigger&quot; OR lower(cfgpath)=&quot;system.auto-script&quot;) AND (lower(action)=&quot;add&quot; OR lower(action)=&quot;edit&quot;)
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<h3>Minimal tier, layer 3: when they try to blind you</h3>
+<p>Any change under <code>log.*</code> that switches a target from enable to disable, moves a syslog or FortiAnalyzer server, or turns <code>logtraffic</code> off on a policy. This is often the <strong>last</strong> event you will get from that device.</p>
+<div class="qlabel"><span><b>DL-0072</b> Log forwarding turned off or pointed somewhere else</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0072.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| filter _raw_log != null
+| alter fg_logid = arrayindex(regextract(_raw_log, &quot;\\blogid=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_user = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_srcip = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_ui = arrayindex(regextract(_raw_log, &quot;\\bui=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_cfgpath = arrayindex(regextract(_raw_log, &quot;\\bcfgpath=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0), fg_logdesc = arrayindex(regextract(_raw_log, &quot;\\blogdesc=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_msg = arrayindex(regextract(_raw_log, &quot;\\bmsg=\&quot;([^\&quot;]*)\&quot;&quot;), 0), fg_cfgattr = arrayindex(regextract(_raw_log, &quot;\\bcfgattr=\&quot;([^\&quot;]*)\&quot;&quot;), 0)
+| filter (fg_cfgpath ~= &quot;(?i)^log\\.&quot; and fg_cfgattr ~= &quot;(?i)status\\[enable-&gt;disable\\]|server\\[[^\\]]*-&gt;|logtraffic\\[[^\\]]*-&gt;disable\\]|upload-option\\[[^\\]]*-&gt;&quot;) or (fg_cfgpath = &quot;firewall.policy&quot; and fg_cfgattr ~= &quot;(?i)logtraffic\\[[^\\]]*-&gt;disable\\]&quot;)
+| fields _time, fg_devname, fg_logid, fg_user, fg_srcip, fg_ui, fg_logdesc, fg_msg
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`fortigate`
+| where (match(cfgpath, &quot;(?i)^log\\.&quot;) AND match(cfgattr, &quot;(?i)status\\[enable-&gt;disable\\]|server\\[[^\\]]*-&gt;|logtraffic\\[[^\\]]*-&gt;disable\\]|upload-option\\[[^\\]]*-&gt;&quot;)) OR (lower(cfgpath)=&quot;firewall.policy&quot; AND match(cfgattr, &quot;(?i)logtraffic\\[[^\\]]*-&gt;disable\\]&quot;))
+| table _time devname logid user srcip ui logdesc msg
+| sort - _time</code></pre>
+<p>Which is why the most important minimal-tier check is not a rule at all. It is a <strong>heartbeat</strong>. A FortiGate that stops talking is either down, misconfigured or hiding something, and all three need a call to the client. In an MSSP, silent log sources are the most common blind spot I see, and this is the cheapest fix.</p>
+<p class="qlabel"><span>Cortex XDR: FortiGates silent for more than 30 minutes (run every 15 minutes over 24 hours)</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| alter fg_devname = arrayindex(regextract(_raw_log, &quot;\\bdevname=\&quot;?([^\&quot;\\s]*)&quot;), 0)
+| comp max(_time) as last_log, count() as events by fg_devname
+| alter minutes_silent = timestamp_diff(current_time(), last_log, &quot;MINUTE&quot;)
+| filter minutes_silent &gt; 30
+| sort desc minutes_silent</code></pre>
+<h3>Minimal tier, layer 4: where they go next</h3>
+<p>The traffic log still shows the first moves inside the network, as long as the policies log traffic. An SSL VPN session that suddenly reaches dozens of internal hosts on SMB, RDP, LDAP or WinRM is scanning or spraying.</p>
+<p class="qlabel"><span>Cortex XDR: SSL VPN users reaching 20 or more internal hosts in an hour</span></p><pre><code>config case_sensitive = false
+| dataset = fortinet_fortigate_raw
+| alter fg_type    = arrayindex(regextract(_raw_log, &quot;\\btype=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_srcintf = arrayindex(regextract(_raw_log, &quot;\\bsrcintf=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_srcip   = arrayindex(regextract(_raw_log, &quot;\\bsrcip=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_dstip   = arrayindex(regextract(_raw_log, &quot;\\bdstip=\&quot;?([^\&quot;\\s]*)&quot;), 0),
+        fg_dstport = to_integer(arrayindex(regextract(_raw_log, &quot;\\bdstport=\&quot;?([0-9]+)&quot;), 0)),
+        fg_user    = arrayindex(regextract(_raw_log, &quot;\\buser=\&quot;?([^\&quot;\\s]*)&quot;), 0)
+| filter fg_type = &quot;traffic&quot; and fg_srcintf ~= &quot;(?i)^ssl\.&quot;
+| filter fg_dstport in (22, 135, 139, 389, 445, 636, 3389, 5985, 5986)
+| bin _time span = 1h
+| comp count_distinct(fg_dstip) as hosts, values(fg_dstport) as ports by _time, fg_user, fg_srcip
+| filter hosts &gt;= 20
+| sort desc hosts</code></pre>
+<h3>Full tier: what you add with EDR and Active Directory logs</h3>
+<p>When the client does send more, the same story gets much clearer:</p>
+<table class="map">
+  <thead><tr><th>Stage</th><th>Minimal tier (FortiGate only)</th><th>Full tier adds</th></tr></thead>
+  <tbody>
+    <tr><td>Way in</td><td>DL-0068, DL-0074, brute force</td><td>Nothing new: the firewall is the only witness</td></tr>
+    <tr><td>On the box</td><td>DL-0069, DL-0070, DL-0071, DL-0073</td><td>Nothing new</td></tr>
+    <tr><td>Blinding</td><td>DL-0072, heartbeat</td><td>The log gap lined up against EDR activity in the same hours</td></tr>
+    <tr><td>Stolen AD account used</td><td>VPN fan-out, new traffic from the bind account's usual source</td><td>4624 logons by the FortiGate bind account from anywhere but the FortiGate; 4741 computer accounts created by a non-admin</td></tr>
+    <tr><td>Foothold on servers</td><td>Outbound traffic to new cloud hosts</td><td>DL-0075, plus <code>SystemComponent=1</code> on uninstall keys</td></tr>
+    <tr><td>Domain takeover</td><td>A large outbound transfer</td><td>DL-0017 (NTDS.dit or SAM hives copied), DL-0057 (privileged group change)</td></tr>
+  </tbody>
+</table>
+<p>Remote management agents the IT team did not deploy, or any program started from <code>C:\ProgramData\USOShared</code>, a Windows Update folder that holds logs, not programs:</p>
+<div class="qlabel"><span><b>DL-0075</b> MeshAgent or Pulseway started, or a program run from ProgramData\USOShared</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0075.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = xdr_data
+| filter event_type = ENUM.PROCESS and event_sub_type = ENUM.PROCESS_START
+| filter action_process_image_name in (&quot;meshagent.exe&quot;, &quot;meshagent64.exe&quot;, &quot;pcmonitorsrv.exe&quot;, &quot;pcmonitormanager.exe&quot;, &quot;pulseway.exe&quot;) or action_process_image_path ~= &quot;(?i)^c:\\\\programdata\\\\usoshared\\\\&quot;
+| fields _time, agent_hostname, actor_effective_username, actor_process_image_name, action_process_image_name, action_process_image_command_line
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`sysmon` EventCode=1
+| eval process_name=lower(mvindex(split(Image,&quot;\\&quot;),-1)), parent_name=lower(mvindex(split(ParentImage,&quot;\\&quot;),-1))
+| where (lower(process_name)=&quot;meshagent.exe&quot; OR lower(process_name)=&quot;meshagent64.exe&quot; OR lower(process_name)=&quot;pcmonitorsrv.exe&quot; OR lower(process_name)=&quot;pcmonitormanager.exe&quot; OR lower(process_name)=&quot;pulseway.exe&quot;) OR match(Image, &quot;(?i)^c:\\\\programdata\\\\usoshared\\\\&quot;)
+| table _time host User ParentImage Image CommandLine
+| sort - _time</code></pre>
+<p>The stolen bind account used from somewhere other than the FortiGate, with the DC security log in Cortex XDR:</p>
+<p class="qlabel"><span>Cortex XDR: logons by the FortiGate bind account from another address</span></p><pre><code>config case_sensitive = false
+| dataset = xdr_data
+| filter event_type = ENUM.EVENT_LOG and action_evtlog_event_id = 4624
+| alter target_user = json_extract_scalar(action_evtlog_data_fields, &quot;$.TargetUserName&quot;),
+        source_ip   = json_extract_scalar(action_evtlog_data_fields, &quot;$.IpAddress&quot;)
+| filter target_user in (&quot;fortidcagent&quot;, &quot;svc_fortigate&quot;)     // your FortiGate LDAP bind account(s)
+| filter source_ip not in (&quot;10.0.0.1&quot;, &quot;10.0.0.2&quot;)            // the FortiGate interfaces facing the DCs
+| fields _time, agent_hostname, target_user, source_ip
+| sort desc _time</code></pre>
+<p>And computers joined by an account that has no business doing it, the <code>ms-DS-MachineAccountQuota</code> abuse from one of the incidents. The rogue machines there had default-looking names such as <code>WIN-X8WRBOSK0OF</code>, so a burst of <code>WIN-</code> names from one user is another hint.</p>
+<p class="qlabel"><span>Cortex XDR: computer accounts created by someone other than your join accounts</span></p><pre><code>config case_sensitive = false
+| dataset = xdr_data
+| filter event_type = ENUM.EVENT_LOG and action_evtlog_event_id = 4741
+| alter creator      = json_extract_scalar(action_evtlog_data_fields, &quot;$.SubjectUserName&quot;),
+        new_computer = json_extract_scalar(action_evtlog_data_fields, &quot;$.TargetUserName&quot;)
+| filter creator !~= &quot;(?i)^(adm-|admin|svc-join)&quot;              // your real join accounts
+| fields _time, agent_hostname, creator, new_computer
+| sort desc _time</code></pre>
+<div class="callout"><b>Before you rely on these:</b> the field extraction was built from Fortinet's log documentation and tested against the rules' own events, not on a live tenant. FortiOS versions differ in small ways, so paste two or three real FortiGate lines into the <a href="https://detections.rayenskhiri.online">playground</a> and run each query once on your own data first.</div>
+
+<h2>Step 3: respond</h2>
+<ol>
+  <li><strong>Save the evidence first.</strong> Export at least 90 days of FortiGate logs from FortiAnalyzer or the SIEM before anything rotates, and note the firmware version.</li>
+  <li><strong>Close the way in.</strong> Disable <code>admin-forticloud-sso-login</code>, remove admin access from WAN interfaces, and patch.</li>
+  <li><strong>Remove what they left.</strong> Unknown admins, unknown local VPN users, automation stitches, auto-scripts and any to any policies. A patch removes none of these.</li>
+  <li><strong>Assume the config is stolen.</strong> Rotate the LDAP or AD bind account first, then VPN pre-shared keys, local user passwords and every admin password.</li>
+  <li><strong>Follow the account into AD.</strong> Even on a minimal-log client, ask for the DC security log for the incident window. One export is enough to check the bind account's logons and new computer accounts.</li>
+  <li><strong>Check below the config.</strong> For PEERSTITCH-style activity a config review is not enough. Follow Fortinet's integrity check guidance and consider a clean firmware reinstall.</li>
+  <li><strong>Fix retention.</strong> In one of this year's cases nobody could tell how the attackers got in because the logs were gone. Keep at least 60 days of FortiGate logs; 90 is better.</li>
+</ol>
+
+<h2>The detections</h2>
+<table class="map">
+  <thead><tr><th>Rule</th><th>What it catches</th><th>Tier</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0068.md">DL-0068</a></td><td>Admin login through FortiCloud SSO or from an internet address</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0069.md">DL-0069</a></td><td>New administrator account</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0070.md">DL-0070</a></td><td>Configuration backed up or downloaded</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0071.md">DL-0071</a></td><td>Policy set to accept any source to any destination</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0072.md">DL-0072</a></td><td>Log forwarding turned off or redirected</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0073.md">DL-0073</a></td><td>Automation stitch, action or auto-script created</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0074.md">DL-0074</a></td><td>Login with an account name used in the intrusions</td><td>Minimal</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0075.md">DL-0075</a></td><td>MeshAgent, Pulseway, or a program run from ProgramData\USOShared</td><td>Full</td></tr>
+  </tbody>
+</table>
+<p>Every rule ships with events that must fire and events that must not, and CI runs the compiled XQL and SPL against them on every commit. If one misbehaves on your platform, open an issue on the repo with the error and I will fix it.</p>
+
+<h3>Indicators from the public reports</h3>
+<p>Good for a one-time look back, not for long-term rules: addresses and account names change.</p>
+<ul>
+  <li><strong>Admin account names:</strong> <code>support</code>, <code>ssl-admin</code>, <code>audit</code>, <code>backup</code>, <code>itadmin</code>, <code>secadmin</code>, <code>backupadmin</code>, <code>deploy</code>, <code>remoteadmin</code>, <code>security</code>, <code>svcadmin</code>, <code>system</code>, <code>adccount</code></li>
+  <li><strong>FortiCloud accounts (CVE-2026-24858):</strong> <code>cloud-noc@mail.io</code>, <code>cloud-init@mail.io</code>, <code>heltaylor.12@tutamail.com</code>, <code>support@openmail.pro</code></li>
+  <li><strong>Addresses:</strong> <code>163.61.198.15</code>, <code>38.54.6.28</code>, <code>37.1.209.19</code>, <code>217.119.139.50</code>, <code>193.24.211.61</code>, <code>23.240.77.233</code> (PEERSTITCH staging, port 8085) and the <code>104.28.x.x</code> range</li>
+  <li><strong>Domains:</strong> <code>ndibstersoft[.]com</code>, <code>neremedysoft[.]com</code></li>
+  <li><strong>Host artifacts:</strong> <code>C:\ProgramData\USOShared</code>, rogue hosts <code>WIN-X8WRBOSK0OF</code> and <code>WIN-YRSXLEONJY2</code></li>
+</ul>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://ctrlaltnod.com/news/fortinet-patches-critical-cve-2026-24858-after-active-exploits">CVE-2026-24858: fixed versions, mitigation and indicators</a></li>
+  <li><a href="https://www.rapid7.com/blog/post/etr-critical-vulnerabilities-in-fortinet-cve-2025-59718-cve-2025-59719-exploited-in-the-wild/">Rapid7: CVE-2025-59718 and CVE-2025-59719 exploited in the wild</a></li>
+  <li><a href="https://technewsday.com/?p=49434">Tech Newsday: FortiGate attacks hitting even patched devices</a></li>
+  <li><a href="https://cybersecuritynews.com/fortigate-firewalls-exploited/">Cyber Security News: two FortiGate intrusions from the firewall to the domain</a></li>
+  <li><a href="https://thehackernews.com/2026/10/attackers-exploit-fortios-flaw-to.html">The Hacker News: PEERSTITCH deployed through CVE-2025-61624</a></li>
+  <li><a href="https://www.govcert.gov.hk/en/alerts_detail.php?id=2119">GovCERT.HK alert A26-10-30: affected FortiOS versions</a></li>
+  <li><a href="https://cybersecuritynews.com/fortinet-fortios-vulnerability-exploited/">CVE-2025-68686 added to CISA KEV</a></li>
+  <li><a href="https://www.pulse.bot/cybersecurity/news/fortinet-warns-of-active-exploitation-of-fortios-ssl-vpn-2fa-bypass-vulnerability-014568dc-a90d-449a-b2d6-ea55b257aa7e/">Fortinet warns of renewed abuse of the CVE-2020-12812 2FA bypass</a></li>
+  <li><a href="https://community.fortinet.com/fortigate-3/technical-tip-difference-between-logid-0100044547-and-logid-0100044546-which-are-generated-when-configuration-is-changed-in-the-fortigate-203472">Fortinet Community: log IDs 0100044547 and 0100044546</a></li>
+</ul>
+<div class="end"><p><b>Thanks for reading.</b> Running a SOC where the FortiGate is all you get? Tell me what fired, what was noise and what I missed. I reply within a day.</p><div class="acts"><a class="btn btn-primary btn-sm" href="https://linkedin.com/in/rayen-skhiri">Message me on LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-ghost btn-sm" href="/blog/">More posts</a></div></div></article></div>
+</main>
+
+<footer class="site">
+  <div class="wrap f">
+    <a class="logo" href="/"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
+    <nav aria-label="Footer">
+      <a href="/">Home</a><a href="/blog/">Blog</a><a href="/#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="https://linkedin.com/in/rayen-skhiri">LinkedIn</a>
+    </nav>
+    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+  </div>
+</footer>
+</body>
+</html>
