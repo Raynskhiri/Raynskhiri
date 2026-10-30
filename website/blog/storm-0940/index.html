@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storm-0940: AI agents, a stolen MSP backup credential and 2,250 Microsoft 365 tenants. How it worked and how to catch it | Rayen Skhiri</title>
+<meta name="description" content="A China-aligned actor used the ARTEX multi-agent AI framework and a stolen ConnectWise Cloud Backup credential to reach Microsoft 365 tenants at machine speed. No user logged in, no endpoint was touched, no EDR saw it. How the OAuth app-only path works, where it leaves traces, and four tested detections for Cortex XDR and Splunk.">
+<meta name="theme-color" content="#0A0C10">
+<link rel="canonical" href="https://rayenskhiri.online/blog/storm-0940/">
+<meta property="og:title" content="Storm-0940: AI agents, a stolen MSP backup credential and 2,250 Microsoft 365 tenants. How it worked and how to catch it">
+<meta property="og:description" content="A China-aligned actor used the ARTEX multi-agent AI framework and a stolen ConnectWise Cloud Backup credential to reach Microsoft 365 tenants at machine speed. No user logged in, no endpoint was touched, no EDR saw it. How the OAuth app-only path works, where it leaves traces, and four tested detections for Cortex XDR and Splunk.">
+<meta property="og:url" content="https://rayenskhiri.online/blog/storm-0940/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://rayenskhiri.online/blog/storm-0940/og.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Storm-0940: AI agents, a stolen MSP backup credential and 2,250 Microsoft 365 tenants. How it worked and how to catch it">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-10-30">
+<meta property="article:author" content="Rayen Skhiri">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog.css">
+</head>
+<body>
+<a class="vh skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="/" aria-label="Rayen Skhiri, home">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <span class="logo-text"><b>RAYEN SKHIRI</b><span>SOC Analyst and AppSec</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="opt" href="/#projects">Projects</a>
+      <a href="/blog/">Blog</a>
+      <a class="btn btn-primary btn-sm" href="/#contact">Let's talk <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<header class="article-head"><div class="wrap"><div class="inner"><a class="back" href="/blog/">&larr; All posts</a><div><a class="badge" href="https://github.com/Raynskhiri/detection-library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14 -1.5 7 5-3 5 3-1.5-7"/></svg>Detections in my open-source library</a></div><h1>Storm-0940: AI agents, a stolen MSP backup credential and 2,250 Microsoft 365 tenants. How it worked and how to catch it</h1><p class="lede">A China-aligned actor used the ARTEX multi-agent AI framework and a stolen ConnectWise Cloud Backup credential to reach Microsoft 365 tenants at machine speed. No user logged in, no endpoint was touched, no EDR saw it. How the OAuth app-only path works, where it leaves traces, and four tested detections for Cortex XDR and Splunk.</p><div class="meta"><span>Rayen Skhiri</span><span><time datetime="2026-10-30">30 October 2026</time></span><span>22 min read</span><span class="tagx">#Storm-0940</span><span class="tagx">#Entra ID</span><span class="tagx">#Supply chain</span><span class="tagx">#Cortex XDR</span><span class="tagx">#Splunk</span></div></div></div></header><div class="wrap"><article class="article"><p>I work at an MSSP. Our clients trust us with access to their environments, and so do the vendor tools we connect to their tenants. This post is about what happens when one of those trusted tools is turned against every customer at once, and the attacker driving it is a team of AI agents that does not sleep.</p>
+
+<p>In October 2026, Microsoft attributed a supply chain compromise of <strong>ConnectWise Cloud Backup</strong> (formerly SkyKick Backup) to <strong>Storm-0940</strong>, a China-aligned actor active since 2021. Using a stolen credential of the backup application and <strong>ARTEX</strong>, an open-source multi-agent AI pentest framework, the actor attempted sign-ins to <strong>more than 2,250 Microsoft 365 tenants</strong>. In some of them it went from first touch to privileged cloud access in under three hours. In one, an application gave itself Global Administrator and planted new secrets in other applications, including a security vendor's own app, in about five minutes.</p>
+
+<p>No user typed a password. No phishing email. No endpoint was touched, so no EDR saw anything. Every step was an API call to Microsoft's cloud, and every step left a trace in logs that most SOCs either do not collect or never look at. This post goes deep on how the app-only path works, where it shows up, and how to detect it in <strong>Cortex XDR</strong> and <strong>Splunk</strong>. The four new rules are in my <a href="https://github.com/Raynskhiri/detection-library">detection library</a> as DL-0076 to DL-0079, and you can paste raw Entra ID audit or sign-in JSON into the <a href="https://detections.rayenskhiri.online">playground</a> to see them fire.</p>
+
+<div class="facts">
+  <div class="fact"><b>2,250+</b><span>tenants Storm-0940 tried to sign in to</span></div>
+  <div class="fact"><b>2,900 / min</b><span>failed logons at the peak of the password spray</span></div>
+  <div class="fact"><b>~5 min</b><span>from Global Administrator to backdoor secrets in other apps</span></div>
+</div>
+
+<h2>What happened</h2>
+<table class="map">
+  <thead><tr><th>Date (2026, UTC)</th><th>What happened</th></tr></thead>
+  <tbody>
+    <tr><td>Early September</td><td>Earliest ARTEX-driven activity Microsoft attributes to Storm-0940</td></tr>
+    <tr><td>10 to 14 October</td><td>Password spray from 144.172.64.99 against 327 accounts in 8 organizations: more than 151,000 failed logons, about 2,900 per minute at the 11 October peak, almost all ending in lockouts. No successful sign-in from this wave</td></tr>
+    <tr><td>13 to 14 October</td><td>Scripted sign-ins as the backup app from 144.172.64.128 with <code>curl/7.88.1</code>, plus spraying against four law firm tenants</td></tr>
+    <tr><td>15 October, 06:13 to 08:34</td><td>Graph tokens collected in customer tenants one after another, a few seconds apart, in sorted tenant GUID order: a script working through a list</td></tr>
+    <tr><td>15 October</td><td>ConnectWise Cloud Management service principals add themselves to directory roles (mostly Exchange Administrator) in about fifty monitored tenants; a PIM alert for one self-assignment is reported publicly</td></tr>
+    <tr><td>16 October</td><td>ConnectWise publishes its first advisory; Huntress confirms sign-ins in more than 160 of its customers' tenants</td></tr>
+    <tr><td>17 October, 05:01</td><td>ConnectWise shuts down Cloud Backup access and disables seven application identities; SaaS Security and Cloud Management go offline the next day</td></tr>
+    <tr><td>21 October</td><td>Microsoft publishes its analysis, attribution to Storm-0940 and hunting queries</td></tr>
+  </tbody>
+</table>
+<p>The targeting was broad: aerospace and defense, energy, finance, government, legal, manufacturing, semiconductors, technology and think tanks, among others. Microsoft says most of the attempts failed. The ones that worked are the reason every MSP and every tenant that trusts one should read this.</p>
+
+<h2>Why the usual defenses never fired</h2>
+<p>To understand the detections you have to understand the path, because it is not a user path at all.</p>
+
+<h3>One secret, every tenant</h3>
+<p>A SaaS backup service is registered in Microsoft Entra ID as a <strong>multi-tenant application</strong>. The application object lives in the vendor's tenant. When a customer connects the service, an administrator grants <strong>admin consent</strong>, and Entra creates a <strong>service principal</strong> for that app inside the customer's tenant, with the application permissions the vendor asked for (to read every mailbox, every OneDrive and SharePoint site, Teams, the directory). From then on the vendor's backend does not need anyone to sign in. It uses the OAuth 2.0 <strong>client credentials</strong> flow with the app's secret or certificate, once per customer tenant:</p>
+<pre><code>POST https://login.microsoftonline.com/&lt;customer-tenant-id&gt;/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=506e08f9-6e9a-4da4-942b-a099a03644ae      # ConnectWise Cloud Backup
+&amp;client_secret=&lt;the vendor&#x27;s credential&gt;
+&amp;scope=https://graph.microsoft.com/.default
+&amp;grant_type=client_credentials</code></pre>
+<p>The token that comes back is an <strong>app-only</strong> token. Decoded, the parts that matter look like this (illustrative values):</p>
+<pre><code>{
+  &quot;aud&quot;:   &quot;https://graph.microsoft.com&quot;,
+  &quot;tid&quot;:   &quot;&lt;customer-tenant-id&gt;&quot;,
+  &quot;appid&quot;: &quot;506e08f9-6e9a-4da4-942b-a099a03644ae&quot;,
+  &quot;idtyp&quot;: &quot;app&quot;,
+  &quot;roles&quot;: [ &quot;...the application permissions the customer consented to...&quot; ]
+}</code></pre>
+<p>Read that again from the attacker's side. The credential is the vendor's, and it is valid in <strong>every tenant that ever consented to the app</strong>. Whoever holds it can loop over the customer list and collect a token per tenant. That is exactly the "sorted GUID order, a few seconds apart" pattern Huntress saw on 15 October. Several consequences follow, and each one breaks a control most of us rely on:</p>
+<ul>
+  <li><strong>No MFA.</strong> There is no user, so there is no second factor to ask for. BleepingComputer reports the attacker signed in directly as the backup app, with its secret, through scripts, so MFA never came into play.</li>
+  <li><strong>No user Conditional Access.</strong> Policies that target users do not apply to app-only tokens. Location rules for applications need Conditional Access for workload identities, which few tenants have.</li>
+  <li><strong>Not in the sign-in log you look at.</strong> App-only sign-ins go to <em>Service principal sign-ins</em>, a separate tab and a separate log category (<code>ServicePrincipalSignInLogs</code>). ConnectWise had to tell customers explicitly not to search the default user sign-ins view.</li>
+  <li><strong>No endpoint at all.</strong> The attacker never touched a device of the victim. The EDR, the firewall and the proxy are all outside the path.</li>
+  <li><strong>Revoking sessions does nothing.</strong> Disabling the service principal stops new tokens, but a token already issued stays valid until it expires, up to about 90 minutes. Resetting user passwords is irrelevant.</li>
+</ul>
+
+<h3>From reading data to owning the tenant</h3>
+<p>Backup only needs to read. But some of the ConnectWise Cloud Management apps had been granted much more, and Microsoft assessed that the actor likely abused <code>Directory.ReadWrite.All</code>. Write permissions over the directory, roles or applications are where reading turns into owning, because Microsoft Graph lets an app act on <em>other</em> principals, including itself. Two Graph calls are enough for the whole persistence chain:</p>
+<pre><code># 1. Put a service principal (here: itself) in a directory role
+POST https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments
+{ &quot;principalId&quot;: &quot;&lt;its own service principal id&gt;&quot;,
+  &quot;roleDefinitionId&quot;: &quot;62e90394-69f5-4237-9190-012177145e10&quot;,   # Global Administrator
+  &quot;directoryScopeId&quot;: &quot;/&quot; }
+
+# 2. Add a new secret to ANOTHER application it now controls
+POST https://graph.microsoft.com/v1.0/servicePrincipals/&lt;other app&gt;/addPassword
+{ &quot;passwordCredential&quot;: { &quot;displayName&quot;: &quot;...&quot;, &quot;endDateTime&quot;: &quot;2028-...&quot; } }</code></pre>
+<p>That is what happened in one partner tenant: <em>ConnectWise Cloud Management - MS Teams</em> added itself to Global Administrator, then a script with the user agent <code>Python-urllib/3.12</code> added client secrets to an MSP management application and to the Huntress Security Platform app. The whole sequence took about five minutes. The new secrets are the real backdoor: they belong to apps nobody suspects, they survive the vendor rotating its own credential, and they survive every password reset in the tenant.</p>
+
+<h3>ARTEX: why the speed matters</h3>
+<p>ARTEX is public on GitHub (AGPL-3.0), and several forks translate it to English, Korean and other languages. It is a self-hosted system: a Go backend with an embedded Next.js interface and PostgreSQL. Its design explains what Microsoft observed:</p>
+<ul>
+  <li>A <strong>goals</strong> agent breaks a target down and extracts the scope.</li>
+  <li>A single <strong>planner</strong> is the only agent that creates new intents. It wakes up whenever the knowledge graph changes and pushes work into a frontier queue.</li>
+  <li>Many <strong>worker</strong> agents (goroutines, one planner and N workers per task) each take one intent, run it with tools (a Kali, Bash and HTTP toolset, nmap among them), and write what they learned back.</li>
+  <li>Two graphs hold the state: a shared <strong>asset graph</strong> (domains, subdomains, IPs, services, apps, endpoints) and a per-task <strong>exploration graph</strong> (goals, intents, facts, findings) linked by "spawns" and "proves" edges.</li>
+  <li>It can drive models from Anthropic, OpenAI or a local Ollama instance, so a capable operator does not depend on any single provider.</li>
+</ul>
+<p>Put that together and you get what Microsoft describes: agents that run continuously, chase several paths at once, and turn a finding into the next action in seconds. Peak spraying hit about 2,900 attempts a minute. Some tenants went from first targeting to privileged access in less than three hours.</p>
+<p>For a SOC, the lesson is not "detect AI". Nothing in these logs says an LLM was involved. The lesson is about <strong>time</strong>. If your process for a "new credential added to an application" alert is a ticket that someone opens tomorrow morning, an agent has already used that credential, pivoted and planted the next one. The rules below are cheap and quiet enough to run in real time, and the response steps assume you act within the hour.</p>
+
+<h2>Where it shows up, and where it does not</h2>
+<table class="map">
+  <thead><tr><th>Stage</th><th>What the attacker did</th><th>Where it is logged</th><th>Blind spot</th></tr></thead>
+  <tbody>
+    <tr><td>Recon and spray</td><td>Password spraying at machine speed</td><td>Entra sign-in logs (user)</td><td>None, if you look per source IP per minute</td></tr>
+    <tr><td>Initial access</td><td>Client credentials sign-in as the vendor app</td><td>Service principal sign-ins</td><td>Not in the default sign-in view; often not exported to the SIEM</td></tr>
+    <tr><td>Reconnaissance</td><td>Graph reads of users, groups, apps, mail, SharePoint</td><td>Graph activity logs; M365 unified audit for mail and files</td><td>Directory reads leave no audit record without Graph activity logs, which must be enabled and paid for</td></tr>
+    <tr><td>Privilege escalation</td><td>App added to Exchange Administrator or Global Administrator</td><td>Entra audit: <code>Add member to role</code></td><td>App-only audit records carry no source IP</td></tr>
+    <tr><td>Persistence</td><td>New secrets on other apps</td><td>Entra audit: <code>Add service principal credentials</code>, <code>Update application - Certificates and secrets management</code></td><td>Same: no IP, but the user agent is recorded in additional details</td></tr>
+    <tr><td>Collection</td><td>Bulk Key Vault secret reads, mailbox and file access</td><td>Key Vault diagnostic logs, M365 unified audit</td><td>Key Vault logging is off unless a diagnostic setting sends it somewhere</td></tr>
+  </tbody>
+</table>
+<p>The good news hidden in that table: <strong>the minimal tier here needs no agent at all</strong>. Entra ID audit logs and sign-in logs exist in every Microsoft 365 tenant. For the many clients that will never send you server logs, these two sources alone catch the escalation and the persistence. The full tier adds Graph activity logs, Key Vault diagnostics and the M365 unified audit log.</p>
+
+<h2>Step 1: find out if you are exposed</h2>
+<p>The seven application IDs involved, as published by ConnectWise and reported by The Hacker News. Search by <strong>application ID</strong>, not by display name: older tenants still show "SkyKick".</p>
+<table class="map">
+  <thead><tr><th>Application</th><th>Application ID</th></tr></thead>
+  <tbody>
+    <tr><td>ConnectWise Cloud Backup (SkyKick Backup)</td><td><code>506e08f9-6e9a-4da4-942b-a099a03644ae</code></td></tr>
+    <tr><td>ConnectWise Cloud Management</td><td><code>2399d300-6fca-4e6a-a686-399fefe75b83</code></td></tr>
+    <tr><td>ConnectWise Cloud Management - MS Teams</td><td><code>24205314-2b89-4e07-a2a4-579e898a5640</code></td></tr>
+    <tr><td>ConnectWise Cloud Management - Exchange Online</td><td><code>b78f6a77-d4e5-46fb-87e5-d1648bd02519</code></td></tr>
+    <tr><td>ConnectWise Cloud Management - MS Graph</td><td><code>0de14c77-b9b0-4137-9360-34878a929827</code></td></tr>
+    <tr><td>ConnectWise Cloud Management - Partner Center</td><td><code>412dcf96-176d-4b3a-a1b0-4981ad66971e</code></td></tr>
+    <tr><td>ConnectWise Cloud Management - SharePoint Online</td><td><code>b2b55f5b-7758-4719-8d8f-88ae172e6bdb</code></td></tr>
+  </tbody>
+</table>
+<p>This read-only PowerShell, using the Microsoft Graph SDK, answers the three questions that matter for each tenant: are these apps here, do any service principals hold directory roles they should not, and which application credentials appeared since 13 October.</p>
+<pre><code>Connect-MgGraph -Scopes &quot;Application.Read.All&quot;,&quot;Directory.Read.All&quot;,&quot;RoleManagement.Read.Directory&quot;
+
+$ids = &quot;506e08f9-6e9a-4da4-942b-a099a03644ae&quot;,&quot;2399d300-6fca-4e6a-a686-399fefe75b83&quot;,
+       &quot;24205314-2b89-4e07-a2a4-579e898a5640&quot;,&quot;b78f6a77-d4e5-46fb-87e5-d1648bd02519&quot;,
+       &quot;0de14c77-b9b0-4137-9360-34878a929827&quot;,&quot;412dcf96-176d-4b3a-a1b0-4981ad66971e&quot;,
+       &quot;b2b55f5b-7758-4719-8d8f-88ae172e6bdb&quot;
+
+# 1. Which ConnectWise / SkyKick service principals exist here, and are they enabled?
+foreach ($id in $ids) {
+  Get-MgServicePrincipal -Filter &quot;appId eq &#x27;$id&#x27;&quot; |
+    Select-Object DisplayName, AppId, Id, AccountEnabled
+}
+
+# 2. Every directory role held by a service principal (any vendor, not only ConnectWise)
+Get-MgRoleManagementDirectoryRoleAssignment -All -ExpandProperty RoleDefinition |
+  ForEach-Object {
+    $sp = Get-MgServicePrincipal -ServicePrincipalId $_.PrincipalId -ErrorAction SilentlyContinue
+    if ($sp) { [pscustomobject]@{ App = $sp.DisplayName; AppId = $sp.AppId; Role = $_.RoleDefinition.DisplayName } }
+  }
+
+# 3. Secrets and certificates created since 13 October 2026, on applications and service principals
+$since = Get-Date &quot;2026-10-13&quot;
+Get-MgApplication -All -Property DisplayName,AppId,PasswordCredentials,KeyCredentials |
+  ForEach-Object {
+    $app = $_
+    @($app.PasswordCredentials) + @($app.KeyCredentials) | Where-Object { $_.StartDateTime -ge $since } |
+      Select-Object @{n=&quot;App&quot;;e={$app.DisplayName}}, @{n=&quot;AppId&quot;;e={$app.AppId}}, DisplayName, KeyId, StartDateTime, EndDateTime
+  }
+Get-MgServicePrincipal -All -Property DisplayName,AppId,PasswordCredentials,KeyCredentials |
+  ForEach-Object {
+    $sp = $_
+    @($sp.PasswordCredentials) + @($sp.KeyCredentials) | Where-Object { $_.StartDateTime -ge $since } |
+      Select-Object @{n=&quot;ServicePrincipal&quot;;e={$sp.DisplayName}}, @{n=&quot;AppId&quot;;e={$sp.AppId}}, DisplayName, KeyId, StartDateTime, EndDateTime
+  }</code></pre>
+<p>Anything you cannot tie to a person and a ticket goes into the investigation. A secret with an end date years away, created by nobody you know, is the classic sign. In Cortex XDR, the same inventory from telemetry, every service principal sign-in by these apps since 1 October grouped by source:</p>
+<p class="qlabel"><span>Cortex XDR: ConnectWise / SkyKick app sign-ins since 1 October, by source address</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_raw
+| filter appId in (&quot;506e08f9-6e9a-4da4-942b-a099a03644ae&quot;, &quot;2399d300-6fca-4e6a-a686-399fefe75b83&quot;,
+                   &quot;24205314-2b89-4e07-a2a4-579e898a5640&quot;, &quot;b78f6a77-d4e5-46fb-87e5-d1648bd02519&quot;,
+                   &quot;0de14c77-b9b0-4137-9360-34878a929827&quot;, &quot;412dcf96-176d-4b3a-a1b0-4981ad66971e&quot;,
+                   &quot;b2b55f5b-7758-4719-8d8f-88ae172e6bdb&quot;)
+| alter error_code = json_extract_scalar(status, &quot;$.errorCode&quot;)
+| comp count() as signins, min(_time) as first_seen, max(_time) as last_seen, values(error_code) as results
+    by appDisplayName, ipAddress, userAgent
+| sort asc first_seen</code></pre>
+<p>The real service authenticates from Azure private IPv6 space. Public IPv4 sources, and above all the 144.172.64.0/24 range, are what you are looking for. If this returns nothing at all, check that service principal sign-ins are collected in the first place before you conclude anything.</p>
+
+<h2>Step 2: detect it, one layer at a time</h2>
+<p>The rules are compiled from one YAML source to both languages. In Cortex XDR they read the Office 365 / Entra ID data source: audit records in <code>msft_azure_ad_audit_raw</code> and sign-ins in <code>msft_azure_ad_raw</code>, with columns named after the Microsoft Graph <code>directoryAudit</code> and <code>signIn</code> resources. In Splunk they read <code>azure:monitor:aad</code> from the Splunk Add-on for Microsoft Cloud Services, through an <code>azure_monitor_aad</code> macro. Each query starts by flattening the nested JSON (initiator, targets, additional details) into plain columns, so the logic is the same on both platforms.</p>
+
+<h3>Layer 0: the spray, at machine speed</h3>
+<p>Before the supply chain path, Storm-0940 sprayed. Humans spray slowly to stay under lockout thresholds; agents do not care. Count failures per source address per minute, together with the number of distinct accounts:</p>
+<p class="qlabel"><span>Cortex XDR: password spray per source per minute</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_raw
+| filter userPrincipalName != null
+| alter error_code = json_extract_scalar(status, &quot;$.errorCode&quot;)
+| filter error_code in (&quot;50126&quot;, &quot;50053&quot;, &quot;50055&quot;, &quot;50057&quot;)      // bad password, locked, expired, disabled
+| bin _time span = 1m
+| comp count() as failures, count_distinct(userPrincipalName) as accounts by _time, ipAddress
+| filter failures &gt;= 30 or accounts &gt;= 10
+| sort desc failures</code></pre><p class="qlabel"><span>Splunk: same idea</span></p><pre><code>`azure_monitor_aad` category=SignInLogs properties.status.errorCode IN (50126, 50053, 50055, 50057)
+| bin _time span=1m
+| stats count as failures dc(properties.userPrincipalName) as accounts by _time properties.ipAddress
+| where failures &gt;= 30 OR accounts &gt;= 10
+| sort - failures</code></pre>
+<p>Lockout code 50053 dominating the results, as it did here (almost 98% of the activity), is a sign of a spray that does not care about being noisy. Take the source addresses and look for any success from them, in user and in service principal sign-ins.</p>
+
+<h3>Layer 1: the vendor app signs in from the wrong place</h3>
+<p>The highest-value signal for this specific campaign: one of the seven apps authenticating from public IPv4, or from the actor's ranges.</p>
+<div class="qlabel"><span><b>DL-0078</b> ConnectWise / SkyKick app signed in from a public IPv4 address or Storm-0940 infrastructure</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0078.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_raw
+| filter appId != null
+| alter si_app_id = appId, si_app_name = appDisplayName, si_sp_name = servicePrincipalName, si_ip = ipAddress, si_user_agent = userAgent, si_resource = resourceDisplayName, si_error = json_extract_scalar(status, &quot;$.errorCode&quot;)
+| filter si_app_id in (&quot;506e08f9-6e9a-4da4-942b-a099a03644ae&quot;, &quot;2399d300-6fca-4e6a-a686-399fefe75b83&quot;, &quot;24205314-2b89-4e07-a2a4-579e898a5640&quot;, &quot;b78f6a77-d4e5-46fb-87e5-d1648bd02519&quot;, &quot;0de14c77-b9b0-4137-9360-34878a929827&quot;, &quot;412dcf96-176d-4b3a-a1b0-4981ad66971e&quot;, &quot;b2b55f5b-7758-4719-8d8f-88ae172e6bdb&quot;) and (si_ip ~= &quot;(?i)^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$&quot; or (incidr(si_ip, &quot;144.172.64.0/24&quot;) or incidr(si_ip, &quot;187.15.88.0/22&quot;)))
+| fields _time, si_app_name, si_app_id, si_sp_name, si_ip, si_user_agent, si_resource, si_error
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`azure_monitor_aad` category=ServicePrincipalSignInLogs
+| eval si_app_id=&#x27;properties.appId&#x27;, si_app_name=&#x27;properties.appDisplayName&#x27;, si_sp_name=&#x27;properties.servicePrincipalName&#x27;, si_ip=coalesce(&#x27;properties.ipAddress&#x27;,callerIpAddress), si_user_agent=&#x27;properties.userAgent&#x27;, si_resource=&#x27;properties.resourceDisplayName&#x27;, si_error=&#x27;properties.status.errorCode&#x27;, si_event_types=category
+| where (lower(si_app_id)=&quot;506e08f9-6e9a-4da4-942b-a099a03644ae&quot; OR lower(si_app_id)=&quot;2399d300-6fca-4e6a-a686-399fefe75b83&quot; OR lower(si_app_id)=&quot;24205314-2b89-4e07-a2a4-579e898a5640&quot; OR lower(si_app_id)=&quot;b78f6a77-d4e5-46fb-87e5-d1648bd02519&quot; OR lower(si_app_id)=&quot;0de14c77-b9b0-4137-9360-34878a929827&quot; OR lower(si_app_id)=&quot;412dcf96-176d-4b3a-a1b0-4981ad66971e&quot; OR lower(si_app_id)=&quot;b2b55f5b-7758-4719-8d8f-88ae172e6bdb&quot;) AND (match(si_ip, &quot;(?i)^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$&quot;) OR (cidrmatch(&quot;144.172.64.0/24&quot;, si_ip) OR cidrmatch(&quot;187.15.88.0/22&quot;, si_ip)))
+| table _time si_app_name si_app_id si_sp_name si_ip si_user_agent si_resource si_error
+| sort - _time</code></pre>
+<p>The general version works for every vendor you trust, and it is the one I would actually leave running: a multi-tenant app signing in from an address it has never used before. Set the time range to 30 days:</p>
+<p class="qlabel"><span>Cortex XDR: service principals signing in from a new address in the last 24 hours</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_raw
+| filter to_string(signInEventTypes) contains &quot;servicePrincipal&quot;
+| alter error_code = json_extract_scalar(status, &quot;$.errorCode&quot;)
+| filter error_code = &quot;0&quot;
+| comp min(_time) as first_seen, count() as signins by appDisplayName, appId, ipAddress
+| alter hours_since_first = timestamp_diff(current_time(), first_seen, &quot;HOUR&quot;)
+| filter hours_since_first &lt;= 24
+| sort asc first_seen</code></pre>
+<h3>Layer 2: the app grants itself power</h3>
+<p>Two ways to escalate, two rules. First, a high-privilege permission granted to an app, the step that makes everything else possible. Granting these should happen a few times a year, during vendor onboarding, with a named owner.</p>
+<div class="qlabel"><span><b>DL-0079</b> Tenant-wide Microsoft Graph or Exchange permission granted to an app</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0079.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_audit_raw
+| filter activityDisplayName != null
+| alter aud_operation = activityDisplayName, aud_initiator_app = json_extract_scalar(initiatedBy, &quot;$.app.displayName&quot;), aud_initiator_user = json_extract_scalar(initiatedBy, &quot;$.user.userPrincipalName&quot;), aud_target_type = json_extract_scalar(targetResources, &quot;$[0].type&quot;), aud_target_name = json_extract_scalar(targetResources, &quot;$[0].displayName&quot;), aud_targets = to_string(targetResources), aud_user_agent = arrayindex(regextract(to_string(additionalDetails), &quot;User-Agent\\\&quot;,\\\&quot;value\\\&quot;:\\\&quot;([^\\\&quot;]*)&quot;), 0)
+| filter aud_operation in (&quot;add app role assignment to service principal&quot;, &quot;add app role assignment grant to user&quot;, &quot;consent to application&quot;) and (aud_targets contains &quot;RoleManagement.ReadWrite.Directory&quot; or aud_targets contains &quot;AppRoleAssignment.ReadWrite.All&quot; or aud_targets contains &quot;Application.ReadWrite.All&quot; or aud_targets contains &quot;Directory.ReadWrite.All&quot; or aud_targets contains &quot;Mail.ReadWrite&quot; or aud_targets contains &quot;Mail.Read&quot; or aud_targets contains &quot;Files.ReadWrite.All&quot; or aud_targets contains &quot;Sites.FullControl.All&quot; or aud_targets contains &quot;full_access_as_app&quot;)
+| fields _time, aud_operation, aud_initiator_app, aud_initiator_user, aud_target_type, aud_target_name, aud_user_agent, aud_targets
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`azure_monitor_aad` category=AuditLogs
+| eval aud_operation=operationName, aud_category=category, aud_result=&#x27;properties.result&#x27;, aud_initiator_app=&#x27;properties.initiatedBy.app.displayName&#x27;, aud_initiator_app_id=&#x27;properties.initiatedBy.app.appId&#x27;, aud_initiator_user=&#x27;properties.initiatedBy.user.userPrincipalName&#x27;, aud_target_type=mvindex(&#x27;properties.targetResources{}.type&#x27;,0), aud_target_name=mvindex(&#x27;properties.targetResources{}.displayName&#x27;,0), aud_targets=mvjoin(mvappend(&#x27;properties.targetResources{}.displayName&#x27;,&#x27;properties.targetResources{}.modifiedProperties{}.newValue&#x27;),&quot; | &quot;), aud_user_agent=mvindex(&#x27;properties.additionalDetails{}.value&#x27;,mvfind(&#x27;properties.additionalDetails{}.key&#x27;,&quot;User-Agent&quot;))
+| where (lower(aud_operation)=&quot;add app role assignment to service principal&quot; OR lower(aud_operation)=&quot;add app role assignment grant to user&quot; OR lower(aud_operation)=&quot;consent to application&quot;) AND (match(aud_targets, &quot;(?i)RoleManagement\\.ReadWrite\\.Directory&quot;) OR match(aud_targets, &quot;(?i)AppRoleAssignment\\.ReadWrite\\.All&quot;) OR match(aud_targets, &quot;(?i)Application\\.ReadWrite\\.All&quot;) OR match(aud_targets, &quot;(?i)Directory\\.ReadWrite\\.All&quot;) OR match(aud_targets, &quot;(?i)Mail\\.ReadWrite&quot;) OR match(aud_targets, &quot;(?i)Mail\\.Read&quot;) OR match(aud_targets, &quot;(?i)Files\\.ReadWrite\\.All&quot;) OR match(aud_targets, &quot;(?i)Sites\\.FullControl\\.All&quot;) OR match(aud_targets, &quot;(?i)full_access_as_app&quot;))
+| table _time aud_operation aud_initiator_app aud_initiator_user aud_target_type aud_target_name aud_user_agent aud_targets
+| sort - _time</code></pre>
+<p>Then the role assignment itself. The key field is the initiator: when <code>initiatedBy</code> is an <em>app</em> and the target is a service principal getting a privileged role, there is no human in the loop. When the initiating app and the target are the same, it is the exact self-assignment from this campaign.</p>
+<div class="qlabel"><span><b>DL-0076</b> Privileged Entra ID role given to a service principal by an application</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0076.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_audit_raw
+| filter activityDisplayName != null
+| alter aud_operation = activityDisplayName, aud_initiator_app = json_extract_scalar(initiatedBy, &quot;$.app.displayName&quot;), aud_initiator_user = json_extract_scalar(initiatedBy, &quot;$.user.userPrincipalName&quot;), aud_target_type = json_extract_scalar(targetResources, &quot;$[0].type&quot;), aud_target_name = json_extract_scalar(targetResources, &quot;$[0].displayName&quot;), aud_targets = to_string(targetResources), aud_user_agent = arrayindex(regextract(to_string(additionalDetails), &quot;User-Agent\\\&quot;,\\\&quot;value\\\&quot;:\\\&quot;([^\\\&quot;]*)&quot;), 0)
+| filter ((aud_operation in (&quot;add member to role&quot;, &quot;add eligible member to role&quot;) and aud_target_type = &quot;serviceprincipal&quot;) and aud_initiator_app ~= &quot;(?i).+&quot;) and (aud_targets contains &quot;Global Administrator&quot; or aud_targets contains &quot;Company Administrator&quot; or aud_targets contains &quot;Privileged Role Administrator&quot; or aud_targets contains &quot;Privileged Authentication Administrator&quot; or aud_targets contains &quot;Application Administrator&quot; or aud_targets contains &quot;Cloud Application Administrator&quot; or aud_targets contains &quot;Exchange Administrator&quot; or aud_targets contains &quot;SharePoint Administrator&quot; or aud_targets contains &quot;Security Administrator&quot; or aud_targets contains &quot;Hybrid Identity Administrator&quot; or aud_targets contains &quot;User Administrator&quot; or aud_targets contains &quot;Partner Tier2 Support&quot; or aud_targets contains &quot;Directory Writers&quot;)
+| fields _time, aud_operation, aud_initiator_app, aud_initiator_user, aud_target_type, aud_target_name, aud_user_agent, aud_targets
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`azure_monitor_aad` category=AuditLogs
+| eval aud_operation=operationName, aud_category=category, aud_result=&#x27;properties.result&#x27;, aud_initiator_app=&#x27;properties.initiatedBy.app.displayName&#x27;, aud_initiator_app_id=&#x27;properties.initiatedBy.app.appId&#x27;, aud_initiator_user=&#x27;properties.initiatedBy.user.userPrincipalName&#x27;, aud_target_type=mvindex(&#x27;properties.targetResources{}.type&#x27;,0), aud_target_name=mvindex(&#x27;properties.targetResources{}.displayName&#x27;,0), aud_targets=mvjoin(mvappend(&#x27;properties.targetResources{}.displayName&#x27;,&#x27;properties.targetResources{}.modifiedProperties{}.newValue&#x27;),&quot; | &quot;), aud_user_agent=mvindex(&#x27;properties.additionalDetails{}.value&#x27;,mvfind(&#x27;properties.additionalDetails{}.key&#x27;,&quot;User-Agent&quot;))
+| where (((lower(aud_operation)=&quot;add member to role&quot; OR lower(aud_operation)=&quot;add eligible member to role&quot;) AND lower(aud_target_type)=&quot;serviceprincipal&quot;) AND match(aud_initiator_app, &quot;(?i).+&quot;)) AND (match(aud_targets, &quot;(?i)Global\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Company\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Privileged\\ Role\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Privileged\\ Authentication\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Application\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Cloud\\ Application\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Exchange\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)SharePoint\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Security\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Hybrid\\ Identity\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)User\\ Administrator&quot;) OR match(aud_targets, &quot;(?i)Partner\\ Tier2\\ Support&quot;) OR match(aud_targets, &quot;(?i)Directory\\ Writers&quot;))
+| table _time aud_operation aud_initiator_app aud_initiator_user aud_target_type aud_target_name aud_user_agent aud_targets
+| sort - _time</code></pre>
+<h3>Layer 3: the backdoor, new secrets on other apps</h3>
+<p>The step that outlives everything else. Real admins add secrets as users, through the portal, from a browser. A secret added by an application, or by a scripting client, is worth an alert every time. The user agent is not in the top-level record: Entra stores it in the audit record's <code>additionalDetails</code>, which is why the query extracts it first.</p>
+<div class="qlabel"><span><b>DL-0077</b> Secret or certificate added to an Entra ID app by another app or by a script</span><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0077.md">rule page and tests</a></div><p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_audit_raw
+| filter activityDisplayName != null
+| alter aud_operation = activityDisplayName, aud_initiator_app = json_extract_scalar(initiatedBy, &quot;$.app.displayName&quot;), aud_initiator_user = json_extract_scalar(initiatedBy, &quot;$.user.userPrincipalName&quot;), aud_target_type = json_extract_scalar(targetResources, &quot;$[0].type&quot;), aud_target_name = json_extract_scalar(targetResources, &quot;$[0].displayName&quot;), aud_targets = to_string(targetResources), aud_user_agent = arrayindex(regextract(to_string(additionalDetails), &quot;User-Agent\\\&quot;,\\\&quot;value\\\&quot;:\\\&quot;([^\\\&quot;]*)&quot;), 0)
+| filter aud_operation ~= &quot;(?i)^(add service principal credentials|update application.*certificates and secrets)&quot; and (aud_initiator_app ~= &quot;(?i).+&quot; or aud_user_agent ~= &quot;(?i)(python-requests|python-urllib|curl/|go-http-client|azure-toolkit)&quot;)
+| fields _time, aud_operation, aud_initiator_app, aud_initiator_user, aud_target_type, aud_target_name, aud_user_agent, aud_targets
+| sort desc _time
+| limit 1000</code></pre><p class="qlabel"><span>Splunk (SPL)</span></p><pre><code>`azure_monitor_aad` category=AuditLogs
+| eval aud_operation=operationName, aud_category=category, aud_result=&#x27;properties.result&#x27;, aud_initiator_app=&#x27;properties.initiatedBy.app.displayName&#x27;, aud_initiator_app_id=&#x27;properties.initiatedBy.app.appId&#x27;, aud_initiator_user=&#x27;properties.initiatedBy.user.userPrincipalName&#x27;, aud_target_type=mvindex(&#x27;properties.targetResources{}.type&#x27;,0), aud_target_name=mvindex(&#x27;properties.targetResources{}.displayName&#x27;,0), aud_targets=mvjoin(mvappend(&#x27;properties.targetResources{}.displayName&#x27;,&#x27;properties.targetResources{}.modifiedProperties{}.newValue&#x27;),&quot; | &quot;), aud_user_agent=mvindex(&#x27;properties.additionalDetails{}.value&#x27;,mvfind(&#x27;properties.additionalDetails{}.key&#x27;,&quot;User-Agent&quot;))
+| where match(aud_operation, &quot;(?i)^(add service principal credentials|update application.*certificates and secrets)&quot;) AND (match(aud_initiator_app, &quot;(?i).+&quot;) OR match(aud_user_agent, &quot;(?i)(python-requests|python-urllib|curl/|go-http-client|azure-toolkit)&quot;))
+| table _time aud_operation aud_initiator_app aud_initiator_user aud_target_type aud_target_name aud_user_agent aud_targets
+| sort - _time</code></pre>
+<h3>Layer 4: the chain, correlated</h3>
+<p>Each rule above stands alone, but the campaign's signature is the sequence: one application taking a role and adding credentials within the same hour. This hunt groups the audit log per initiating app per hour and keeps the apps that did both:</p>
+<p class="qlabel"><span>Cortex XDR: an application that took a role and added credentials in the same hour</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_ad_audit_raw
+| alter initiating_app = json_extract_scalar(initiatedBy, &quot;$.app.displayName&quot;)
+| filter initiating_app != null
+| filter activityDisplayName in (&quot;Add member to role&quot;, &quot;Add service principal credentials&quot;,
+                                 &quot;Add app role assignment to service principal&quot;)
+    or activityDisplayName contains &quot;Certificates and secrets&quot;
+| bin _time span = 1h
+| comp values(activityDisplayName) as operations, count() as changes by _time, initiating_app
+| alter took_role = array_length(arrayfilter(operations, &quot;@element&quot; contains &quot;to role&quot;)),
+        added_creds = array_length(arrayfilter(operations, &quot;@element&quot; contains &quot;credentials&quot; or &quot;@element&quot; contains &quot;secrets&quot;))
+| filter took_role &gt; 0 and added_creds &gt; 0
+| sort desc _time</code></pre><p class="qlabel"><span>Splunk: same correlation</span></p><pre><code>`azure_monitor_aad` category=AuditLogs properties.initiatedBy.app.displayName=*
+    (operationName=&quot;Add member to role&quot; OR operationName=&quot;Add service principal credentials&quot;
+     OR operationName=&quot;Add app role assignment to service principal&quot; OR operationName=&quot;*Certificates and secrets*&quot;)
+| eval initiating_app=&#x27;properties.initiatedBy.app.displayName&#x27;
+| bin _time span=1h
+| stats values(operationName) as operations count as changes by _time initiating_app
+| where (isnotnull(mvfind(operations, &quot;to role&quot;))) AND (isnotnull(mvfind(operations, &quot;(?i)credentials|secrets&quot;)))
+| sort - _time</code></pre>
+<h3>Full tier: what the attacker did with the access</h3>
+<p>These need log sources you have to switch on, usually through diagnostic settings into an Event Hub that Cortex XDR reads into <code>msft_azure_raw</code>. They are worth it for any client that keeps secrets in Azure.</p>
+
+<p><strong>The Graph calls themselves.</strong> With Microsoft Graph activity logs enabled, you see the request, not only its result. These are the two calls from the escalation above, plus the older role-membership endpoint:</p>
+<p class="qlabel"><span>Cortex XDR: role assignment and new-credential calls in Graph activity logs</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_raw
+| filter category = &quot;MicrosoftGraphActivityLogs&quot;
+| alter method = json_extract_scalar(properties, &quot;$.requestMethod&quot;),
+        uri    = json_extract_scalar(properties, &quot;$.requestUri&quot;),
+        app    = json_extract_scalar(properties, &quot;$.appId&quot;),
+        ip     = json_extract_scalar(properties, &quot;$.ipAddress&quot;),
+        ua     = json_extract_scalar(properties, &quot;$.userAgent&quot;),
+        code   = json_extract_scalar(properties, &quot;$.responseStatusCode&quot;)
+| filter method = &quot;POST&quot;
+| filter uri ~= &quot;(?i)/(addPassword|addKey)$&quot;
+    or uri ~= &quot;(?i)/roleManagement/directory/roleAssignments&quot;
+    or uri ~= &quot;(?i)/directoryRoles/[^/]+/members&quot;
+    or uri ~= &quot;(?i)/servicePrincipals/[^/]+/appRoleAssignments&quot;
+| fields _time, app, ip, ua, method, uri, code
+| sort desc _time</code></pre>
+<p><strong>Bulk Key Vault reads.</strong> Microsoft saw secrets read across several vaults in a short window. Their threshold is a good start: 20 or more successful <code>SecretGet</code> calls across 3 or more vaults by one identity in 15 minutes.</p>
+<p class="qlabel"><span>Cortex XDR: bulk Key Vault secret reads</span></p><pre><code>config case_sensitive = false
+| dataset = msft_azure_raw
+| filter category = &quot;AuditEvent&quot; and operationName = &quot;SecretGet&quot;
+| filter to_string(resultSignature) = &quot;OK&quot; or to_string(httpStatusCode) = &quot;200&quot;
+| alter caller_app = json_extract_scalar(identity, &quot;$.claim.appid&quot;)
+| bin _time span = 15m
+| comp count() as secret_reads, count_distinct(resourceId) as vaults, values(callerIpAddress) as ips by _time, caller_app
+| filter secret_reads &gt;= 20 and vaults &gt;= 3
+| sort desc secret_reads</code></pre>
+<p><strong>Mailbox persistence.</strong> ConnectWise, Huntress and Microsoft all ask to check forwarding, inbox rules and delegated access. In the M365 unified audit log:</p>
+<p class="qlabel"><span>Splunk: forwarding, inbox rules and delegation (Splunk Add-on for Microsoft Office 365)</span></p><pre><code>index=* sourcetype=o365:management:activity Workload=Exchange
+    (Operation=New-InboxRule OR Operation=Set-InboxRule OR Operation=UpdateInboxRules
+     OR Operation=Add-MailboxPermission OR Operation=Add-RecipientPermission
+     OR (Operation=Set-Mailbox (Parameters{}.Name=ForwardingSmtpAddress OR Parameters{}.Name=ForwardingAddress OR Parameters{}.Name=DeliverToMailboxAndForward)))
+| table _time UserId ClientIP Operation Parameters{}.Name Parameters{}.Value
+| sort - _time</code></pre><p class="qlabel"><span>Cortex XDR: same, Office 365 Exchange dataset</span></p><pre><code>config case_sensitive = false
+| dataset = msft_o365_exchange_online_raw
+| filter Operation in (&quot;New-InboxRule&quot;, &quot;Set-InboxRule&quot;, &quot;UpdateInboxRules&quot;, &quot;Set-Mailbox&quot;,
+                       &quot;Add-MailboxPermission&quot;, &quot;Add-RecipientPermission&quot;)
+| filter Operation != &quot;Set-Mailbox&quot; or to_string(Parameters) contains &quot;Forwarding&quot;
+| fields _time, UserId, ClientIP, Operation, Parameters
+| sort desc _time</code></pre>
+<div class="callout"><b>Before you rely on these:</b> the four rules are tested against their own events in CI, in Python, in compiled XQL and SPL, and in the browser engine. The hunts in this post are not, and none of it ran on a live tenant. Dataset and column names depend on how your tenant is connected: Graph-schema columns through the Office 365 data source, <code>properties.*</code> through Event Hub. Paste a real audit record into the <a href="https://detections.rayenskhiri.online">playground</a> first, then run each query once on your own data.</div>
+
+<h2>Step 3: respond</h2>
+<p>Order matters here, because the evidence lives in the configuration you are about to change, and the logs expire fast (7 days of Entra logs on free tenants, 30 with P1 or P2).</p>
+<ol>
+  <li><strong>Disable, do not delete.</strong> For each of the seven apps, open the enterprise application and set "Enabled for users to sign-in?" to No. This also blocks new app-only tokens. Deleting the service principal destroys its permissions, owners and credentials, which are your evidence.</li>
+  <li><strong>Export the logs now.</strong> Audit logs, user and service principal sign-ins, the M365 unified audit log and Graph activity logs if you have them. Do not let the export delay containment, but do it the same hour.</li>
+  <li><strong>Review from 1 October, not from the advisory.</strong> Microsoft recommends at least 15 October and service principal sign-ins from 1 October. Look at failed sign-ins too, and do not limit the search to the published IPs.</li>
+  <li><strong>Remove what was added.</strong> Directory roles held by service principals you did not intend, app role assignments and consent grants nobody owns, and every secret or certificate since 13 October that you cannot explain. Check app owners as well.</li>
+  <li><strong>Rotate what was readable.</strong> Key Vault secrets read during the window, credentials of the other apps that got new secrets, and anything stored in mailboxes or SharePoint that the backup app could read.</li>
+  <li><strong>Wait out the tokens.</strong> Tokens issued before you disabled the app work for up to about 90 minutes. Keep watching Graph activity for that long after containment.</li>
+  <li><strong>Re-enable only on the vendor's word.</strong> ConnectWise asked customers to keep connections disabled until it sends restoration instructions directly.</li>
+</ol>
+
+<h2>What I am changing as an MSSP</h2>
+<p>The uncomfortable part of this story is that MSPs and MSSPs are the trusted app. A few things I now treat as non-negotiable for every client tenant:</p>
+<ul>
+  <li><strong>Inventory every multi-tenant app and what it can do.</strong> Most tenants have dozens of vendor service principals with application permissions nobody remembers granting.</li>
+  <li><strong>Treat <code>RoleManagement.ReadWrite.Directory</code>, <code>AppRoleAssignment.ReadWrite.All</code> and <code>Application.ReadWrite.All</code> as Global Administrator.</strong> Because they are: any app holding one can make itself Global Administrator.</li>
+  <li><strong>Ingest service principal sign-ins and the audit log for every client,</strong> even the ones that send nothing else. It costs almost nothing and it is the only place this attack is visible.</li>
+  <li><strong>Baseline where each vendor app signs in from,</strong> and alert on the first new address. That single hunt would have caught the token sweep within minutes.</li>
+  <li><strong>Restrict user consent</strong> and use Conditional Access for workload identities where the license allows, to pin vendor apps to their known locations.</li>
+</ul>
+
+<h2>The detections</h2>
+<table class="map">
+  <thead><tr><th>Rule</th><th>What it catches</th><th>Log source</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0078.md">DL-0078</a></td><td>ConnectWise / SkyKick app signing in from public IPv4 or Storm-0940 infrastructure</td><td>Service principal sign-ins</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0079.md">DL-0079</a></td><td>Tenant-wide Graph or Exchange permission granted to an app</td><td>Entra audit</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0076.md">DL-0076</a></td><td>Privileged directory role given to a service principal by an application</td><td>Entra audit</td></tr>
+    <tr><td><a href="https://github.com/Raynskhiri/detection-library/blob/main/docs/rules/DL-0077.md">DL-0077</a></td><td>Secret or certificate added to an app by another app or a script</td><td>Entra audit</td></tr>
+  </tbody>
+</table>
+<p>Plus the hunts in this post: password spray per minute, new sign-in address for any service principal, the role-then-credentials correlation, Graph escalation calls, bulk Key Vault reads and mailbox persistence. If a rule misbehaves on your platform, open an issue on the repo with the error and I will fix it.</p>
+
+<h3>Indicators</h3>
+<p>Useful for looking back, not for long-term rules.</p>
+<ul>
+  <li><strong>Addresses:</strong> <code>144.172.64.60</code>, <code>144.172.64.99</code>, <code>144.172.64.128</code>; transient VPN exits around 15 and 16 October: <code>187.15.88.186</code>, <code>187.15.89.186</code>, <code>187.15.90.217</code></li>
+  <li><strong>User agents:</strong> <code>Python-urllib/3.12</code>, <code>python-requests/2.31.0</code>, <code>python-requests/2.34.2</code>, <code>curl/7.88.1</code>, <code>azure-toolkit/1.0</code>. ConnectWise's own SDK shows as <code>kiota-dotnet</code>, which is not suspicious by itself.</li>
+  <li><strong>Applications:</strong> the seven IDs in the table above.</li>
+  <li><strong>Defender alerts named by Microsoft:</strong> "Application self-assigned Global Administrator role", "Malicious sign-in from known threat actor IP address", and for Key Vault, KV_AccountVolumeAccessDeniedAnomaly.</li>
+</ul>
+
+<h2>Sources</h2>
+<ul>
+  <li><a href="https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/">Microsoft Threat Intelligence: Storm-0940 uses ARTEX in a ConnectWise supply chain compromise</a></li>
+  <li><a href="https://thehackernews.com/2026/10/hackers-use-compromised-connectwise.html">The Hacker News: compromised ConnectWise credential used to sign in to Microsoft 365 tenants (Huntress and Todyl findings, application IDs)</a></li>
+  <li><a href="https://www.bleepingcomputer.com/news/security/hackers-breach-microsoft-365-tenants-via-connectwise-supply-chain-attack/">BleepingComputer: role self-assignment in about fifty tenants, Global Administrator and secret planting</a></li>
+  <li><a href="https://www.cybersecuritydive.com/news/connecwise-suspends-cloud-backup-hacker-microsoft-365/833345/">Cybersecurity Dive: ConnectWise suspends Cloud Backup</a></li>
+  <li><a href="https://windowsforum.com/news/connectwise-cloud-backup-breach-disable-skykick-apps-and-hunt-microsoft-entra-backdoors.448897/">WindowsForum: which apps to disable and which Entra backdoors to hunt</a></li>
+  <li><a href="https://github.com/BaaRai/ARTEX">ARTEX on GitHub (English translation of the original project)</a></li>
+  <li><a href="https://research.splunk.com/cloud/5dfaa3d3-e2e4-4053-8252-16d9ee528c41/">Splunk Security Content: privileged role assigned to a service principal</a></li>
+  <li><a href="https://research.splunk.com/cloud/e3adc0d3-9e4b-4b5d-b662-12cec1adff2a">Splunk Security Content: new client credentials on a service principal</a></li>
+  <li><a href="https://cortex.marketplace.pan.dev/marketplace/details/MicrosoftEntraID/">Cortex Marketplace: Microsoft Entra ID datasets</a></li>
+</ul>
+<div class="end"><p><b>Thanks for reading.</b> Running an MSP or MSSP, or protecting tenants that trust one? Tell me what these queries found, or what they missed. I reply within a day.</p><div class="acts"><a class="btn btn-primary btn-sm" href="https://linkedin.com/in/rayen-skhiri">Message me on LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-ghost btn-sm" href="/blog/">More posts</a></div></div></article></div>
+</main>
+
+<footer class="site">
+  <div class="wrap f">
+    <a class="logo" href="/"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
+    <nav aria-label="Footer">
+      <a href="/">Home</a><a href="/blog/">Blog</a><a href="/#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="https://linkedin.com/in/rayen-skhiri">LinkedIn</a>
+    </nav>
+    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+  </div>
+</footer>
+</body>
+</html>
