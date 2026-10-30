@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.29",
- "generated": "2026-10-30T13:14:15Z",
- "total": 1764,
- "added_7d": 10,
- "added_30d": 35,
+ "catalog_version": "2026.10.30",
+ "generated": "2026-10-30T22:25:37Z",
+ "total": 1766,
+ "added_7d": 12,
+ "added_30d": 37,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-118527",
+   "vendor": "Ivanti",
+   "product": "Connect Secure",
+   "name": "Ivanti Connect Secure Generation of Predictable Numbers or Identifiers Vulnerability",
+   "added": "2026-10-30",
+   "due": "2026-11-13",
+   "ransomware": false,
+   "summary": "Ivanti Connect Secure contains a generation of predictable numbers or identifiers vulnerability that allows a remote authenticated attacker to upload files with attacker-controlled content to a known location on disk. This vulnerability can be chained with CVE-2026-104935 and CV…"
+  },
+  {
+   "cve": "CVE-2026-111357",
+   "vendor": "Ivanti",
+   "product": "Connect Secure",
+   "name": "Ivanti Connect Secure Missing Authentication for Critical Function Vulnerability",
+   "added": "2026-10-30",
+   "due": "2026-11-02",
+   "ransomware": false,
+   "summary": "Ivanti Connect Secure contains a missing authentication for critical function vulnerability that could allow a local authenticated attacker to escalate their privileges. This vulnerability can be chained with CVE-2026-104935 and CVE-2026-118527."
+  },
   {
    "cve": "CVE-2026-97229",
    "vendor": "GitLab",
@@ -387,26 +407,6 @@
    "due": "2026-09-30",
    "ransomware": false,
    "summary": "Citrix NetScaler ADC and NetScaler Gateway contain an improper input validation vulnerability that could allow an unauthenticated attacker to execute arbitrary commands."
-  },
-  {
-   "cve": "CVE-2026-87902",
-   "vendor": "WordPress",
-   "product": "Core",
-   "name": "WordPress Core Remote File Inclusion Vulnerability",
-   "added": "2026-09-25",
-   "due": "2026-09-28",
-   "ransomware": false,
-   "summary": "WordPress Core contains a remote file inclusion vulnerability which could allow an unauthenticated attacker to make page-template resolution include a chosen readable local `.php` file outside the active theme directories, leading to remote code execution."
-  },
-  {
-   "cve": "CVE-2026-67279",
-   "vendor": "MikroTik",
-   "product": "RouterOS",
-   "name": "Mikrotik RouterOS Improper Enforcement of Behavioral Workflow Vulnerability",
-   "added": "2026-09-25",
-   "due": "2026-09-28",
-   "ransomware": false,
-   "summary": "Mikrotik RouterOS contains an improper enforcement of behavioral workflow vulnerability that could allow an unauthenticated client to open a session channel and send an exec request. This vulnerability can be chained to achieve unauthenticated exploitation of CVE-2026-86060."
   }
  ],
  "ransomware_latest": [
