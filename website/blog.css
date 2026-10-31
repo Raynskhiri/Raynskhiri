@@ -136,3 +136,14 @@ footer .f { display: flex; justify-content: space-between; align-items: center; 
 footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
 footer nav a { text-decoration: none; }
 footer nav a:hover { color: var(--text); }
+.chain { list-style: none; padding: 0; margin: 14px 0 10px; }
+.chain li { position: relative; margin: 0 0 18px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; }
+.chain li.inferred { border-style: dashed; }
+.chain li.hit { border-color: var(--orange); background: rgba(255, 107, 26, 0.08); }
+.chain li:not(:last-child)::after { content: ""; position: absolute; left: 50%; bottom: -19px; width: 1px; height: 18px; background: var(--line-2); }
+.chain li b { color: var(--text); }
+.chain .st { margin-left: 10px; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chain p { margin: 6px 0 6px; }
+.chain .ttp { display: block; font-family: var(--mono); font-size: 0.76rem; color: var(--dim); }
+.chain-key { font-size: 0.86rem; color: var(--muted); margin: 0 0 26px; }
+table.map td code { overflow-wrap: anywhere; word-break: break-all; }

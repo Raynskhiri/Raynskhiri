@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The $6.36B Binance heist: no key was stolen, the signer was turned. How it worked and how to detect it | Rayen Skhiri</title>
+<meta name="description" content="On 29 October 2026 an attacker drained $6.36 billion from Binance hot wallets on ten chains in about 20 minutes without stealing a single private key. The DevOps laptop entry, 50 pre-signed EIP-7702 authorizations, the race against the stablecoin freezes, Cortex XDR hunts for every stage, and the signer controls that would have stopped it.">
+<meta name="theme-color" content="#0A0C10">
+<link rel="canonical" href="https://rayenskhiri.online/blog/binance-heist/">
+<meta property="og:title" content="The $6.36B Binance heist: no key was stolen, the signer was turned. How it worked and how to detect it">
+<meta property="og:description" content="On 29 October 2026 an attacker drained $6.36 billion from Binance hot wallets on ten chains in about 20 minutes without stealing a single private key. The DevOps laptop entry, 50 pre-signed EIP-7702 authorizations, the race against the stablecoin freezes, Cortex XDR hunts for every stage, and the signer controls that would have stopped it.">
+<meta property="og:url" content="https://rayenskhiri.online/blog/binance-heist/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://rayenskhiri.online/blog/binance-heist/og.png?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The $6.36B Binance heist: no key was stolen, the signer was turned. How it worked and how to detect it">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-10-31">
+<meta property="article:author" content="Rayen Skhiri">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/blog.css">
+</head>
+<body>
+<a class="vh skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="/" aria-label="Rayen Skhiri, home">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <span class="logo-text"><b>RAYEN SKHIRI</b><span>SOC Analyst and AppSec</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="opt" href="/#projects">Projects</a>
+      <a href="/blog/">Blog</a>
+      <a class="btn btn-primary btn-sm" href="/#contact">Let's talk <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<header class="article-head"><div class="wrap"><div class="inner"><a class="back" href="/blog/">&larr; All posts</a><div><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14 -1.5 7 5-3 5 3-1.5-7"/></svg>Deep dive and Cortex XDR hunts</span></div><h1>The $6.36B Binance heist: no key was stolen, the signer was turned. How it worked and how to detect it</h1><p class="lede">On 29 October 2026 an attacker drained $6.36 billion from Binance hot wallets on ten chains in about 20 minutes without stealing a single private key. The DevOps laptop entry, 50 pre-signed EIP-7702 authorizations, the race against the stablecoin freezes, Cortex XDR hunts for every stage, and the signer controls that would have stopped it.</p><div class="meta"><span>Rayen Skhiri</span><span><time datetime="2026-10-31">31 October 2026</time></span><span>23 min read</span><span class="tagx">#TraderTraitor</span><span class="tagx">#EIP-7702</span><span class="tagx">#Crypto exchange</span><span class="tagx">#Cortex XDR</span></div></div></div></header><div class="wrap"><article class="article"><p>I spend my days in Cortex XDR at an MSSP, watching for the moment an attacker turns a trusted tool against the people who own it. On 29 October 2026 that happened at a scale nobody had seen before. In about twenty minutes, Binance hot wallets on ten blockchains paid an attacker <strong>$6.36 billion</strong>. Four times Bybit. The largest theft on record, of any kind.</p>
+
+<p>The strange part is what did <em>not</em> happen. No private key was stolen. No smart contract bug, no protocol flaw. Binance's own signing system produced every signature the attacker needed, on chains that do not even share a key type. This post reconstructs how that is possible from the on-chain record and the forensic reports, then turns it into hunts for <strong>Cortex XDR</strong> and the controls that would have stopped it.</p>
+
+<div class="facts">
+  <div class="fact"><b>$6.36B</b><span>left 17 hot wallets on 10 chains</span></div>
+  <div class="fact"><b>~20 min</b><span>for the main drain, starting 20:05 UTC</span></div>
+  <div class="fact"><b>0 keys</b><span>stolen: the signer signed for the attacker</span></div>
+</div>
+
+<div class="callout"><b>Status, 31 October 2026:</b> Binance has not published its root-cause report and no government has attributed the attack. Everything below is graded: what Binance confirmed, what the chain shows, and what is analyst inference. I will update this post when the post-mortem lands.</div>
+
+<h2>The short version</h2>
+<p>On October 29, 2026, an attacker drained about <strong>$6.36 billion</strong> from Binance hot wallets on ten blockchains, most of it in roughly 20 minutes. No private key was stolen. The attacker made Binance's own signing system sign for them.</p>
+<ul>
+<li><strong>Who:</strong> TRM Labs (high confidence) and Chainalysis attribute it to <strong>TraderTraitor</strong> (UNC4899, Jade Sleet, Slow Pisces), the North Korean unit behind the $1.5B Bybit theft. Binance has not confirmed attribution.</li>
+<li><strong>Entry:</strong> Binance's first finding was a compromised <strong>DevOps engineer's laptop</strong> that reached a <strong>service container</strong> able to submit withdrawals. It later found "additional points of breach" it has not described.</li>
+<li><strong>The trick:</strong> on Ethereum, a batch of <strong>50 pre-signed EIP-7702 authorizations</strong> turned a hot wallet into a sweeper the attacker controlled. On the other nine chains, wallets simply signed normal transfers to the attacker.</li>
+<li><strong>Lesson for defenders:</strong> the private key was never the weak point. The path from an engineer's endpoint to the system that <em>asks</em> the signer to sign was. That path is detectable on the endpoint, in the cloud control plane and at the signer's policy layer.</li>
+</ul>
+<p>This post walks the attack chain, then gives Cortex XDR hunting queries for each stage and mitigations ranked by how directly they would have stopped it.</p>
+<h2>Timeline</h2>
+<p>Staging started 36 hours before the theft, nine chains were drained in about 20 minutes starting with the XRP Ledger, and Binance only revoked the Ethereum delegation 3 hours 46 minutes after the main sweep. All times are UTC.</p>
+<table class="map">
+<thead>
+<tr>
+<th>Time (UTC)</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oct 28, morning</td>
+<td>Operator wallet <code>0x7C86...5CA0</code> funded by three small Tornado Cash withdrawals</td>
+</tr>
+<tr>
+<td>Oct 29, 02:28</td>
+<td>Sweeper v1 deployed (<code>0x19beE294...70f2bf</code>)</td>
+</tr>
+<tr>
+<td>13:51</td>
+<td>Rehearsal 1: a throwaway wallet is delegated to v1 via EIP-7702 and swept</td>
+</tr>
+<tr>
+<td>15:59</td>
+<td>Sweeper v2 deployed (<code>0x63e8...6fAe</code>), callable only by the operator</td>
+</tr>
+<tr>
+<td>16:25</td>
+<td>Rehearsal 2 on v2; test funds routed back to the operator</td>
+</tr>
+<tr>
+<td>18:20</td>
+<td>Operator receives 1.08 ETH for gas</td>
+</tr>
+<tr>
+<td>20:05:00</td>
+<td>XRP Ledger: five Binance accounts send 233.46M XRP to one address</td>
+</tr>
+<tr>
+<td>\~20:10</td>
+<td>Solana: 970,522 SOL leaves</td>
+</tr>
+<tr>
+<td>20:16:19 / 20:18:23</td>
+<td>Base, then Optimism: plain signed transfers</td>
+</tr>
+<tr>
+<td>20:19:57</td>
+<td>Tron: first USDT outflow (612.7M USDT and 46.4M TRX in total)</td>
+</tr>
+<tr>
+<td>20:20:06</td>
+<td>Bitcoin: 18,270 BTC leaves; peel into 1,000 BTC lots starts in the same block</td>
+</tr>
+<tr>
+<td>20:20:59</td>
+<td>One type-4 transaction with 50 authorizations delegates Binance 14 to sweeper v2</td>
+</tr>
+<tr>
+<td>20:24:23</td>
+<td>Single sweep of Binance 14: 167,464 ETH, 1.615B USDT and 62 other tokens, about $2.53B</td>
+</tr>
+<tr>
+<td>20:24:47</td>
+<td>Second Ethereum hot wallet sends 28,006 ETH, 55.7M USDT, 25.9M RLUSD by plain transfers</td>
+</tr>
+<tr>
+<td>\~20:30 / 20:33:18</td>
+<td>Arbitrum (74.56M ARB, 8,426 ETH), then Avalanche</td>
+</tr>
+<tr>
+<td>20:41</td>
+<td>823M USDC pulled from a Circle smart account that Binance 14 controlled</td>
+</tr>
+<tr>
+<td>21:01</td>
+<td>Tether freezes the main collector, 37 minutes after the sweep</td>
+</tr>
+<tr>
+<td>21:04:59</td>
+<td>Circle freezes the 823M USDC</td>
+</tr>
+<tr>
+<td>21:44:11</td>
+<td>Binance's routine 200M USDT top-up lands in Binance 14 and is swept 72 seconds later</td>
+</tr>
+<tr>
+<td>\~22:15 to 22:27</td>
+<td>Binance suspends withdrawals (sources differ on the minute)</td>
+</tr>
+<tr>
+<td>23:05:55</td>
+<td>Polygon and a second Avalanche wave</td>
+</tr>
+<tr>
+<td>23:56</td>
+<td>Last sweep through the still-active delegation</td>
+</tr>
+<tr>
+<td>Oct 30, 00:08</td>
+<td>Arbitrum Security Council force-moves 8,426 ETH and 74.6M ARB out of the attacker's wallet</td>
+</tr>
+<tr>
+<td>00:10:35</td>
+<td>Binance 14 signs a new authorization to the zero address, clearing the delegation</td>
+</tr>
+<tr>
+<td>02:23</td>
+<td>Binance names a compromised DevOps engineer laptop as the likely entry point</td>
+</tr>
+<tr>
+<td>from 04:02</td>
+<td>Binance proceeds meet Bitget-hack proceeds at <code>0x1510...eb7</code> after THORChain hops</td>
+</tr>
+<tr>
+<td>\~08:47</td>
+<td>Binance reports "additional points of breach"</td>
+</tr>
+<tr>
+<td>Nov 1 to 2 (planned)</td>
+<td>Withdrawal restart, then an updated proof-of-reserves report</td>
+</tr>
+</tbody>
+</table>
+<p>Times come from TRM Labs, Etherscan-based reconstructions and Cointegrity's graded timeline. The 17 Binance hot wallets that paid out span at least two signature algorithms.</p>
+<h2>Initial access: the DevOps laptop</h2>
+<p>Binance has confirmed only that a DevOps engineer's laptop was compromised; it has not said how. TraderTraitor's documented playbook makes the likely shape clear, and every recent case starts with a developer running something they were handed.</p>
+<table class="map">
+<thead>
+<tr>
+<th>Case</th>
+<th>Lure</th>
+<th>First payload</th>
+<th>Pivot to the money</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DMM Bitcoin via Ginco, May 2024 ($308M)</td>
+<td>Fake LinkedIn recruiter sends a "pre-employment test" on GitHub to a Ginco engineer with wallet-system access</td>
+<td>Malicious Python script, copied by the victim to their own GitHub and run</td>
+<td>Stolen session cookies used to impersonate the engineer in Ginco's unencrypted messaging system; a legitimate DMM transaction request was tampered with</td>
+</tr>
+<tr>
+<td>Bybit via Safe{Wallet}, Feb 2025 ($1.5B)</td>
+<td>Docker project posing as a stock simulator (<code>MC-Based-Stock-Invest-Simulator-main</code>), likely sent over Telegram as a "help me debug" ask</td>
+<td>PLOTTWIST backdoor on macOS, C2 at <code>getstockprice[.]com</code> registered 2 days earlier</td>
+<td>Hijacked live AWS session tokens to bypass MFA; Mythic C2; malicious JS pushed to an S3 bucket; Kali user agent over ExpressVPN</td>
+</tr>
+<tr>
+<td>Unnamed crypto firm, 2025 (Google, H1 2026 report)</td>
+<td>Archive sent as an "open-source collaboration", AirDropped from a personal to a corporate Mac</td>
+<td>Python in the archive, run via an AI-assisted IDE, dropped a binary masquerading as <code>kubectl</code></td>
+<td>Bastion MFA policy tampered; K8s deployment edited for persistence; CI/CD service account token leaked into logs; privileged pod escape; DB creds from pod env vars; MFA seeds reset</td>
+</tr>
+<tr>
+<td>Binance, Oct 2026 ($6.36B)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>Laptop to a service container that could submit withdrawals; further breach points undisclosed</td>
+</tr>
+</tbody>
+</table>
+<p>Two traits repeat. First, the target is always someone with production reach: Safe said its Developer1 was one of the very few staff with elevated access. Second, the attacker lives off the victim's own cloud and DevOps tooling, so nothing looks like classic malware after day one.</p>
+<p>Teng said the breach was not a "one-click" action using a single engineer's permissions. That fits the 2025 pattern of chaining several identities and service accounts before reaching the money path.</p>
+<p>One more data point matters. On October 27, two days before the theft, Binance said it had blocked several North Korea-linked attacks in the previous week, reportedly from the "Contagious Interview" fake-recruiter campaign. No source links that campaign to this breach, but it shows the exchange's engineers were being actively targeted.</p>
+<p>DMM Bitcoin is the closest structural match. There, the attacker never touched the keys either: they sat inside the transaction-request workflow and altered a request that a legitimate employee had made. Binance's "service container that submits withdrawals" is the same choke point, one layer further into production.</p>
+<h2>From laptop to signer: why no key leaked</h2>
+<p>The attacker did not need Binance's keys, because they could get Binance's signer to sign anything. That is TRM's core finding, and Binance's own statement points the same way.</p>
+<p>An exchange hot wallet is built to sign fast and without humans. The usual architecture has three layers:</p>
+<ol>
+<li><strong>Requesters:</strong> internal services (withdrawal processors, rebalancers) running in containers that build transactions and submit them for signing.</li>
+<li><strong>Policy layer:</strong> rules that decide whether a request is allowed (destination allowlists, amount limits, velocity caps, transaction types).</li>
+<li><strong>Signer:</strong> an HSM or MPC cluster holding the key material, which signs whatever the policy layer approves.</li>
+</ol>
+<p>Binance said the laptop gave access to "a service container" that could "submit unauthorized withdrawal transactions". That is the requester layer. From there, the attacker's requests had to pass the policy layer, and on ten chains they did.</p>
+<p>The evidence that the signer itself was driven, rather than keys stolen:</p>
+<ul>
+<li>Wallets on Bitcoin, Ethereum, Tron, XRP Ledger, Solana, Arbitrum, Optimism, Base, Avalanche and Polygon all produced valid signatures within about half an hour. These use different key types and signing schemes (secp256k1 on the EVM chains and Bitcoin, Ed25519 on Solana), so one stolen key could not explain it.</li>
+<li>The 50 EIP-7702 authorizations were signed <strong>in advance, as a batch</strong>, across a range of nonces. With raw key access, the attacker would just sign one authorization at the right nonce at execution time. TRM reads the batch as a sign that access was time-limited, or that signatures had to be requested through a system.</li>
+<li>Teng has said the 7702 delegation bypassed Binance's normal approval controls. So either the policy layer did not understand type 0x04 authorizations, or the attacker reached a path that skipped it.</li>
+</ul>
+<p>One more on-chain fact settles who held the key afterwards: the revocation at 00:10:35 on October 30 was signed by Binance 14 itself. Binance still controlled that key, so the attacker borrowed signing capability rather than walking off with it.</p>
+<h3>Competing hypotheses</h3>
+<table class="map">
+<thead>
+<tr>
+<th>Hypothesis</th>
+<th>What fits</th>
+<th>What does not fit</th>
+<th>Who leans this way</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request path to the signer was hijacked</td>
+<td>17 wallets on 10 chains and at least 2 signature algorithms signed within 30 minutes; 50 pre-signed authorizations because the live nonce was unknowable; Binance found no key leak</td>
+<td>Binance has not shown how the container reached signing requests</td>
+<td>TRM, Cointegrity ("probable, strong"), Blockaid ("key misuse", not extraction)</td>
+</tr>
+<tr>
+<td>Raw private keys were stolen</td>
+<td>Any valid signature fits</td>
+<td>Needs many separate key stores at once; a key holder would sign one authorization at the live nonce seconds before sending</td>
+<td>Mark Karpeles (at least two wallets); SlowMist lists it as open</td>
+</tr>
+<tr>
+<td>Insider or tampered approval system</td>
+<td>The chain shows what was signed, never who asked</td>
+<td>Nothing published points to an insider; Teng says no individual has been blamed</td>
+<td>Raised by analysts as possible, unsupported so far</td>
+</tr>
+</tbody>
+</table>
+<h3>Controls that did not fire</h3>
+<p>Binance has published nothing on its control environment, but the on-chain record shows six places where a control was missing or silent:</p>
+<ol>
+<li><strong>Message-type policy.</strong> The signer produced type <code>0x04</code> delegation authorizations for a treasury wallet. An exchange hot wallet has no routine reason to sign one.</li>
+<li><strong>Batch and nonce-range check.</strong> One request yielded 50 authorizations spanning nonces 18,914,775 to 18,914,824, all ahead of the wallet's live nonce.</li>
+<li><strong>Cross-chain velocity.</strong> No aggregate limit tripped while 17 wallets on 10 chains paid one actor inside half an hour. Per-wallet limits cannot see that pattern.</li>
+<li><strong>Delegation circuit breaker.</strong> Binance's top-up automation sent 200M USDT into Binance 14 at 21:42:59, 78 minutes after it had been emptied, and the attacker swept it 72 seconds later.</li>
+<li><strong>Inherited-authority inventory.</strong> Binance 14 was the executor of a Circle smart account, so the hijacked address also unlocked 823M USDC.</li>
+<li><strong>Revocation speed.</strong> The delegation stayed live for 3 hours 49 minutes. Tether, Circle, Ripple and the Arbitrum Security Council all acted before Binance cleared it.</li>
+</ol>
+<p>For detection engineering, the takeaway is that the crown jewel is not the key store. It is every identity and workload that can talk to the signer's request API.</p>
+<h2>EIP-7702: turning a hot wallet into a sweeper</h2>
+<p>One valid authorization signature gave the attacker standing control of Binance's main Ethereum hot wallet until revoked. EIP-7702 shipped in the Pectra upgrade in May 2025 and adds transaction type <code>0x04</code> (set code), which carries an <code>authorization_list</code>.</p>
+<p>Each entry is a tuple <code>[chain_id, address, nonce, y_parity, r, s]</code>. The wallet's key signs this digest:</p>
+<p class="qlabel"><span>Authorization digest</span></p><pre><code>keccak256(0x05 || rlp([chain_id, address, nonce]))
+</code></pre>
+<p>When the transaction executes, the EVM writes a delegation designator into the wallet's code slot: <code>0xef0100 || address</code>. From then on, any call to the wallet runs the delegate contract's code in the wallet's own context, with its balance and token approvals. Three properties made this the perfect drain primitive:</p>
+<ul>
+<li><strong>Anyone can submit it.</strong> The authorization is signed by the wallet, but the <code>0x04</code> transaction can be sent and paid for by any account. Here the operator submitted it.</li>
+<li><strong>It is nonce-bound.</strong> An authorization is valid only if its <code>nonce</code> equals the wallet's current account nonce. Binance 14's nonce climbs with every withdrawal, so the attacker pre-signed tuples for nonces 18,914,775 to 18,914,824 and packed all 50 into one type-4 transaction. In the same block, Binance's own withdrawal used nonce 18,914,808, so the tuple for 18,914,809 was the first valid one. Invalid tuples are skipped rather than reverting the transaction, and each applied tuple bumps the nonce, so the higher tuples simply re-applied the same delegation.</li>
+<li><strong>It persists.</strong> The delegation stays until the wallet signs a new one. The sweeper only obeyed the operator, so every deposit arriving after 20:24 was swept again, six more times by 23:56.</li>
+</ul>
+<p>The hot wallet also acted as the executor of a separate Binance smart account, which let the attacker pull a further 823M USDC from it before Circle froze it.</p>
+<p>A second Ethereum hot wallet sent 28,006 ETH, 55.7M USDT and 25.9M RLUSD by plain signed transfers with no delegation. 7702 was a convenience for the busiest wallet, not the core of the breach.</p>
+<p><strong>Detection hook:</strong> a delegated EOA has code. <code>eth_getCode</code> on a treasury address returning anything starting <code>0xef0100</code> means the wallet now runs someone else's logic. The same is true of any <code>0x04</code> transaction whose authorization list names a wallet you own.</p>
+<p class="qlabel"><span>web3.py: poll treasury addresses for a delegation</span></p><pre><code># Poll treasury EOAs for EIP-7702 delegation (web3.py)
+from web3 import Web3
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
+for addr in TREASURY_EOAS:
+    code = w3.eth.get_code(addr)
+    if code[:3] == bytes.fromhex(&quot;ef0100&quot;):
+        delegate = &quot;0x&quot; + code[3:23].hex()
+        alert(f&quot;{addr} delegated to {delegate}&quot;)
+</code></pre>
+<h2>On-chain forensics: addresses and IOCs</h2>
+<p>These are public, Etherscan-labelled addresses and transactions from the forensic write-ups. They are screening IOCs for deposits and counterparties, not endpoint IOCs; nothing here will show up in an EDR.</p>
+<h3>Addresses</h3>
+<table class="map">
+<thead>
+<tr>
+<th>Role</th>
+<th>Chain</th>
+<th>Address</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Operator ("Binance Hot Wallet Exploiter"), Tornado-funded</td>
+<td>Ethereum</td>
+<td><code>0x7C8601d4645b93cea45F71e118A729332e6B5CA0</code></td>
+</tr>
+<tr>
+<td>Sweeper v2, used in the attack</td>
+<td>Ethereum</td>
+<td><code>0x63e842b054bd624a465454d533c33f573e9c6fae</code></td>
+</tr>
+<tr>
+<td>Sweeper v1, used in rehearsal</td>
+<td>Ethereum</td>
+<td><code>0x19beE294...70f2bf</code> (truncated in sources)</td>
+</tr>
+<tr>
+<td>Victim hot wallet "Binance 14"</td>
+<td>Ethereum</td>
+<td><code>0x28C6c06298d514Db089934071355E5743bf21d60</code></td>
+</tr>
+<tr>
+<td>Main collector ("Exploiter 2"), frozen by Tether and Circle</td>
+<td>Ethereum</td>
+<td><code>0x5227f603C1eE34CE3C06eFe6477003BDfCCB2f8c</code></td>
+</tr>
+<tr>
+<td>ETH stash, \~195,460 ETH</td>
+<td>Ethereum</td>
+<td><code>0x8532FA14ACAf483729C449b8458aedDb900543D4</code></td>
+</tr>
+<tr>
+<td>ETH stash, \~122,310 ETH</td>
+<td>Ethereum</td>
+<td><code>0xc887aF690E0301CD4edBbCe8F8d31b4EC65B286A</code></td>
+</tr>
+<tr>
+<td>ETH stash, \~75k ETH</td>
+<td>Ethereum</td>
+<td><code>0x897C80d1a9729E94460e2Bd93178bD5215158DF3</code></td>
+</tr>
+<tr>
+<td>ETH stash, \~26.8k ETH</td>
+<td>Ethereum</td>
+<td><code>0x54401f80Da97893a15D43566184635B6674BC942</code></td>
+</tr>
+<tr>
+<td>Hub shared with Bitget-hack proceeds (watch, likely a laundering service)</td>
+<td>Ethereum</td>
+<td><code>0x15104a9ce0f08a8f0075a0869ae80e795fe0feb7</code></td>
+</tr>
+<tr>
+<td>Avalanche receiver</td>
+<td>Avalanche</td>
+<td><code>0x80358c5b8f9b2cc27147a1e0f2a6c9a30eb2c397</code></td>
+</tr>
+<tr>
+<td>233.46M XRP, unmoved</td>
+<td>XRP Ledger</td>
+<td><code>rK21t6...fzMx</code> (truncated)</td>
+</tr>
+<tr>
+<td>970,522 SOL, unmoved</td>
+<td>Solana</td>
+<td><code>AffzFD...BEaU</code> (truncated)</td>
+</tr>
+<tr>
+<td>18,270 BTC in 19 lots of up to 1,000 BTC, unmoved since 20:48</td>
+<td>Bitcoin</td>
+<td>Full list in Elliptic's free screening CSV and Cointegrity's Appendix A</td>
+</tr>
+</tbody>
+</table>
+<p>Elliptic's screening list holds 662 entries, about 570 of them Tron addresses from a scripted layering network in which each hop is first funded with exactly 1 TRX. Diff it daily; it changes.</p>
+<h3>Key transactions</h3>
+<table class="map">
+<thead>
+<tr>
+<th>Time (UTC)</th>
+<th>What</th>
+<th>Hash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Oct 29</td>
+<td>Sweeper v1 deployment</td>
+<td><code>0x6b76e8748ba1c6bc81e674c830a0b3603db6bde04ec4bd4a2d3126c1a12706d8</code></td>
+</tr>
+<tr>
+<td>Oct 29, 16:25</td>
+<td>Rehearsal on sweeper v2</td>
+<td><code>0x7c5206cb7aa77ce5b54f030e94ad127af0184e856689526602ffcd21a238e95d</code></td>
+</tr>
+<tr>
+<td>20:20:59</td>
+<td>Type-4 transaction with 50 authorizations</td>
+<td><code>0xad99264d5532ae0dd04b2004eebda05f25657e70dacb764f7ac8d4ccd051298b</code></td>
+</tr>
+<tr>
+<td>20:24:23</td>
+<td>Main sweep, block 26,300,770</td>
+<td><code>0x53bd38b816c23e74134786c29a8c18d792777998a3b9326047b583100e88e2f3</code></td>
+</tr>
+<tr>
+<td>Oct 30, 00:10:35</td>
+<td>Binance 14 re-delegates to the zero address, block 26,301,896</td>
+<td><code>0xafbf94c9...7209</code> (truncated)</td>
+</tr>
+</tbody>
+</table>
+<h3>The sweeper</h3>
+<p>Sweeper v2 is 1,674 bytes of Solidity 0.8.28 with unverified source; the interface below is a third-party reconstruction from bytecode, so function names are guesses. The <code>sweep</code> selector is <code>0x8a179be4</code>.</p>
+<p class="qlabel"><span>Sweeper v2, reconstructed interface</span></p><pre><code>// Reconstructed behaviour of sweeper v2 (names inferred)
+function sweep(address to, address[] calldata tokens) external onlyOperator;
+//   sends the full balance of each listed token, plus ETH, to `to`
+function withdrawETH(address to, uint256 amount) external onlyOperator;
+function withdrawToken(address token, address to, uint256 amount) external onlyOperator;
+function callExecute(address target, address to, uint256 value, bytes calldata data)
+    external payable onlyOperator;
+//   makes the delegated wallet perform any call, e.g. execute() on a smart account it owns
+// onlyOperator: msg.sender must equal the hard-coded 0x7C86...5CA0, else revert
+</code></pre>
+<p>The hard-coded caller is the design choice that matters. Once Binance 14 ran this code, nobody else could call it, so Binance could not front-run the sweeps and had to sign a fresh authorization to evict it. <code>callExecute</code> is how the attacker drove the Circle smart account that Binance 14 owned and pulled the 823M USDC.</p>
+<h2>Laundering and the freeze race</h2>
+<p>Assets with an issuer were caught and assets without one were not: about $2.84B is frozen (Elliptic, verified on-chain), while the attacker still controls roughly $2.4B to $3.3B of ETH, BTC, XRP and SOL depending on the snapshot. The stablecoins sat in attacker wallets for 37 minutes on Ethereum and 46 on Tron before the first freezes, and the attacker used that window to sell at any price.</p>
+<table class="map">
+<thead>
+<tr>
+<th>Route</th>
+<th>What happened</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Intent-based fills</td>
+<td>\~325M USDT sold to market makers through UniswapX and solver contracts for \~122,300 ETH, an implied \~$2,650 per ETH against a \~$2,300 market</td>
+</tr>
+<tr>
+<td>Panic swap</td>
+<td>100M USDT swapped in one transaction with zero slippage protection for 34,583 ETH, about 22% below value</td>
+</tr>
+<tr>
+<td>Lending as an exit</td>
+<td>59.9M USDT supplied to Aave v3 and 19,762 WETH borrowed between 20:58 and 21:01; frozen collateral, unfreezable ETH</td>
+</tr>
+<tr>
+<td>Tron</td>
+<td>300M USDT into JustLend; 234M USDT swapped for 638M TRX on SunSwap; thousands of fresh addresses each seeded with exactly 1 TRX</td>
+</tr>
+<tr>
+<td>Token dumps</td>
+<td>UNI, PEPE, ENA and \~150 smaller tokens sold for \~70,480 ETH, some into pools far too thin to absorb them</td>
+</tr>
+<tr>
+<td>Cross-chain</td>
+<td>Only \~$1.9M so far: TRX through a \~28-hop peel chain, THORChain and the Hyperlane bridge to the hub shared with Bitget proceeds</td>
+</tr>
+<tr>
+<td>Bitcoin, XRP, SOL</td>
+<td>Untouched since the first hour</td>
+</tr>
+</tbody>
+</table>
+<p>Two tooling details stand out. The swaps ran through MetaMask's stock EIP-7702 delegator and the Uniswap Universal Router, so the attacker used 7702 for laundering as well as theft. Chainalysis describes the redistribution as scripted and unlike anything it had seen before, and Bitquery estimates about $119M lost to slippage.</p>
+<p>Freezes so far: Tether about 1.77B USDT, Circle about 825M USDC, Ripple 40.5M RLUSD, World Liberty Financial 27.8M USD1, and the Arbitrum Security Council about $30M in ETH and ARB by forcing transfers through governance.</p>
+<h3>What this does to attribution</h3>
+<p>TRM (high confidence) and Chainalysis name TraderTraitor; Elliptic says "likely" but urges caution. The laundering is the main reason for doubt:</p>
+<ul>
+<li><strong>For:</strong> Tornado-funded staging, rehearsal on test wallets and pre-obtained signatures fired in one burst, all matching Bybit; the fake-recruiter attempts on Binance staff the week before.</li>
+<li><strong>Against:</strong> DPRK operators normally dump stablecoins within minutes, yet $2.6B sat long enough to be frozen. Market makers and lending markets replaced the bridge-heavy Bybit pattern. The Bitget overlap rests on about 13.63 ETH (\~$39,000) of Binance funds at an address that may be a shared laundering service.</li>
+<li><strong>Missing:</strong> no FBI, OFAC or South Korean statement. After Bybit, the FBI named North Korea within five days.</li>
+</ul>
+<h2>Kill chain and MITRE ATT&amp;CK mapping</h2>
+<ol class="chain" aria-label="Kill chain, six stages">
+  <li class="inferred"><b>1. Initial access</b><span class="st">inferred</span><p>Developer lured into running a trojanized project or archive, as in DMM Bitcoin, Bybit and the 2025 UNC4899 case.</p><span class="ttp">T1566.003 Spearphishing via Service · T1204.002 Malicious File</span></li>
+  <li><b>2. Foothold on a DevOps laptop</b><span class="st">confirmed by Binance</span><p>Backdoor on the engineer's machine. Past cases used PLOTTWIST or a binary disguised as kubectl.</p><span class="ttp">T1059 Command and Scripting Interpreter · T1036.005 Match Legitimate Name or Location</span></li>
+  <li class="inferred"><b>3. Credential and session theft</b><span class="st">inferred</span><p>Live cloud sessions, kubeconfig and tokens reused. Binance later found additional breach points.</p><span class="ttp">T1550.004 Web Session Cookie · T1552.001 Credentials In Files · T1528 Steal Application Access Token</span></li>
+  <li><b>4. Service container access</b><span class="st">confirmed by Binance</span><p>The attacker reaches a container that can submit withdrawal requests to the signer.</p><span class="ttp">T1078.004 Valid Accounts: Cloud Accounts · T1609 Container Administration Command</span></li>
+  <li class="inferred"><b>5. Signer abuse</b><span class="st">TRM assessment</span><p>The signing system signs attacker transfers on 10 chains, plus 50 EIP-7702 authorizations pre-signed as a batch.</p><span class="ttp">T1565.003 Runtime Data Manipulation (closest fit)</span></li>
+  <li class="hit"><b>6. Impact</b><span class="st">confirmed on-chain</span><p>About $6.36B out in roughly 20 minutes from 20:05 UTC. The sweeper kept draining deposits until 23:56.</p><span class="ttp">T1657 Financial Theft</span></li>
+</ol>
+<p class="chain-key">Solid border: confirmed by Binance or by on-chain data. Dashed: inferred from past TraderTraitor cases or analyst assessment.</p>
+<p>Three of the six stages are confirmed; the rest come from TraderTraitor's past cases and TRM's analysis. Stages 2, 4 and 5 are where the detections below have the best odds.</p>
+<h2>Detections with Cortex XDR</h2>
+<p>No single rule catches this campaign; six hunts across four layers give overlapping chances. Each query below is XQL you can run as a hunt or save as a correlation rule. Field names follow the standard <code>xdr_data</code> and <code>cloud_audit_logs</code> schemas, so confirm them against your tenant before scheduling.</p>
+<table class="map">
+<thead>
+<tr>
+<th>#</th>
+<th>Layer</th>
+<th>What it catches</th>
+<th>Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Endpoint</td>
+<td>DevOps tool binaries running from odd paths (fake <code>kubectl</code>)</td>
+<td>Execution</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Endpoint</td>
+<td>Unsigned children of IDEs, Docker or Python reaching the internet</td>
+<td>C2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Endpoint</td>
+<td>Non-CLI processes reading cloud and cluster credentials</td>
+<td>Credential access</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Cloud</td>
+<td>One identity's session used from several IPs, or an offensive user agent</td>
+<td>Session hijack</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Kubernetes</td>
+<td>Humans exec-ing into, patching or reading secrets of wallet workloads</td>
+<td>Lateral movement</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Signer</td>
+<td>7702 authorizations, nonce-range batches, multi-chain signing bursts</td>
+<td>Impact</td>
+</tr>
+</tbody>
+</table>
+<h3>1. Masquerading DevOps binaries</h3>
+<p>The 2025 UNC4899 case dropped a backdoor named like the Kubernetes CLI. Real tooling lives in a handful of install paths; anything else with that name is suspect.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>dataset = xdr_data
+| filter event_type = ENUM.PROCESS and event_sub_type = ENUM.PROCESS_START
+| filter agent_os_type in (ENUM.AGENT_OS_MAC, ENUM.AGENT_OS_LINUX)
+| filter action_process_image_name in (&quot;kubectl&quot;, &quot;docker&quot;, &quot;aws&quot;, &quot;gcloud&quot;, &quot;terraform&quot;, &quot;helm&quot;)
+| filter not (action_process_image_path ~= &quot;^(/usr/local/bin|/opt/homebrew/bin|/usr/bin|/Applications|/snap/bin)/&quot;)
+| fields _time, agent_hostname, actor_effective_username, action_process_image_path,
+         action_process_image_command_line, actor_process_image_name, action_process_image_sha256
+</code></pre>
+<h3>2. Lure-spawned implants calling out</h3>
+<p>The lures run inside a developer's trusted tools: an IDE task, <code>docker compose up</code>, <code>npm install</code> or a Python script. Flag unsigned processes in that causality chain making external connections.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>dataset = xdr_data
+| filter event_type = ENUM.NETWORK and agent_os_type = ENUM.AGENT_OS_MAC
+| filter causality_actor_process_image_name in (&quot;Code Helper (Plugin)&quot;, &quot;Cursor Helper (Plugin)&quot;,
+         &quot;python3&quot;, &quot;node&quot;, &quot;docker&quot;, &quot;com.docker.backend&quot;, &quot;Terminal&quot;, &quot;iTerm2&quot;)
+| filter actor_process_signature_status != ENUM.SIGNED
+| filter action_external_hostname != null
+| comp count() as conns, values(action_external_hostname) as hosts by agent_hostname,
+       actor_process_image_path, actor_process_image_sha256
+</code></pre>
+<p>Enrich <code>hosts</code> with domain age: Bybit's C2 was two days old. Any lookup under 30 days on an engineer laptop deserves triage.</p>
+<h3>3. Cloud and cluster credential theft</h3>
+<p>After landing, the attacker reads whatever the engineer is already logged into. Watch reads of credential stores by processes that are not the official CLIs.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>dataset = xdr_data
+| filter event_type = ENUM.FILE and event_sub_type = ENUM.FILE_OPEN
+| filter action_file_path ~= &quot;/\.(aws/(credentials|sso/cache/.+)|kube/config|config/gcloud/.+|docker/config\.json|azure/.+)$&quot;
+| filter actor_process_image_name not in (&quot;aws&quot;, &quot;kubectl&quot;, &quot;gcloud&quot;, &quot;docker&quot;, &quot;terraform&quot;,
+         &quot;helm&quot;, &quot;k9s&quot;, &quot;Code Helper (Plugin)&quot;, &quot;Lens&quot;)
+| fields _time, agent_hostname, actor_process_image_path, actor_process_signature_status, action_file_path
+</code></pre>
+<h3>4. Hijacked sessions in the cloud control plane</h3>
+<p>Bybit's attacker reused live AWS session tokens, timed to the developer's working hours, from ExpressVPN exits with a Kali user agent. A stolen session shows up as one identity spread across new IPs.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>config timeframe = 24h
+| dataset = cloud_audit_logs
+| filter identity_type in (&quot;AssumedRole&quot;, &quot;FederatedUser&quot;, &quot;user&quot;)
+| comp count_distinct(caller_ip) as ip_count, values(caller_ip) as ips,
+       values(user_agent) as agents by identity_name, cloud_provider
+| filter ip_count &gt; 2 or arraystring(agents, &quot;,&quot;) ~= &quot;(?i)kali|distrib#&quot;
+</code></pre>
+<p>Pair this with the endpoint: an engineer's session token used from an IP that is not their laptop's egress IP is a strong signal. Also alert on new MFA device registration and MFA policy edits, both tried in the 2025 cases.</p>
+<h3>5. Kubernetes moves toward wallet workloads</h3>
+<p>The 2025 case edited deployments for persistence, leaked a CI/CD service account token into logs, and pulled database creds from pod env vars. Binance's "service container" sits at the same layer.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>dataset = cloud_audit_logs
+| filter operation_name ~= &quot;(?i)pods[./](exec|attach|portforward)|deployments[./](patch|update)|secrets[./](get|list)|serviceaccounts[./]token&quot;
+| filter resource_name ~= &quot;(?i)wallet|signer|withdraw|custody|treasury|hsm|mpc&quot;
+| filter not (identity_name ~= &quot;^system:&quot;)
+| fields _time, identity_name, caller_ip, operation_name, resource_name, user_agent
+</code></pre>
+<p>Also flag new privileged pods, <code>hostPID</code> or <code>hostPath</code> mounts, and container image changes in those namespaces outside a CI pipeline run.</p>
+<h3>6. The signer: where impact becomes visible</h3>
+<p>This is the layer that would have caught Binance's breach regardless of entry point. It needs the signing service's audit log shipped to Cortex as a custom dataset; here it is <code>signer_audit_raw</code>, with fields you will map from your own HSM or MPC logs.</p>
+<p class="qlabel"><span>Cortex XDR (XQL)</span></p><pre><code>// 6a: any EIP-7702 authorization request on a treasury wallet
+dataset = signer_audit_raw
+| filter tx_type = &quot;0x04&quot; or authorization_count &gt; 0
+| alter nonce_span = max_auth_nonce - min_auth_nonce
+| fields _time, requester_identity, requester_workload, wallet_id, authorization_count,
+         nonce_span, delegate_address
+
+// 6b: one requester signing across many chains or wallets in minutes
+dataset = signer_audit_raw
+| bin _time span = 5m
+| comp count() as sigs, count_distinct(chain) as chains, count_distinct(wallet_id) as wallets,
+       sum(amount_usd) as usd by _time, requester_identity
+| filter chains &gt;= 3 or wallets &gt;= 5 or usd &gt; 10000000
+
+// 6c: destination not on the withdrawal allowlist
+dataset = signer_audit_raw
+| join type = left (dataset = withdrawal_allowlist | fields address as allowed)
+       as al al.allowed = destination_address
+| filter allowed = null and wallet_tier = &quot;hot&quot;
+</code></pre>
+<p>TRM recommends treating a request for many authorizations across a range of nonces as an indicator of compromise. Rule 6a should page someone instantly; there is no benign reason for a treasury wallet to sign 50 delegations at once.</p>
+<p>Finally, ingest the on-chain poller from the EIP-7702 section through an HTTP collector, so a <code>0xef0100</code> code prefix on any treasury address lands as an alert next to the endpoint and cloud signals.</p>
+<div class="callout"><b>Before you rely on these:</b> the hunts are written from public reporting, not from Binance's telemetry, and none of them ran on a live exchange. Dataset and field names depend on how your tenant ingests endpoint, cloud and Kubernetes data. The signer queries assume you ship your signing service's audit log as a custom dataset with fields you map yourself. Run each query once on your own data before you schedule it.</div>
+
+<h2>Mitigations</h2>
+<p>The key store held; the request path and the signer's judgment failed. The controls below are ranked by how directly they would have cut this attack, and they apply to any exchange, custodian or fintech running automated signing.</p>
+<table class="map">
+<thead>
+<tr>
+<th>#</th>
+<th>Control</th>
+<th>Layer</th>
+<th>What it would have stopped</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Signer refuses delegation and other dangerous message types</td>
+<td>Signer</td>
+<td>The $2.5B Ethereum sweep and every later sweep</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Signer verifies each request against an independently signed intent</td>
+<td>Request path</td>
+<td>Unauthorized transfers on all 17 wallets</td>
+<td>High</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Per-chain, per-tier signer isolation and cross-chain velocity caps</td>
+<td>Signer</td>
+<td>The 10-chain blast radius</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Delegation circuit breaker and a fast revocation path</td>
+<td>Wallet ops</td>
+<td>Sweeps 2 to 7 and the 200M USDT top-up</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>5</td>
+<td>No path from engineer laptops to signing workloads</td>
+<td>Access</td>
+<td>The entry chain</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Locked-down wallet namespaces</td>
+<td>Cluster</td>
+<td>The container pivot</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Pre-arranged freeze and halt runbook</td>
+<td>Response</td>
+<td>Shrinks the 37-minute conversion window</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<h3>1. Give the signer its own judgment</h3>
+<p>HSMs and MPC protect the key, not the decision to use it. The policy engine in front of the signer must reason about <em>what</em> it is signing. For hot EOAs, the allowed set should be plain value transfers and token <code>transfer()</code> calls; everything else (EIP-7702 authorizations, <code>approve</code>, <code>permit</code>, <code>setApprovalForAll</code>, upgrades, arbitrary calldata) is denied unless a separate quorum approves it.</p>
+<p>A minimal policy, written in Rego for OPA:</p>
+<p class="qlabel"><span>Signer policy (Rego for OPA)</span></p><pre><code>package signer.policy
+import rego.v1
+
+default allow := false
+
+deny contains &quot;EIP-7702 authorization on a hot wallet&quot; if {
+    input.tx.type == &quot;0x04&quot;
+    input.wallet.tier == &quot;hot&quot;
+}
+
+deny contains &quot;more than one authorization in a request&quot; if {
+    count(input.tx.authorization_list) &gt; 1
+}
+
+deny contains &quot;chain-agnostic authorization (chain_id 0)&quot; if {
+    some a in input.tx.authorization_list
+    a.chain_id == 0
+}
+
+deny contains &quot;authorization for a non-current nonce&quot; if {
+    some a in input.tx.authorization_list
+    a.nonce != input.wallet.current_nonce
+}
+
+deny contains &quot;destination outside registry with no withdrawal record&quot; if {
+    not input.tx.to in data.registry.addresses
+    not input.request.withdrawal_id
+}
+
+allow if {
+    count(deny) == 0
+    input.request.intent_verified
+}
+</code></pre>
+<p>Any one of the first four rules would have refused the 50-authorization batch. The <code>chain_id 0</code> rule matters too: a tuple with chain ID 0 is valid on every EVM chain, so one signature could be replayed against the same address on any 7702-enabled chain where its nonce matches.</p>
+<h3>2. Verify intent, not just the requester</h3>
+<p>DMM Bitcoin and Binance share one lesson: an authenticated service submitting a request proves nothing about whether the request is legitimate. Fix it with two independent trust domains:</p>
+<ul>
+<li>The withdrawal ledger signs an <strong>intent</strong> (customer ID, asset, amount, destination, request ID) with its own key, run by a different team in a different cloud account.</li>
+<li>The signer, or an independent policy co-signer inside the MPC quorum, rebuilds the transaction from that intent and refuses if a single byte differs.</li>
+<li>Internal moves (rebalancing, top-ups) may only go to a registry of exchange-owned addresses that changes through a separate, multi-person process.</li>
+<li>Requesters authenticate with workload identity (mTLS with SPIFFE-style certificates bound to the pod), so a session lifted from a laptop cannot impersonate the container.</li>
+</ul>
+<h3>3. Shrink the blast radius</h3>
+<ul>
+<li>Run separate signer clusters and policy engines per chain family and per wallet tier. No single orchestrator should be able to request signatures on ten chains.</li>
+<li>Enforce velocity caps per wallet, per chain <strong>and</strong> in aggregate across all chains per 5, 15 and 60 minutes. A global breach halts all hot signing, not just the wallet that tripped.</li>
+<li>Size hot wallets to hours of outflow. Binance 14 alone held 167,464 ETH and 1.6B USDT.</li>
+<li>Inventory every right a hot EOA holds elsewhere: smart-account ownership, executor roles, token allowances, admin keys. Move them off hot wallets. Delegated code inherits all of them, which is how 823M USDC left a Circle account.</li>
+</ul>
+<h3>4. Make eviction fast</h3>
+<p>A revocation is itself an EIP-7702 authorization to the zero address, and it is nonce-bound like any other, so it cannot be usefully pre-signed. What you can prepare is the path to sign it live:</p>
+<ul>
+<li>A break-glass signing route for the revocation, outside the normal request service, tested quarterly. Binance needed 3 hours 49 minutes.</li>
+<li>A per-block <code>eth_getCode</code> monitor on every hot EOA. A <code>0xef0100</code> prefix triggers an automatic halt of all top-ups and deposit consolidation into that wallet, then pages the on-call. This alone would have saved the 200M USDT top-up swept at 21:44.</li>
+<li>The same halt on any outflow pattern the wallet has never produced before.</li>
+</ul>
+<h3>5. Close the engineer-to-production path</h3>
+<ul>
+<li>Anyone who can reach wallet infrastructure works from a privileged access workstation, not their daily laptop. Block AirDrop, Bluetooth file transfer and unmanaged USB on those machines.</li>
+<li>No standing production access. Use just-in-time, time-boxed, approved sessions through a recorded bastion with FIDO2 MFA.</li>
+<li>Bind sessions to the device and keep cloud tokens short-lived, so stolen cookies and tokens fail when replayed elsewhere (the core of both DMM and Bybit).</li>
+<li>Run every coding test, "help me debug" project and unknown repo in a disposable cloud sandbox with no credentials. Brief engineers on fake-recruiter lures; Binance staff were being targeted that very week.</li>
+<li>On macOS, enforce an EDR policy that blocks unsigned binaries launched from IDE workspaces, Downloads and Docker volumes, and deploy the Cortex hunts above.</li>
+</ul>
+<h3>6. Lock down wallet namespaces</h3>
+<ul>
+<li>Put wallet services in their own cluster and cloud account. Deny <code>kubectl exec</code>, <code>attach</code> and <code>port-forward</code> in those namespaces through RBAC and an admission policy, with a logged break-glass role.</li>
+<li>Apply Pod Security Admission at <code>restricted</code>: no privileged pods, no <code>hostPID</code>, no <code>hostPath</code>.</li>
+<li>Pull secrets from a vault as short-lived dynamic credentials, never from environment variables.</li>
+<li>Admit only signed images (cosign or equivalent), and ship deployment changes only through CI with two-person review.</li>
+<li>Use NetworkPolicy so that only the request service can reach the signer, and alert on any interactive shell in a wallet pod.</li>
+</ul>
+<h3>7. Have the halt-and-freeze runbook ready</h3>
+<ol>
+<li><strong>Halt</strong> all hot signing and deposit consolidation with one global switch. Binance's suspension came over an hour after Tether's first freeze.</li>
+<li><strong>Evict</strong> any delegation with a zero-address authorization and confirm <code>eth_getCode</code> returns empty.</li>
+<li><strong>Freeze</strong> by sending collector addresses to pre-agreed 24/7 contacts at Tether, Circle, Ripple, Paxos and L2 security councils. Tether's 37-minute response still let \~$786M convert to ETH and TRX.</li>
+<li><strong>Share</strong> addresses with TRM, Chainalysis, Elliptic and SEAL 911 so exchanges and solvers screen at the fill.</li>
+<li><strong>Preserve</strong> the laptop image, container filesystem and signer logs before cleanup. Safe{Wallet}'s attacker wiped malware and bash history.</li>
+<li><strong>Rotate</strong> every credential reachable from the compromised laptop and container, and assume they are all burned.</li>
+</ol>
+<h2>Still unknown</h2>
+<p>Binance has promised a full technical post-mortem, and these questions decide how much of the above is confirmed. I will update this post when it lands.</p>
+<ul>
+<li>How was the DevOps laptop compromised: fake recruiter, trojanized project, supply-chain package, or something new? Is it linked to the "Contagious Interview" attempts Binance reported blocking on October 27?</li>
+<li>What are the "additional points of breach", and do they include identities beyond the first engineer?</li>
+<li>How did the service container reach signing requests on ten chains: a policy bypass, a misconfigured rule, or a direct path to the signers?</li>
+<li>Why did 50 type <code>0x04</code> authorizations pass: was the message type simply unknown to the policy engine?</li>
+<li>Does the address <code>0x4885...7c8e</code>, which received withdrawals from Binance 14 and 16 in September and later paid the Bitget hub, point to an attacker-controlled Binance account?</li>
+<li>Will a government attribute the theft? Until the FBI, OFAC or South Korea does, exposure to these funds is stolen-property risk; after, it becomes sanctions risk.</li>
+<li>How long was the attacker inside before October 28? In the Bybit case, 17 days passed between the developer's infection and the theft.</li>
+</ul>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history">TRM Labs: North Korea Steals USD 6.36 Billion From Binance</a> (timeline, amounts, EIP-7702 analysis, signer assessment)</li>
+<li><a href="https://www.securityweek.com/6-billion-binance-hack-bears-hallmarks-of-north-koreas-tradertraitor/">SecurityWeek: $6 Billion Binance Hack Bears Hallmarks of TraderTraitor</a></li>
+<li><a href="https://www.aikido.dev/blog/binance-hack-developer-laptop">Aikido: How a compromised developer laptop can lead to a $6.3B breach</a> (Teng's comments on EIP-7702 and approval controls)</li>
+<li><a href="https://www.coindesk.com/markets/2026/10/30/live-news-binance-hack-rattles-crypto-as-intel-plunges-and-ai-spending-fears-hit-tech">CoinDesk live coverage, Oct 30</a> (additional breach points, withdrawal timeline)</li>
+<li><a href="https://www.cnbc.com/2026/10/30/billions-in-crypto-frozen-in-binance-hack-heres-what-happens-next-.html">CNBC: What we know and what comes next</a></li>
+<li><a href="https://thehackernews.com/2025/03/safewallet-confirms-north-korean.html">The Hacker News: Safe{Wallet} confirms North Korean TraderTraitor behind Bybit</a> (Bybit initial access, PLOTTWIST, AWS session hijack)</li>
+<li><a href="https://rekt.news/not-so-safe">rekt.news: Not So Safe</a> (Bybit timeline, getstockprice domain)</li>
+<li><a href="https://thehackernews.com/2026/03/unc4899-used-airdrop-file-transfer-and.html">The Hacker News: UNC4899 breached crypto firm via AirDrop</a> (Google Cloud H1 2026 case: fake kubectl, K8s and CI/CD pivots)</li>
+<li><a href="https://arxiv.org/pdf/2512.12174">Qi et al., EIP-7702 Phishing Attack (arXiv 2512.12174)</a></li>
+<li><a href="https://www.zealynx.io/glossary/eip-7702">Zealynx: EIP-7702 glossary</a> (authorization tuple and delegation designator format)</li>
+<li><a href="https://cointegrity.substack.com/p/the-binance-hack-of-29-october-2026">Cointegrity: The Binance Hack of 29 October 2026, Preliminary Analysis</a> (graded timeline, hypotheses, laundering, attribution evidence)</li>
+<li><a href="https://dev.to/thevenice/how-a-53b-binance-hot-wallet-hack-worked-eip-7702-50-signatures-and-a-37-minute-race-2lea">Prakash Pawar on DEV: EIP-7702, 50 signatures and a 37-minute race</a> (rehearsal times, nonce range, sweeper interface, addresses)</li>
+<li><a href="https://www.elliptic.co/insights/binance-largest-hack-in-history/">Elliptic: The largest theft in history</a> (frozen totals, automated laundering, screening list)</li>
+<li><a href="https://etherscan.io/tx/0xad99264d5532ae0dd04b2004eebda05f25657e70dacb764f7ac8d4ccd051298b">Etherscan: 50-authorization takeover transaction</a></li>
+<li><a href="https://etherscan.io/address/0x63e842b054bd624a465454d533c33f573e9c6fae">Etherscan: sweeper v2 contract</a></li>
+<li><a href="https://gigazine.net/gsc_news/en/20241225-dmm-bitcoin-north-korea">GIGAZINE: FBI and NPA on the DMM Bitcoin theft</a> (Ginco recruiter lure, tampered transaction request)</li>
+<li><a href="https://www.chainalysis.com/blog/binance-exploit-latest-findings-and-response/">Chainalysis: Binance exploit, latest findings</a></li>
+</ul>
+<div class="end"><p><b>Thanks for reading.</b> Running signing infrastructure, or defending engineers who can reach it? Tell me which of these hunts or controls you would add or cut. I reply within a day.</p><div class="acts"><a class="btn btn-primary btn-sm" href="https://linkedin.com/in/rayen-skhiri">Message me on LinkedIn <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a><a class="btn btn-ghost btn-sm" href="/blog/">More posts</a></div></div></article></div>
+</main>
+
+<footer class="site">
+  <div class="wrap f">
+    <a class="logo" href="/"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.4 7.5 9.5 4.4-1.1 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="logo-text"><b>RAYEN SKHIRI</b><span>Tunis, Tunisia</span></span></a>
+    <nav aria-label="Footer">
+      <a href="/">Home</a><a href="/blog/">Blog</a><a href="/#projects">Projects</a><a href="https://threatwatch.rayenskhiri.online">Threat Watch</a><a href="https://github.com/Raynskhiri">GitHub</a><a href="https://linkedin.com/in/rayen-skhiri">LinkedIn</a>
+    </nav>
+    <span>Designed and built by Rayen. Hosted on Vercel.</span>
+  </div>
+</footer>
+</body>
+</html>
