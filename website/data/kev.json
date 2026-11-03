@@ -1,13 +1,23 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.10.30",
- "generated": "2026-11-03T01:02:02Z",
- "total": 1766,
- "added_7d": 8,
- "added_30d": 33,
+ "catalog_version": "2026.11.03",
+ "generated": "2026-11-03T23:27:08Z",
+ "total": 1767,
+ "added_7d": 9,
+ "added_30d": 34,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-119977",
+   "vendor": "WordPress",
+   "product": "WordPress Core",
+   "name": "WordPress WordPress Core Time-of-check Time-of-use (TOCTOU) Race Condition Vulnerability",
+   "added": "2026-11-03",
+   "due": "2026-11-06",
+   "ransomware": false,
+   "summary": "WordPress WordPress Core contains a time-of-check time-of-use (TOCTOU) race condition vulnerability that could allow unauthenticated attackers to execute code on the server during the upgrade window. This is due to predictable, web-accessible staging paths used during full-packa…"
+  },
   {
    "cve": "CVE-2026-118527",
    "vendor": "Ivanti",
@@ -397,16 +407,6 @@
    "due": "2026-09-30",
    "ransomware": false,
    "summary": "Citrix NetScaler ADC and NetScaler Gateway contain an improper restriction of operations within the bounds of a memory buffer vulnerability that could allow for remote code execution or denial of service"
-  },
-  {
-   "cve": "CVE-2026-88771",
-   "vendor": "Citrix",
-   "product": "NetScaler",
-   "name": "Citrix NetScaler Improper Input Validation Vulnerability",
-   "added": "2026-09-27",
-   "due": "2026-09-30",
-   "ransomware": false,
-   "summary": "Citrix NetScaler ADC and NetScaler Gateway contain an improper input validation vulnerability that could allow an unauthenticated attacker to execute arbitrary commands."
   }
  ],
  "ransomware_latest": [
