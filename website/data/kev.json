@@ -1,13 +1,23 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.04",
- "generated": "2026-11-06T14:27:22Z",
- "total": 1768,
- "added_7d": 4,
- "added_30d": 34,
+ "catalog_version": "2026.11.06",
+ "generated": "2026-11-06T23:13:39Z",
+ "total": 1769,
+ "added_7d": 5,
+ "added_30d": 35,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-19868",
+   "vendor": "SonicWall",
+   "product": "SonicOS SSLVPN",
+   "name": "SonicWall SonicOS SSLVPN Use of Single-factor Authentication Vulnerability",
+   "added": "2026-11-06",
+   "due": "2026-11-20",
+   "ransomware": false,
+   "summary": "SonicWall SonicOS SSLVPN contains a use of single-factor authentication vulnerability that may allow a user with valid credentials for an alternate authentication method to bypass SAML authentication controls. Successful exploitation may also bypass SAML-enforced multi-factor au…"
+  },
   {
    "cve": "CVE-2024-27834",
    "vendor": "Apple",
@@ -397,16 +407,6 @@
    "due": "2026-10-03",
    "ransomware": false,
    "summary": "Cisco Catalyst SD-WAN Manager contains a hex encoding vulnerability that could allow an unauthenticated, remote attacker to access an affected system with privileges of the admin user due to improper handling of URI encoding in an HTTP request."
-  },
-  {
-   "cve": "CVE-2026-86950",
-   "vendor": "Apple",
-   "product": "Multiple Products",
-   "name": "Apple Multiple Products Out-of-Bounds Write Vulnerability",
-   "added": "2026-09-29",
-   "due": "2026-10-13",
-   "ransomware": false,
-   "summary": "Apple iOS, macOS, and iPadOS contain an out-of-bounds write vulnerability in CoreGraphics that may lead to arbitrary code execution."
   }
  ],
  "ransomware_latest": [
