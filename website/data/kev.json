@@ -1,13 +1,43 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.06",
- "generated": "2026-11-08T13:40:35Z",
- "total": 1769,
- "added_7d": 3,
- "added_30d": 30,
+ "catalog_version": "2026.11.09",
+ "generated": "2026-11-09T16:40:31Z",
+ "total": 1772,
+ "added_7d": 6,
+ "added_30d": 33,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-123158",
+   "vendor": "OpenBSD",
+   "product": "OpenSSH",
+   "name": "OpenBSD OpenSSH Unexpected Status Code or Return Value Vulnerability",
+   "added": "2026-11-09",
+   "due": "2026-11-12",
+   "ransomware": false,
+   "summary": "OpenBSD OpenSSH on Linux contains an unexpected status code or return value vulnerability that could allow for authentication bypass."
+  },
+  {
+   "cve": "CVE-2026-116779",
+   "vendor": "SignalWire",
+   "product": "FreeSwitch",
+   "name": "SignalWire FreeSwitch Code Injection Vulnerability",
+   "added": "2026-11-09",
+   "due": "2026-11-12",
+   "ransomware": false,
+   "summary": "SignalWire FreeSwitch contains a code injection vulnerability that permits configuration and credential disclosure, arbitrary call control, and command execution."
+  },
+  {
+   "cve": "CVE-2026-102895",
+   "vendor": "GPUStack",
+   "product": "GPUStack",
+   "name": "GPUStack Improper Authentication Vulnerability",
+   "added": "2026-11-09",
+   "due": "2026-11-12",
+   "ransomware": false,
+   "summary": "GPUStack contains an improper authentication vulnerability which could allow unauthenticated administrative access, including user and model changes, persistent administrator API-key creation, disclosure of worker and cloud-provider secrets, and code execution through POST /v2/i…"
+  },
   {
    "cve": "CVE-2026-19868",
    "vendor": "SonicWall",
@@ -377,36 +407,6 @@
    "due": "2026-10-05",
    "ransomware": false,
    "summary": "Zammad GmbH Zammad contains an improper privilege management vulnerability that can allow the local zammad user to escalate privileges to root. This vulnerability can be chained with CVE-2026-102489."
-  },
-  {
-   "cve": "CVE-2026-102489",
-   "vendor": "Zammad GmbH",
-   "product": "Zammad",
-   "name": "Zammad GmbH Zammad Session Fixation Vulnerability",
-   "added": "2026-10-02",
-   "due": "2026-10-05",
-   "ransomware": false,
-   "summary": "Zammad GmbH Zammad contains a session fixation vulnerability that can lead to remote code execution as the zammad user. This vulnerability can be chained with CVE-2026-102490."
-  },
-  {
-   "cve": "CVE-2026-104286",
-   "vendor": "Fortinet",
-   "product": "FortiMail",
-   "name": "Fortinet FortiMail Path Traversal Vulnerability",
-   "added": "2026-10-01",
-   "due": "2026-10-04",
-   "ransomware": false,
-   "summary": "Fortinet FortiMail contains a path traversal and an improper neutralization of NULL byte or NULL character vulnerability that may allow an unauthenticated attacker to write arbitrary files on the underlying system via crafted HTTP or HTTPS requests."
-  },
-  {
-   "cve": "CVE-2026-76504",
-   "vendor": "Cisco",
-   "product": "Catalyst SD-WAN Manager",
-   "name": "Cisco Catalyst SD-WAN Manager Hex Encoding Vulnerability",
-   "added": "2026-09-30",
-   "due": "2026-10-03",
-   "ransomware": false,
-   "summary": "Cisco Catalyst SD-WAN Manager contains a hex encoding vulnerability that could allow an unauthenticated, remote attacker to access an affected system with privileges of the admin user due to improper handling of URI encoding in an HTTP request."
   }
  ],
  "ransomware_latest": [
