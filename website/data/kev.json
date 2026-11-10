@@ -2,12 +2,22 @@
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
  "catalog_version": "2026.11.09",
- "generated": "2026-11-09T16:40:31Z",
- "total": 1772,
- "added_7d": 6,
- "added_30d": 33,
+ "generated": "2026-11-10T01:36:22Z",
+ "total": 1773,
+ "added_7d": 7,
+ "added_30d": 34,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-123218",
+   "vendor": "IBM",
+   "product": "Aspera Faspex",
+   "name": "IBM Aspera Faspex Incorrect Authorization Vulnerability",
+   "added": "2026-11-09",
+   "due": "2026-11-12",
+   "ransomware": false,
+   "summary": "IBM Aspera Faspex contains an incorrect authorization vulnerability that could allow an authenticated user to craft a specific message to bypass authorization, causing privilege escalations."
+  },
   {
    "cve": "CVE-2026-123158",
    "vendor": "OpenBSD",
@@ -397,16 +407,6 @@
    "due": "2026-10-07",
    "ransomware": false,
    "summary": "Citrix NetScaler ADC (formerly Citrix ADC) and Citrix NetScaler Gateway (formerly Citrix Gateway) contain an improper restriction of operations within the bounds of a memory buffer vulnerability that could allow for a denial of service."
-  },
-  {
-   "cve": "CVE-2026-102490",
-   "vendor": "Zammad GmbH",
-   "product": "Zammad",
-   "name": "Zammad GmbH Zammad Improper Privilege Management Vulnerability",
-   "added": "2026-10-02",
-   "due": "2026-10-05",
-   "ransomware": false,
-   "summary": "Zammad GmbH Zammad contains an improper privilege management vulnerability that can allow the local zammad user to escalate privileges to root. This vulnerability can be chained with CVE-2026-102489."
   }
  ],
  "ransomware_latest": [
