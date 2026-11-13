@@ -2,10 +2,10 @@
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
  "catalog_version": "2026.11.10",
- "generated": "2026-11-12T00:47:38Z",
+ "generated": "2026-11-13T14:44:24Z",
  "total": 1779,
  "added_7d": 11,
- "added_30d": 40,
+ "added_30d": 38,
  "ransomware_total": 361,
  "latest": [
   {
