@@ -1,13 +1,33 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.10",
- "generated": "2026-11-13T14:44:24Z",
- "total": 1779,
- "added_7d": 11,
- "added_30d": 38,
+ "catalog_version": "2026.11.13",
+ "generated": "2026-11-13T23:37:29Z",
+ "total": 1781,
+ "added_7d": 13,
+ "added_30d": 40,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-123039",
+   "vendor": "Check Point",
+   "product": "Multiple Products",
+   "name": "Check Point Multiple Products Incorrect Permission Assignment for Critical Resource Vulnerability",
+   "added": "2026-11-13",
+   "due": "2026-11-16",
+   "ransomware": false,
+   "summary": "Check Point Firewall, Multi-Domain Security Management Server, Scalable Platforms, Security Gateway, and Security Management Server contain an incorrect permissions assignment for critical resources vulnerability when the Gaia OS DynamicCLI daemon runs as root and listens on a w…"
+  },
+  {
+   "cve": "CVE-2026-114713",
+   "vendor": "UnrealIRCd",
+   "product": "UnrealIRCd",
+   "name": "UnrealIRCd Improper Neutralization of Delimiters Vulnerability",
+   "added": "2026-11-13",
+   "due": "2026-11-16",
+   "ransomware": false,
+   "summary": "UnrealIRCd UnrealIRCd contains an improper neutralization of delimiters vulnerability that allows any user on a network with two or more linked servers to inject server-to-server commands that are executed with server authority."
+  },
   {
    "cve": "CVE-2026-20320",
    "vendor": "Cisco",
@@ -387,26 +407,6 @@
    "due": "2026-10-17",
    "ransomware": false,
    "summary": "Palo Alto Networks PAN-OS contains a code injection vulnerability that could allow an authenticated attacker with network access to execute arbitrary code with root privileges on the firewall."
-  },
-  {
-   "cve": "CVE-2026-96951",
-   "vendor": "Microsoft",
-   "product": "Windows",
-   "name": "Microsoft Windows Command Injection Vulnerability",
-   "added": "2026-10-13",
-   "due": "2026-10-16",
-   "ransomware": false,
-   "summary": "Microsoft Windows Shell contains a command injection vulnerability that allows an unauthorized attacker to bypass a security feature over a network."
-  },
-  {
-   "cve": "CVE-2026-104935",
-   "vendor": "Ivanti",
-   "product": "Connect Secure",
-   "name": "Ivanti Connect Secure Authentication Bypass by Spoofing Vulnerability",
-   "added": "2026-10-13",
-   "due": "2026-10-16",
-   "ransomware": false,
-   "summary": "Ivanti Connect Secure contains an authentication bypass by spoofing vulnerability that allows a remote unauthenticated attacker to execute arbitrary commands."
   }
  ],
  "ransomware_latest": [
