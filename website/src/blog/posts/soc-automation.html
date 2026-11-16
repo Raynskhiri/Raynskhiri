@@ -1,0 +1,175 @@
+<!--meta
+{
+  "slug": "soc-automation",
+  "title": "Automating a managed SOC on Cortex XDR: playbooks, correlation, AI briefs and reports",
+  "description": "How I rebuilt the triage of a managed SOC on Cortex XDR: a broken correlation rule fixed, a family of playbooks routed by automation rules, an AI brief that helps but never decides, fleet health alerts, a report pipeline that cannot invent a number, and one real incident from alert to ticket.",
+  "date": "2026-11-16",
+  "date_human": "16 November 2026",
+  "read": "15 min read",
+  "tags": [
+    "Cortex XDR",
+    "SOAR",
+    "Detection engineering",
+    "Incident response"
+  ],
+  "badge": "Client work, anonymised",
+  "cta": "Running a SOC on Cortex XDR or XSIAM and want to compare playbooks or correlation rules? I reply within a day."
+}
+-->
+<p>In a managed SOC the hard part is not one difficult alert. It is the same ten alerts, every day, on every client, each one needing the same five lookups before anyone can say "noise" or "escalate". This post is what I built over two weeks to take that repetition off the analysts on a <strong>Cortex XDR Pro</strong> tenant: correlation rules, a family of triage playbooks, automation rules to route alerts to them, an AI brief inside the playbooks, fleet health alerts, and a reporting pipeline. It ends with one real incident handled from the first alert to the ticket.</p>
+
+<div class="callout"><b>Confidentiality.</b> This is client work, so everything that could identify a client is gone: no company or tenant names, hostnames, usernames, IP addresses, file hashes, case or ticket numbers, and no volumes that would describe a client's environment. The queries and logic are rewritten in generic form. The method is what I want to share, not the data.</div>
+
+<div class="facts">
+  <div class="fact"><b>0</b><span>playbooks allowed to close a case on their own</span></div>
+  <div class="fact"><b>1 journal</b><span>per production change, each with its rollback order</span></div>
+  <div class="fact"><b>Every number</b><span>in a client report recounted from the export</span></div>
+</div>
+
+<h2>Rules I set before touching anything</h2>
+<p>A SOC tenant is production. A bad playbook can close a real intrusion, and a bad policy change can stop a client's services. So the work followed five rules:</p>
+<ol>
+  <li><strong>Audit read-only first.</strong> Licence, integrations, policies, rules, playbooks and the alert mix, written up before any change.</li>
+  <li><strong>Additive changes only.</strong> A new rule or playbook version sits next to the old one. Nothing is disabled or deleted without an explicit decision for that object, and prevention policies and profiles were left alone on purpose.</li>
+  <li><strong>No automatic closure.</strong> Playbooks enrich, write a note, set a verdict and assign. A human closes.</li>
+  <li><strong>Every change has a journal entry</strong> with what was created, what was tested, what was <em>not</em> tested, and the rollback in order.</li>
+  <li><strong>Tenants never mix.</strong> Nothing from one client appears in another client's rule, playbook, report or ticket.</li>
+</ol>
+
+<h2>Step 1: read the alert mix, not the alert list</h2>
+<p>The first useful query is not a hunt. It is a count of issues by name and detection source over the retention window, from the <code>issues</code> dataset. It tells you where the analyst hours go.</p>
+<div class="qlabel"><span><b>XQL</b> · what fills the queue</span></div>
+<pre><code>dataset = issues
+| comp count() as issues, max(_time) as last_seen
+    by xdm.issue.name, xdm.issue.detection.method
+| sort desc issues
+| limit 30</code></pre>
+<p>On this tenant three families made up nearly all the work: firewall VPN events, a VPN correlation rule, and endpoint agent alerts (WildFire and local analysis verdicts, hash and signer restrictions, behaviour and exploit detections). The firewall family was already automated. The other two were handled by hand, one alert at a time.</p>
+<p>Two field facts saved hours later:</p>
+<ul>
+  <li>In the <code>issues</code> dataset, <code>xdm.issue.case_ids</code> is an array of numbers. <code>arraystring()</code> on it fails; <code>arrayindex(xdm.issue.case_ids, 0)</code> works and lets you pull every alert of a range of cases in one query.</li>
+  <li>The useful detail of an alert (host, user, file path, SHA-256, process, command line, remote address) lives in <code>xdm.issue.normalized_fields</code>. Profile it before you write a playbook, instead of guessing field names.</li>
+</ul>
+
+<h2>Step 2: fix the correlation rule that was making noise</h2>
+<p>The VPN rule was meant to catch the classic brute-force success: many failed logins, then a successful session, for the same account or from the same address. Every case it produced said the success came "from NULL" for "no account". The rule was firing, but it could never be investigated.</p>
+<p>The cause was the firewall's log format. On SSL-VPN events from this FortiGate, the fields you would expect (<code>src</code>, <code>suser</code>) are empty. The remote address is in <code>dst</code> and the account in <code>duser</code>. The rule grouped by the empty field, so every event in the window fell into one null group, and any day with failures and one legitimate login matched.</p>
+<p>The fix was two new rules, created with "Save as new" so the old one stayed untouched until validated:</p>
+<div class="qlabel"><span><b>XQL</b> · per account (shape of the rule)</span></div>
+<pre><code>dataset = &lt;firewall dataset&gt;
+| filter subtype = "vpn" and account != null
+| alter failed = if(action = "ssl-login-fail", 1, 0),
+        opened = if(action = "tunnel-up", 1, 0)
+| comp sum(failed) as failures, sum(opened) as sessions,
+       values(remote_ip) as addresses by account
+| filter failures &gt;= 5 and sessions &gt;= 1</code></pre>
+<p>A second rule does the same per remote address with a higher threshold, for password spraying across many accounts. Lesson: <strong>profile the fields before you group by them</strong>. A <code>comp count(), count(field)</code> by event type shows in seconds which fields are really populated.</p>
+
+<h2>Step 3: a family of triage playbooks</h2>
+<p>Instead of one giant playbook, I wrote one per alert family, each with the same skeleton, and routed them with automation rules. Only the first matching automation rule runs, so the specific rules sit above a catch-all.</p>
+<table class="map">
+  <thead><tr><th>Family</th><th>Matched on</th><th>What the playbook does</th></tr></thead>
+  <tbody>
+    <tr><td>Hash and signer restrictions</td><td>Alert name</td><td>Reputation of the file, propagation and executions in XQL, backup or share path as a noise indicator, verdict</td></tr>
+    <tr><td>Malicious file</td><td>WildFire and local analysis alerts</td><td>Full investigation note, then a Slack message with response buttons (isolate, quarantine, block hash) that a human must press</td></tr>
+    <tr><td>Behaviour and exploit</td><td>Catch-all on agent and BIOC detections</td><td>Command line against a keyword list, temp or user path, system binary guard, verdict</td></tr>
+    <tr><td>IOC on an IP address</td><td>Detection method</td><td>AbuseIPDB, firewall events for the address, endpoints that contacted it, verdict</td></tr>
+    <tr><td>VPN brute force</td><td>Correlation rule name</td><td>Account overlap, address overlap, campaign size</td></tr>
+    <tr><td>Fleet health</td><td>Fleet correlation rules</td><td>Notification only</td></tr>
+  </tbody>
+</table>
+<p>Every triage playbook ends on one of four verdicts, written as a French note on the case and nothing more:</p>
+<ul>
+  <li><strong>ESCALATE</strong>: malicious reputation, a suspicious command line, or an internal host that talked to a bad address. Severity goes up.</li>
+  <li><strong>PROBABLE NOISE</strong> or <strong>PROBABLE COMMON SOFTWARE</strong>: no propagation, no suspicious command, benign reputation. Marked low priority, an exception still needs a human.</li>
+  <li><strong>MANUAL REVIEW</strong>: everything else, which is the default.</li>
+</ul>
+
+<h3>What the engine taught me</h3>
+<ul>
+  <li><strong>Condition logic.</strong> Inside one condition block the items are OR. Between blocks they are AND. Two of my conditions were inverted until I checked this in the editor.</li>
+  <li><strong>The system binary trap.</strong> <code>powershell.exe</code> or <code>rundll32.exe</code> always has a clean reputation and is present everywhere, so a naive playbook calls it "common software". A guard on the path (<code>\Windows\System32</code>, <code>SysWOW64</code>) sends those alerts to manual review instead.</li>
+  <li><strong>Context is cumulative.</strong> Reputation and query results append across runs. A <code>DeleteContext</code> before each lookup keeps old answers out of new verdicts.</li>
+  <li><strong>Enrichment must not stop the playbook.</strong> Every lookup task continues on error through an explicit error path, and every consolidation is guarded by an "is not empty" check.</li>
+  <li><strong>The debugger can act for real.</strong> A run on a copy of a real alert once took a response branch and added a hash to the tenant block list. Since then, approval steps in tests are always answered "Reject", and response branches are treated as live.</li>
+</ul>
+
+<h2>Step 4: AI inside the playbook, on a short leash</h2>
+<p>Cortex lets a playbook call an AI prompt as a task. I added one at the end of each triage playbook: it receives the investigation note the playbook already wrote, and returns a short brief for the analyst: summary, evidence, risk, recommended action, and what to verify. For the malicious file playbook, the brief is appended to the Slack approval message.</p>
+<p>The guard rails matter more than the prompt:</p>
+<ul>
+  <li><strong>It is optional and non-blocking.</strong> An input switches it off, and if the model call fails the playbook carries on.</li>
+  <li><strong>It never decides.</strong> It does not close, change severity or press a button. Its text is labelled "AI analysis, to verify".</li>
+  <li><strong>It only sees the note.</strong> No free access to the tenant, so it cannot invent context. An empty lookup must be written as "none" in the note, otherwise the model reads it as "unknown" and hedges.</li>
+  <li><strong>Pick the model for the job.</strong> The reasoning model failed above an 8,192 token output limit; a fast model was enough for a one-screen brief.</li>
+</ul>
+
+<h2>Step 5: alert on the fleet, not only on threats</h2>
+<p>An agent that stopped reporting a month ago is a blind spot that no detection will ever show. Three scheduled correlation rules on the <code>endpoints</code> dataset now raise it as an alert: agents offline for more than 30 days, agents not on the target version, and agents that are not fully protected.</p>
+<div class="qlabel"><span><b>XQL</b> · agents silent for more than 30 days</span></div>
+<pre><code>dataset = endpoints
+| filter endpoint_status != "CONNECTED"
+| alter days_silent = timestamp_diff(current_time(), last_seen, "DAY")
+| filter days_silent &gt; 30
+| fields endpoint_name, endpoint_type, agent_version, days_silent
+| sort desc days_silent</code></pre>
+<p>Two traps: <code>last_seen</code> is a date in XQL (the API returns it in epoch milliseconds, so the obvious conversion fails), and a telemetry-based version of this query misses exactly the machines that matter, because a silent endpoint has no events at all.</p>
+
+<h2>Step 6: reports that cannot invent a number</h2>
+<p>Weekly and monthly client reports are where a SOC loses credibility: a count copied from the wrong export, a duplicate counted twice, a score quoted on the wrong scale. The pipeline I use treats the report as code:</p>
+<ol>
+  <li><strong>Export</strong> the cases of the period from the console.</li>
+  <li><strong>Recount</strong> everything deterministically: duplicates by ID removed, "Duplicate Incident" cases excluded, totals per severity, status, source, host and analyst.</li>
+  <li><strong>Consistency checks</strong> before any writing: the same alert name closed with different statuses, high scores closed as false positives, active cases with no owner, missing columns. Each one must be arbitrated in the report.</li>
+  <li><strong>Facts file</strong>: the only numbers the narrative is allowed to use.</li>
+  <li><strong>Narrative</strong> written from the facts, under ten written rules (no estimated figure, no requalification of the console status, correlation is not causation, no compliance claim that is not attested).</li>
+  <li><strong>Word document</strong> in the client's visual identity, with line charts per day, per family, cumulative and per hour, and a per-case technical annex (hosts, file paths, hashes, network peers) pulled from the alerts with one XQL query.</li>
+  <li><strong>Visual QA</strong>: conversion to PDF, every page rendered and checked, and a count of any "to complete" marker left.</li>
+</ol>
+<p>The detail annex is what changed the reports most. Pulling the alerts of the week's cases showed things the case list hides: a single host behind one large case, network peers that repeat at the same minute every day, a correlation rule that cannot name an account. Those became recommendations instead of footnotes.</p>
+
+<h2>One incident, start to finish</h2>
+<p>To show the whole loop, here is a recent case with every identifying detail removed.</p>
+
+<ul class="chain">
+  <li><b>Detection</b><span class="st">analytics</span><p>Two "recurring rare domain access from an uncommon unsigned process" alerts on one workstation, a day apart. The process was <code>C:\Windows\Windows Driver Foundation (WDF).exe</code>, contacting a Peer2Profit API domain.</p><span class="ttp">T1036.005 masquerading</span></li>
+  <li><b>Scope</b><span class="st">XQL, 30 days</span><p>One machine only on the whole fleet, but under three different hostnames (the endpoint had been renamed twice). Active for at least a month, started at every logon by <code>userinit.exe</code> for every account on the machine, and resolving names directly against public DNS servers instead of the internal ones.</p></li>
+  <li><b>Persistence</b><span class="st">read-only script</span><p>A read-only command set through the Action Center found it: the Winlogon <code>Shell</code> value had been changed from <code>explorer.exe</code> to <code>explorer.exe,Windows Driver Foundation (WDF).exe --minimized</code>.</p><span class="ttp">T1547.004 Winlogon helper</span></li>
+  <li><b>Evasion</b><span class="st">file facts</span><p>The binary was unsigned, hidden with the system attribute, had a last-write date set back to 2008, and was padded to about 700 MB, too large for sandbox and reputation services, which returned "unknown".</p><span class="ttp">T1564.001, T1070.006</span></li>
+  <li class="hit"><b>Response</b><span class="st">about 20 minutes</span><p>Registry key exported for rollback, process stopped, <code>Shell</code> restored to <code>explorer.exe</code>, hash added to the tenant block list, binary moved to a local quarantine folder, then a verification run: default shell, no process left.</p></li>
+  <li><b>Tracking</b><span class="st">case and ticket</span><p>Investigation note on the case, a ticket with the full timeline (each step with its time and owner, missing ones flagged), and a mail to the client's contact with what was done, the indicators, and what we needed from them: identify the user, find the origin, block the domain at the firewall, confirm the next logon is normal.</p></li>
+</ul>
+<p class="chain-key">Proxyware sells the machine's bandwidth to strangers, so the client's public IP carries traffic nobody can vouch for. It usually arrives bundled with a cracked tool, which is why the origin question matters more than the file itself.</p>
+
+<h3>Hunting for the same thing elsewhere</h3>
+<div class="qlabel"><span><b>XQL</b> · Winlogon Shell or Userinit changed</span></div>
+<pre><code>dataset = xdr_data
+| filter event_type = ENUM.REGISTRY
+    and action_registry_key_name contains "Winlogon"
+    and action_registry_value_name in ("Shell", "Userinit")
+| alter data = lowercase(action_registry_data),
+        programs = array_length(regextract(lowercase(action_registry_data), "[^,]+[.]exe"))
+| filter (action_registry_value_name = "Shell" and data != "explorer.exe")
+    or (action_registry_value_name = "Userinit" and programs &gt; 1)
+| fields _time, agent_hostname, actor_process_image_name,
+         action_registry_value_name, action_registry_data</code></pre>
+<div class="qlabel"><span><b>XQL</b> · what userinit.exe starts besides the shell</span></div>
+<pre><code>dataset = xdr_data
+| filter event_type = ENUM.PROCESS and actor_process_image_name = "userinit.exe"
+| filter action_process_image_name not in ("explorer.exe")
+| comp count() as starts, count_distinct(agent_id) as hosts,
+       values(action_process_signature_status) as signature
+    by action_process_image_path
+| sort asc hosts</code></pre>
+<p>On a healthy fleet the second query returns almost nothing, so anything unsigned in the root of <code>C:\Windows</code> stands out immediately.</p>
+<p>Two small lessons from the response: <code>Get-Item</code> does not see a hidden system file without <code>-Force</code>, so a "file not found" during triage is not proof of absence; and when the native quarantine is not offered for an artefact, a scripted move to a protected folder plus a block list entry gives the same safety and stays reversible.</p>
+
+<h2>What I would tell another analyst</h2>
+<ul>
+  <li><strong>Start from the alert mix.</strong> The playbook that saves the most hours is rarely the most interesting one.</li>
+  <li><strong>Write the verdict, not the closure.</strong> A playbook that writes a good note and assigns the case is already most of the value, with none of the risk.</li>
+  <li><strong>Treat every rule as code.</strong> Generate playbook YAML with a script, check the graph before upload, test in the debugger, and log what was not tested.</li>
+  <li><strong>Keep the AI where it helps.</strong> Summaries and briefs, yes. Decisions, no.</li>
+  <li><strong>Make reports recount themselves.</strong> If a number cannot be traced to the export, it does not go to the client.</li>
+</ul>
+<p>The two hunts above are generic: they need nothing from the client environment they came from, and they run on any Cortex XDR tenant that collects registry and process events.</p>

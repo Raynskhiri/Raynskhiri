@@ -577,7 +577,7 @@ footer nav a:hover { color: var(--text); }
         <div>
           <p class="eyebrow">// 04 <b>· projects</b></p>
           <h2 class="title" id="projects-title">Things I built</h2>
-          <p>Open source, tested in CI, and two of them running live right now.</p>
+          <p>Open source and tested in CI, two of them running live right now, plus anonymised client work.</p>
         </div>
         <a class="btn btn-ghost btn-sm" href="https://github.com/Raynskhiri">All projects on GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
       </div>
@@ -643,8 +643,23 @@ footer nav a:hover { color: var(--text); }
             <div class="links"><a href="https://github.com/Raynskhiri">Follow on GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></div>
           </div>
         </article>
+        <article class="proj reveal">
+          <div class="preview rules" aria-hidden="true">
+            <div class="pv-bar"><span>Alert routing, first match wins</span><span class="live">In production</span></div>
+            <div class="pv-row"><span class="c-or">Malware</span><span>Investigate, then Slack approval to respond</span><small>human</small></div>
+            <div class="pv-row"><span class="c-or">Agent</span><span>Reputation, propagation, command line, verdict</span><small>note</small></div>
+            <div class="pv-row"><span class="c-or">IOC IP</span><span>AbuseIPDB, firewall and endpoint pivots</span><small>note</small></div>
+            <div class="pv-row"><span class="c-or">Fleet</span><span>Silent, outdated or unprotected agents</span><small>alert</small></div>
+          </div>
+          <div class="proj-body">
+            <div class="top"><h3>Managed SOC automation</h3><span class="tag on">Client work</span></div>
+            <p>Correlation rules fixed, a family of Cortex XDR triage playbooks routed by automation rules, an AI brief that helps but never decides, fleet health alerts, and a report pipeline that recounts every number. Nothing closes a case without a human. Written up with all client data removed.</p>
+            <ul class="techs"><li>Cortex XDR</li><li>XQL</li><li>XSOAR playbooks</li><li>Slack</li><li>Python</li></ul>
+            <div class="links"><a href="/blog/soc-automation/">Read the case study <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>
+          </div>
+        </article>
       </div>
-      <p class="preview-note reveal">The SOC agent preview is an illustration of the interface, not a real alert.</p>
+      <p class="preview-note reveal">The SOC agent and SOC automation previews are illustrations, not real alerts or client data.</p>
     </div>
   </section>
 
