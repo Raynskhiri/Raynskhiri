@@ -1,13 +1,23 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.13",
- "generated": "2026-11-17T01:52:38Z",
- "total": 1781,
- "added_7d": 8,
- "added_30d": 33,
+ "catalog_version": "2026.11.17",
+ "generated": "2026-11-18T00:59:21Z",
+ "total": 1782,
+ "added_7d": 3,
+ "added_30d": 34,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-115731",
+   "vendor": "Perforce",
+   "product": "Puppet Enterprise",
+   "name": "Perforce Puppet Enterprise Deserialization of Untrusted Data Vulnerability",
+   "added": "2026-11-17",
+   "due": "2026-12-01",
+   "ransomware": false,
+   "summary": "Perforce Puppet Enterprise contains a deserialization of untrusted data vulnerability in Puppet’s report-processing code that allows a client with any CA-signed agent certificate to execute arbitrary code on the Puppet Server as the service user by submitting a report containing…"
+  },
   {
    "cve": "CVE-2026-123039",
    "vendor": "Check Point",
@@ -397,16 +407,6 @@
    "due": "2026-10-17",
    "ransomware": false,
    "summary": "Ahsay AhsayCBS contains an improper authentication vulnerability that could allow a remote attacker to bypass authentication via manipulation of the random parameter in the API component’s checkSysPwd function. This vulnerability can be chained with CVE-2026-105134."
-  },
-  {
-   "cve": "CVE-2026-0322",
-   "vendor": "Palo Alto Networks",
-   "product": "PAN-OS",
-   "name": "Palo Alto Networks PAN-OS Code Injection Vulnerability",
-   "added": "2026-10-14",
-   "due": "2026-10-17",
-   "ransomware": false,
-   "summary": "Palo Alto Networks PAN-OS contains a code injection vulnerability that could allow an authenticated attacker with network access to execute arbitrary code with root privileges on the firewall."
   }
  ],
  "ransomware_latest": [
