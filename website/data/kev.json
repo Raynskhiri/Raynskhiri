@@ -1,13 +1,53 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.17",
- "generated": "2026-11-18T00:59:21Z",
- "total": 1782,
- "added_7d": 3,
- "added_30d": 34,
+ "catalog_version": "2026.11.18",
+ "generated": "2026-11-19T00:26:45Z",
+ "total": 1786,
+ "added_7d": 7,
+ "added_30d": 38,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-90817",
+   "vendor": "Vanderbilt University",
+   "product": "Research Electronic Data Capture (REDCap)",
+   "name": "Vanderbilt University Research Electronic Data Capture (REDCap) Code Injection Vulnerability",
+   "added": "2026-11-18",
+   "due": "2026-11-21",
+   "ransomware": false,
+   "summary": "Vanderbilt University Research Electronic Data Capture (REDCap) contains a code injection vulnerability which could allow an unauthenticated attacker to execute arbitrary code on the server. An attacker could exploit this via crafted HTTP requests that access an unintended contr…"
+  },
+  {
+   "cve": "CVE-2026-90436",
+   "vendor": "Apache",
+   "product": "Axis",
+   "name": "Apache Axis Unsafe Reflection Vulnerability",
+   "added": "2026-11-18",
+   "due": "2026-11-21",
+   "ransomware": false,
+   "summary": "Apache Axis contains an unsafe reflection vulnerability that could allow an unauthenticated remote attacker to execute arbitrary code via a crafted SOAP fault message that causes Axis to load and instantiate an attacker-specified class when a suitable class is available on the a…"
+  },
+  {
+   "cve": "CVE-2026-40217",
+   "vendor": "BerriAI",
+   "product": "LiteLLM",
+   "name": "BerriAI LiteLLM Unprotected Alternate Channel Vulnerability",
+   "added": "2026-11-18",
+   "due": "2026-12-02",
+   "ransomware": false,
+   "summary": "BerriAI LiteLLM contains an unprotected alternate channel vulnerability that could allow remote attackers to execute arbitrary code via bytecode rewriting at the /guardrails/test_custom_code URI."
+  },
+  {
+   "cve": "CVE-2024-10441",
+   "vendor": "Synology",
+   "product": "DiskStation Manager (DSM)",
+   "name": "Synology DiskStation Manager (DSM) Improper Encoding or Escaping of Output Vulnerability",
+   "added": "2026-11-18",
+   "due": "2026-11-21",
+   "ransomware": false,
+   "summary": "Synology DSM contains an improper encoding or escaping of output vulnerability in the system plugin daemon in Synology BeeStation OS (BSM) that could allow a remote attacker to execute arbitrary code via unspecified vectors."
+  },
   {
    "cve": "CVE-2026-115731",
    "vendor": "Perforce",
@@ -367,46 +407,6 @@
    "due": "2026-10-19",
    "ransomware": false,
    "summary": "FortiOS, FortiPAM, FortiProxy, and FortiSwitchManager contain a path traversal vulnerability that may allow an authenticated attacker with admin profile and at least read-write permissions to write or delete arbitrary files via specific CLI commands."
-  },
-  {
-   "cve": "CVE-2026-21589",
-   "vendor": "Atlassian",
-   "product": "Multiple Products",
-   "name": "Atlassian Multiple Products Files or Directories Accessible to External Parties Vulnerability",
-   "added": "2026-10-15",
-   "due": "2026-10-18",
-   "ransomware": false,
-   "summary": "Multiple Atlassian products (Bitbucket Data Center ,Confluence Data Center, Jira Service Management Data Center, Jira Software Data Center, Bamboo Data Center, Crowd Data Center, Crucible and Fisheye) contain a files or directories accessible to external parties vulnerability wh…"
-  },
-  {
-   "cve": "CVE-2026-76519",
-   "vendor": "Cisco",
-   "product": "Secure Email Gateway",
-   "name": "Cisco Secure Email Gateway Relative Path Traversal Vulnerability",
-   "added": "2026-10-14",
-   "due": "2026-10-17",
-   "ransomware": false,
-   "summary": "Cisco Secure Email Gateway contains a relative path traversal vulnerability that could allow an unauthenticated, remote attacker to write arbitrary files on the underlying operating system."
-  },
-  {
-   "cve": "CVE-2026-105134",
-   "vendor": "Ahsay",
-   "product": "AhsayCBS",
-   "name": "Ahsay AhsayCBS Command Injection Vulnerability",
-   "added": "2026-10-14",
-   "due": "2026-10-17",
-   "ransomware": false,
-   "summary": "Ahsay AhsayCBS contains a command injection vulnerability that could allow a remote attacker to execute operating system commands via manipulation of the random parameter in the Replication Receiver component’s /rps/api/json/UpdateReceivers.do endpoint. This vulnerability can be…"
-  },
-  {
-   "cve": "CVE-2026-105133",
-   "vendor": "Ahsay",
-   "product": "AhsayCBS",
-   "name": "Ahsay AhsayCBS Improper Authentication Vulnerability",
-   "added": "2026-10-14",
-   "due": "2026-10-17",
-   "ransomware": false,
-   "summary": "Ahsay AhsayCBS contains an improper authentication vulnerability that could allow a remote attacker to bypass authentication via manipulation of the random parameter in the API component’s checkSysPwd function. This vulnerability can be chained with CVE-2026-105134."
   }
  ],
  "ransomware_latest": [
