@@ -1,13 +1,53 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.18",
- "generated": "2026-11-20T00:40:38Z",
- "total": 1786,
- "added_7d": 7,
- "added_30d": 32,
+ "catalog_version": "2026.11.20",
+ "generated": "2026-11-20T23:59:58Z",
+ "total": 1790,
+ "added_7d": 11,
+ "added_30d": 36,
  "ransomware_total": 361,
  "latest": [
+  {
+   "cve": "CVE-2026-76466",
+   "vendor": "Cisco",
+   "product": "Expressway Series",
+   "name": "Cisco Expressway Series Use of Hard-coded Credentials Vulnerability",
+   "added": "2026-11-20",
+   "due": "2026-11-23",
+   "ransomware": false,
+   "summary": "Cisco Expressway Series contains a use of hard-coded credentials vulnerability that allows an unauthenticated, remote attacker with persistent cookies and network access to execute commands as root on a clustered device via the database service."
+  },
+  {
+   "cve": "CVE-2026-129448",
+   "vendor": "Apache",
+   "product": "Roller",
+   "name": "Apache Roller Deserialization of Untrusted Data Vulnerability",
+   "added": "2026-11-20",
+   "due": "2026-11-23",
+   "ransomware": false,
+   "summary": "Apache Roller contains a deserialization of untrusted data vulnerability that allows an unauthenticated remote attacker to execute arbitrary code via the XML-RPC endpoint, which accepts and deserializes vendor extension types before authentication. This CVE covers the same under…"
+  },
+  {
+   "cve": "CVE-2026-123890",
+   "vendor": "Broadcom",
+   "product": "VMware vCenter",
+   "name": "VMWare vCenter Authentication Bypass Using an Alternate Path or Channel Vulnerability",
+   "added": "2026-11-20",
+   "due": "2026-11-23",
+   "ransomware": false,
+   "summary": "Broadcom VMware vCenter contains an authentication bypass using an alternate path or channel vulnerability in the VMware Directory Service that allows an unauthenticated attacker with network access to vCenter to bypass authentication and gain unauthorized access to the system."
+  },
+  {
+   "cve": "CVE-2025-42884",
+   "vendor": "SAP",
+   "product": "NetWeaver",
+   "name": "SAP NetWeaver Improper Neutralization of Special Elements in Data Query Logic Vulnerability",
+   "added": "2026-11-20",
+   "due": "2026-11-23",
+   "ransomware": false,
+   "summary": "SAP NetWeaver Enterprise Portal contains an improper neutralization of special elements in data query logic vulnerability that allows an unauthenticated attacker to disclose or modify server information via injected JNDI environment properties or a URL used during JNDI lookup op…"
+  },
   {
    "cve": "CVE-2026-90817",
    "vendor": "Vanderbilt University",
@@ -367,46 +407,6 @@
    "due": "2026-11-03",
    "ransomware": false,
    "summary": "Plex Media Server contains a server-side request forgery (SSRF) vulnerability which could allow an attacker using any X-Plex-Token value to include a full URL in the 'protocol' parameter and force the Plex server to POST to the attacker's chosen destination. This vulnerability c…"
-  },
-  {
-   "cve": "CVE-2026-110936",
-   "vendor": "Siemens",
-   "product": "Software Center",
-   "name": "Siemens Software Center Uncontrolled Search Path Element Vulnerability",
-   "added": "2026-10-20",
-   "due": "2026-11-03",
-   "ransomware": false,
-   "summary": "Siemens Software Center contains an uncontrolled search path element vulnerability that could allow an authenticated local attacker to place a specially crafted DLL in a directory that the application searches, leading to arbitrary code execution with the privileges of the affec…"
-  },
-  {
-   "cve": "CVE-2026-106931",
-   "vendor": "EG Secure Solutions",
-   "product": "SiteGuard Server Edition",
-   "name": "EG Secure Solutions SiteGuard Server Edition OS Command Injection Vulnerability",
-   "added": "2026-10-20",
-   "due": "2026-10-23",
-   "ransomware": false,
-   "summary": "EG Secure Solutions SiteGuard Server Edition contains an OS command injection vulnerability which may allow an attacker to execute arbitrary OS commands with root or SYSTEM privileges on the system running the affected product."
-  },
-  {
-   "cve": "CVE-2026-102764",
-   "vendor": "BeyondTrust",
-   "product": "Remote Support",
-   "name": "BeyondTrust Remote Support Authentication Bypass by Spoofing Vulnerability",
-   "added": "2026-10-16",
-   "due": "2026-10-19",
-   "ransomware": false,
-   "summary": "BeyondTrust Remote Support contains an authentication bypass by spoofing vulnerability that could allow a remote attacker to perform file operations on the appliance."
-  },
-  {
-   "cve": "CVE-2025-61624",
-   "vendor": "Fortinet",
-   "product": "Multiple Products",
-   "name": "Fortinet Multiple Products Path Traversal Vulnerability",
-   "added": "2026-10-16",
-   "due": "2026-10-19",
-   "ransomware": false,
-   "summary": "FortiOS, FortiPAM, FortiProxy, and FortiSwitchManager contain a path traversal vulnerability that may allow an authenticated attacker with admin profile and at least read-write permissions to write or delete arbitrary files via specific CLI commands."
   }
  ],
  "ransomware_latest": [
