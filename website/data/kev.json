@@ -1,12 +1,12 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.20",
- "generated": "2026-11-21T14:48:55Z",
+ "catalog_version": "2026.11.23",
+ "generated": "2026-11-23T18:30:52Z",
  "total": 1790,
  "added_7d": 9,
- "added_30d": 36,
- "ransomware_total": 361,
+ "added_30d": 34,
+ "ransomware_total": 362,
  "latest": [
   {
    "cve": "CVE-2026-76466",
@@ -85,7 +85,7 @@
    "name": "Synology DiskStation Manager (DSM) Improper Encoding or Escaping of Output Vulnerability",
    "added": "2026-11-18",
    "due": "2026-11-21",
-   "ransomware": false,
+   "ransomware": true,
    "summary": "Synology DSM contains an improper encoding or escaping of output vulnerability in the system plugin daemon in Synology BeeStation OS (BSM) that could allow a remote attacker to execute arbitrary code via unspecified vectors."
   },
   {
@@ -411,6 +411,16 @@
  ],
  "ransomware_latest": [
   {
+   "cve": "CVE-2024-10441",
+   "vendor": "Synology",
+   "product": "DiskStation Manager (DSM)",
+   "name": "Synology DiskStation Manager (DSM) Improper Encoding or Escaping of Output Vulnerability",
+   "added": "2026-11-18",
+   "due": "2026-11-21",
+   "ransomware": true,
+   "summary": "Synology DSM contains an improper encoding or escaping of output vulnerability in the system plugin daemon in Synology BeeStation OS (BSM) that could allow a remote attacker to execute arbitrary code via unspecified vectors."
+  },
+  {
    "cve": "CVE-2026-59310",
    "vendor": "Broadcom",
    "product": "VMware vCenter",
@@ -599,16 +609,6 @@
    "due": "2026-05-04",
    "ransomware": true,
    "summary": "PaperCut NG/MF contains an improper authentication vulnerability that could allow remote attackers to bypass authentication on affected installations via the SecurityRequestFilter class."
-  },
-  {
-   "cve": "CVE-2025-60710",
-   "vendor": "Microsoft",
-   "product": "Windows",
-   "name": "Microsoft Windows Link Following Vulnerability",
-   "added": "2026-04-13",
-   "due": "2026-04-27",
-   "ransomware": true,
-   "summary": "Microsoft Windows contains a link following vulnerability that allows for privilege escalation"
   }
  ]
 }
