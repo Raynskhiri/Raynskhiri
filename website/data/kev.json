@@ -1,13 +1,43 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.23",
- "generated": "2026-11-24T03:58:24Z",
- "total": 1792,
- "added_7d": 11,
- "added_30d": 36,
+ "catalog_version": "2026.11.24",
+ "generated": "2026-11-24T17:58:37Z",
+ "total": 1795,
+ "added_7d": 14,
+ "added_30d": 39,
  "ransomware_total": 362,
  "latest": [
+  {
+   "cve": "CVE-2026-132224",
+   "vendor": "Optimizely",
+   "product": "Web Experimentation",
+   "name": "Optimizely Web Experimentation External Control of Critical State Data Vulnerability",
+   "added": "2026-11-24",
+   "due": "2026-11-27",
+   "ransomware": false,
+   "summary": "Optimizely Web Experimentation contains an external control of critical state data vulnerability in its account signup flow that could allow an attacker to impersonate existing customer users and modify Project JavaScript. Successful exploitation can result in attacker-controlle…"
+  },
+  {
+   "cve": "CVE-2026-132165",
+   "vendor": "Drupal",
+   "product": "Core",
+   "name": "Drupal Core Remote Code Execution Vulnerability",
+   "added": "2026-11-24",
+   "due": "2026-11-27",
+   "ransomware": false,
+   "summary": "Drupal Core contains a not failing securely vulnerability that could allow an unauthenticated attacker to take over an existing site or execute arbitrary code via the Drupal installer. Under specific conditions, the attacker can use install.php to attempt to reinstall Drupal on…"
+  },
+  {
+   "cve": "CVE-2026-131914",
+   "vendor": "Idunno",
+   "product": "AntiCsrf",
+   "name": "Idunno AntiCsrf Deserialization of Untrusted Data Vulnerability",
+   "added": "2026-11-24",
+   "due": "2026-11-27",
+   "ransomware": false,
+   "summary": "Idunno AntiCsrf contains a deserialization of untrusted data vulnerability that allows an unauthenticated remote attacker to execute arbitrary code via object injection. The impacted product(s) could be end-of-life (EoL) and/or end-of-service (EoS). Users are advised to disconti…"
+  },
   {
    "cve": "CVE-2026-134624",
    "vendor": "N-able",
@@ -377,36 +407,6 @@
    "due": "2026-10-26",
    "ransomware": false,
    "summary": "Arista VeloCloud Orchestrator on-prem contains a SQL injection vulnerability that may allow a remote attacker to access privileged internal functionality and impact the VCO host. Successful exploitation may compromise the confidentiality, integrity, and availability of the orche…"
-  },
-  {
-   "cve": "CVE-2026-110447",
-   "vendor": "Collabora",
-   "product": "Collabora Online – Built-in CODE Server",
-   "name": "Collabora Online – Built-in CODE Server OS Command Injection Vulnerability",
-   "added": "2026-10-23",
-   "due": "2026-10-26",
-   "ransomware": false,
-   "summary": "Collabora Collabora Online – Built-in CODE Server when used within the NextCloud platform contains an OS command injection vulnerability that allows for remote code execution when the CODE server isn't running."
-  },
-  {
-   "cve": "CVE-2026-96656",
-   "vendor": "Plex",
-   "product": "Media Server",
-   "name": "Plex Media Server External Control of File Name or Path Vulnerability",
-   "added": "2026-10-20",
-   "due": "2026-10-23",
-   "ransomware": false,
-   "summary": "Plex Media Server contains an external control of file name or path vulnerability which can allow an admin user to write arbitrary files that may be executed on load. This vulnerability can be chained with CVE-2026-96652, CVE-2026-96654, and CVE-2026-96655."
-  },
-  {
-   "cve": "CVE-2026-96655",
-   "vendor": "Plex",
-   "product": "Media Server",
-   "name": "Plex Media Server Server-Side Request Forgery (SSRF) Vulnerability",
-   "added": "2026-10-20",
-   "due": "2026-11-03",
-   "ransomware": false,
-   "summary": "Plex Media Server contains a server-side request forgery (SSRF) vulnerability that could allow an authenticated user to request arbitrary internal or external addresses via the '/video/:/transcode/universal' path parameter. This vulnerability can be chained with CVE-2026-96652,…"
   }
  ],
  "ransomware_latest": [
