@@ -1,13 +1,23 @@
 {
  "source": "CISA Known Exploited Vulnerabilities catalog",
  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
- "catalog_version": "2026.11.24",
- "generated": "2026-11-25T02:32:55Z",
- "total": 1795,
- "added_7d": 13,
- "added_30d": 39,
+ "catalog_version": "2026.11.25",
+ "generated": "2026-11-25T17:27:15Z",
+ "total": 1796,
+ "added_7d": 14,
+ "added_30d": 40,
  "ransomware_total": 362,
  "latest": [
+  {
+   "cve": "CVE-2026-103406",
+   "vendor": "Hewlett Packard Enterprise (HPE)",
+   "product": "Juniper Session Smart Conductor and Session Smart Router",
+   "name": "Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router OS Command Injectio…",
+   "added": "2026-11-25",
+   "due": "2026-11-28",
+   "ransomware": false,
+   "summary": "Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router contain an OS command injection vulnerability that could allow a remote attacker to execute arbitrary commands as root via a specially crafted salt minion ID."
+  },
   {
    "cve": "CVE-2026-132224",
    "vendor": "Optimizely",
@@ -397,16 +407,6 @@
    "due": "2026-10-29",
    "ransomware": false,
    "summary": "PHP contains an out-of-memory corruption vulnerability that allows for unauthenticated remote code execution."
-  },
-  {
-   "cve": "CVE-2026-114625",
-   "vendor": "Arista",
-   "product": "VeloCloud Orchestrator",
-   "name": "Arista VeloCloud Orchestrator SQL Injection Vulnerability",
-   "added": "2026-10-23",
-   "due": "2026-10-26",
-   "ransomware": false,
-   "summary": "Arista VeloCloud Orchestrator on-prem contains a SQL injection vulnerability that may allow a remote attacker to access privileged internal functionality and impact the VCO host. Successful exploitation may compromise the confidentiality, integrity, and availability of the orche…"
   }
  ],
  "ransomware_latest": [
